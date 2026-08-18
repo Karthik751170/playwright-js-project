@@ -1,0 +1,75 @@
+name: Playwright Tests CI/CD
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      test_file:
+        description: 'Specific test file to run (e.g., tests/Hercules_ShareLinkValidation.spec.js or leave blank for all)'
+        required: false
+        default: ''
+
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci || npm install
+
+    - name: Install Playwright Browsers & OS Dependencies
+      run: npx playwright install --with-deps
+
+    - name: Run Playwright Tests
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        CI: true
+      run: |
+        if [ -n "${{ github.event.inputs.test_file }}" ]; then
+          npx playwright test ${{ github.event.inputs.test_file }} --reporter=list,html,allure-playwright
+        else
+          npx playwright test --reporter=list,html,allure-playwright
+        fi
+
+    - name: Upload Playwright Test HTML Report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: playwright-report
+        path: playwright-report/
+        retention-days: 30
+
+    - name: Upload Test Results & Screenshots
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results
+        path: test-results/
+        retention-days: 30
+
+    - name: Generate Allure Report
+      if: always()
+      run: |
+        npm run allure:generate || true
+
+    - name: Upload Allure Report Artifact
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: allure-report
+        path: allure-report/
+        retention-days: 30

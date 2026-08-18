@@ -1,0 +1,212 @@
+[
+  {
+    "tag": "P",
+    "text": "Create a comprehensive employee engagement survey for a remote tech company.",
+    "id": "",
+    "className": "text-[14px] font-normal leading-[140%] tracking-normal text-[#464646] whitespace-pre-wrap break-words mt-[2px] roboto_8068afc-module__EN1jzW__className",
+    "ariaLabel": ""
+  },
+  {
+    "tag": "BUTTON",
+    "text": "Reading everything shared — before assuming anything",
+    "id": "",
+    "className": "group flex items-center cursor-pointer select-none",
+    "ariaLabel": ""
+  },
+  {
+    "tag": "P",
+    "text": "Hercules is reading everything you've shared — your goals, category, constraints, and any prior cont",
+    "id": "",
+    "className": "roboto_9f186078-module__bqURWG__className text-[12px] leading-[140%] text-[#464646] font-normal",
+    "ariaLabel": ""
+  },
+  {
+    "tag": "H2",
+    "text": "1. What specifically triggered this engagement survey?",
+    "id": "",
+    "className": "allow-text-select text-[16px] md:text-[18px] leading-[28px] lg:leading-[28px] text-[#1A1C1C] behindtheninetiesmd_75847852-module__RF1Ruq__className",
+    "ariaLabel": ""
+  },
+  {
+    "tag": "P",
+    "text": "Generic answer for context.",
+    "id": "",
+    "className": "allow-text-select text-[14px] md:text-[15px] leading-[24px] text-[#444748] mb-2 font-inter",
+    "ariaLabel": ""
+  },
+  {
+    "tag": "H2",
+    "text": "2. Which employee groups should this survey cover? Select all that apply.",
+    "id": "",
+    "className": "allow-text-select text-[16px] md:text-[18px] leading-[28px] lg:leading-[28px] text-[#1A1C1C] behindtheninetiesmd_75847852-module__RF1Ruq__className",
+    "ariaLabel": ""
+  },
+  {
+    "tag": "P",
+    "text": "All company employees",
+    "id": "",
+    "className": "allow-text-select text-[14px] md:text-[15px] leading-[24px] text-[#444748] mb-2 font-inter",
+    "ariaLabel": ""
+  },
+  {
+    "tag": "H2",
+    "text": "3. Which core focus areas are most critical to measure in your remote environment? Select all that a",
+    "id": "",
+    "className": "allow-text-select text-[16px] md:text-[18px] leading-[28px] lg:leading-[28px] text-[#1A1C1C] behindtheninetiesmd_75847852-module__RF1Ruq__className",
+    "ariaLabel": ""
+  },
+  {
+    "tag": "P",
+    "text": "Remote collaboration, tools, and friction",
+    "id": "",
+    "className": "allow-text-select text-[14px] md:text-[15px] leading-[24px] text-[#444748] mb-2 font-inter",
+    "ariaLabel": ""
+  },
+  {
+    "tag": "H2",
+    "text": "4. What is the primary action or decision leadership will take based on these results?",
+    "id": "",
+    "className": "allow-text-select text-[16px] md:text-[18px] leading-[28px] lg:leading-[28px] text-[#1A1C1C] behindtheninetiesmd_75847852-module__RF1Ruq__className",
+    "ariaLabel": ""
+  },
+  {
+    "tag": "P",
+    "text": "Generic answer for context.",
+    "id": "",
+    "className": "allow-text-select text-[14px] md:text-[15px] leading-[24px] text-[#444748] mb-2 font-inter",
+    "ariaLabel": ""
+  },
+  {
+    "tag": "H2",
+    "text": "5. Are there any specific recent organizational events, changes, or challenges you would like to add",
+    "id": "",
+    "className": "allow-text-select text-[16px] md:text-[18px] leading-[28px] lg:leading-[28px] text-[#1A1C1C] behindtheninetiesmd_75847852-module__RF1Ruq__className",
+    "ariaLabel": ""
+  },
+  {
+    "tag": "P",
+    "text": "Generic answer for context.",
+    "id": "",
+    "className": "allow-text-select text-[14px] md:text-[15px] leading-[24px] text-[#444748] mb-2 font-inter",
+    "ariaLabel": ""
+  },
+  {
+    "tag": "H2",
+    "text": "6. What is the timeline for launching this survey?",
+    "id": "",
+    "className": "allow-text-select text-[16px] md:text-[18px] leading-[28px] lg:leading-[28px] text-[#1A1C1C] behindtheninetiesmd_75847852-module__RF1Ruq__className",
+    "ariaLabel": ""
+  },
+  {
+    "tag": "P",
+    "text": "Generic answer for context.",
+    "id": "",
+    "className": "allow-text-select text-[14px] md:text-[15px] leading-[24px] text-[#444748] mb-2 font-inter",
+    "ariaLabel": ""
+  },
+  {
+    "tag": "BUTTON",
+    "text": "The intellectual scaffolding of your study",
+    "id": "",
+    "className": "group flex items-center cursor-pointer select-none",
+    "ariaLabel": ""
+  },
+  {
+    "tag": "P",
+    "text": "Your inputs are being parsed in full — Hercules is building an internal model of what you've shared,",
+    "id": "",
+    "className": "roboto_9f186078-module__bqURWG__className text-[12px] leading-[140%] text-[#464646] font-normal",
+    "ariaLabel": ""
+  },
+  {
+    "tag": "P",
+    "text": "The framework generation layer is active — Hercules is turning your correlated goals into a structur",
+    "id": "",
+    "className": "roboto_9f186078-module__bqURWG__className text-[12px] leading-[140%] text-[#464646] font-normal",
+    "ariaLabel": ""
+  },
+  {
+    "tag": "H3",
+    "text": "Core Objective & Business Context",
+    "id": "",
+    "className": "text-[12px] font-bold text-[#464646] mt-4 mb-2",
+    "ariaLabel": ""
+  },
+  {
+    "tag": "H3",
+    "text": "Secondary Research Snapshot",
+    "id": "",
+    "className": "text-[12px] font-bold text-[#464646] mt-4 mb-2",
+    "ariaLabel": ""
+  },
+  {
+    "tag": "H3",
+    "text": "Research Type & Methodology",
+    "id": "",
+    "className": "text-[12px] font-bold text-[#464646] mt-4 mb-2",
+    "ariaLabel": ""
+  },
+  {
+    "tag": "H3",
+    "text": "Target Audience Profile",
+    "id": "",
+    "className": "text-[12px] font-bold text-[#464646] mt-4 mb-2",
+    "ariaLabel": ""
+  },
+  {
+    "tag": "H3",
+    "text": "Key Information Areas & Data Architecture",
+    "id": "",
+    "className": "text-[12px] font-bold text-[#464646] mt-4 mb-2",
+    "ariaLabel": ""
+  },
+  {
+    "tag": "H3",
+    "text": "Survey Flow & Question Design Approach",
+    "id": "",
+    "className": "text-[12px] font-bold text-[#464646] mt-4 mb-2",
+    "ariaLabel": ""
+  },
+  {
+    "tag": "H3",
+    "text": "Expected Insights & Business Decisions Enabled",
+    "id": "",
+    "className": "text-[12px] font-bold text-[#464646] mt-4 mb-2",
+    "ariaLabel": ""
+  },
+  {
+    "tag": "P",
+    "text": "Yes, generate the brief",
+    "id": "",
+    "className": "text-[14px] font-normal leading-[140%] tracking-normal text-[#464646] whitespace-pre-wrap break-words mt-[2px] roboto_8068afc-module__EN1jzW__className",
+    "ariaLabel": ""
+  },
+  {
+    "tag": "BUTTON",
+    "text": "How respondents move through this — being planned",
+    "id": "",
+    "className": "group flex items-center cursor-pointer select-none",
+    "ariaLabel": ""
+  },
+  {
+    "tag": "P",
+    "text": "The target audience is being defined — Hercules is building the respondent profile and specifying wh",
+    "id": "",
+    "className": "roboto_9f186078-module__bqURWG__className text-[12px] leading-[140%] text-[#464646] font-normal",
+    "ariaLabel": ""
+  },
+  {
+    "tag": "P",
+    "text": "Hercules is gathering more secondary data — filling the gaps in the brief with relevant category con",
+    "id": "",
+    "className": "roboto_9f186078-module__bqURWG__className text-[12px] leading-[140%] text-[#464646] font-normal",
+    "ariaLabel": ""
+  },
+  {
+    "tag": "P",
+    "text": "The flow is being defined — Hercules is mapping the survey structure: which sections appear, in what",
+    "id": "",
+    "className": "roboto_9f186078-module__bqURWG__className text-[12px] leading-[140%] text-[#464646] font-normal",
+    "ariaLabel": ""
+  }
+]

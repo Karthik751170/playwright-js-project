@@ -1,0 +1,293 @@
+{
+  "home": {
+    "label": "AUDIT & ACCOUNTING PROFESSIONAL",
+    "firstName": "Chinthapanti",
+    "lastName": "Ajay",
+    "designation": "Audit & Accounting Professional",
+    "supportingText": "Detail-oriented Audit and Accounting professional with 6 months of experience in internal audit, ledger scrutiny, and financial transaction review within a Chartered Accountant firm.",
+    "tags": "US GAAP Audit | Internal Audit | Accounting | Reconciliation"
+  },
+  "about": {
+    "heading": "Building accuracy<br>through audit and<br>accounting.",
+    "description1": "I'm a detail-oriented Audit and Accounting professional with 6 months of experience working within a Chartered Accountant firm.",
+    "description2": "My experience includes basic accounting activities, bank reconciliation, transaction review, internal audits, stock audits, and identifying errors or mismatches during accounting and audit activities.",
+    "description3": "I'm seeking to contribute to US GAAP audit engagements by supporting planning, execution, and documentation processes.",
+    "tags": [
+      "Audit",
+      "Accounting",
+      "Bank Reconciliation",
+      "Internal Audit",
+      "Stock Audit",
+      "Financial Transactions"
+    ]
+  },
+  "experience": {
+    "label": "PROFESSIONAL EXPERIENCE",
+    "heading": "6 months of<br>audit & accounting<br>experience.",
+    "timeline": {
+      "start": "May 2025",
+      "end": "Oct 2025",
+      "position": "Audit & Accounting Professional",
+      "company": "MSPR & Co., Chartered Accountants",
+      "location": "Hyderabad"
+    },
+    "description": [
+      "Performed basic accounting activities under supervision, including passing journal entries, recording purchase and sales transactions, and importing bank statements.",
+      "Assisted in bank reconciliation by comparing bank statements with book balances and identifying differences.",
+      "Reviewed accounting transactions and supporting documents to ensure accuracy and completeness.",
+      "Assisted in reconciliations and identified errors or mismatches during accounting and audit activities.",
+      "Performed internal and stock audits to verify process compliance, transaction accuracy, and data reliability.",
+      "Coordinated with seniors to resolve audit issues."
+    ],
+    "cards": [
+      {
+        "id": "01",
+        "title": "ACCOUNTING",
+        "bullets": [
+          "Journal Entries",
+          "Purchase Transactions",
+          "Sales Transactions",
+          "Bank Statement Importing"
+        ]
+      },
+      {
+        "id": "02",
+        "title": "RECONCILIATION",
+        "bullets": [
+          "Bank Reconciliation",
+          "Book Balance Comparison",
+          "Difference Identification",
+          "Account Reconciliation"
+        ]
+      },
+      {
+        "id": "03",
+        "title": "TRANSACTION REVIEW",
+        "bullets": [
+          "Transaction Review",
+          "Supporting Documents",
+          "Accuracy",
+          "Completeness"
+        ]
+      },
+      {
+        "id": "04",
+        "title": "AUDIT",
+        "bullets": [
+          "Internal Audit",
+          "Stock Audit",
+          "Process Compliance",
+          "Transaction Accuracy",
+          "Data Reliability"
+        ]
+      },
+      {
+        "id": "05",
+        "title": "ISSUE RESOLUTION",
+        "bullets": [
+          "Error Identification",
+          "Mismatch Identification",
+          "Audit Issues",
+          "Coordination with Seniors"
+        ]
+      }
+    ]
+  },
+  "skills": {
+    "heading": "Numbers, records,<br>accuracy & control.",
+    "categories": [
+      {
+        "id": "01",
+        "name": "ACCOUNTING",
+        "skills": [
+          "Journal Entries",
+          "Accounting",
+          "Bank Reconciliation",
+          "Account Reconciliation",
+          "Purchase Transactions",
+          "Sales Transactions"
+        ]
+      },
+      {
+        "id": "02",
+        "name": "MICROSOFT EXCEL",
+        "skills": [
+          "VLOOKUP",
+          "XLOOKUP",
+          "PivotTables",
+          "Filters",
+          "Conditional Formatting",
+          "Data Validation",
+          "Basic Charts"
+        ]
+      },
+      {
+        "id": "03",
+        "name": "TALLY PRIME",
+        "skills": [
+          "Journal Entries",
+          "Bank Reconciliation",
+          "Account Reconciliation",
+          "Accounting"
+        ]
+      },
+      {
+        "id": "04",
+        "name": "AUDIT",
+        "skills": [
+          "Internal Audit",
+          "Stock Audit",
+          "Transaction Review",
+          "Process Compliance",
+          "Supporting Document Review"
+        ]
+      },
+      {
+        "id": "05",
+        "name": "CONTROLS",
+        "skills": [
+          "Basic Knowledge in SOX"
+        ]
+      },
+      {
+        "id": "06",
+        "name": "PROFESSIONAL SKILLS",
+        "skills": [
+          "Problem Solving",
+          "Typing Speed — 35 WPM"
+        ]
+      }
+    ]
+  },
+  "education": {
+    "heading": "Academic foundation<br>behind the numbers.",
+    "items": [
+      {
+        "id": "01",
+        "period": "SEP 2021 — MAY 2024",
+        "institution": "A.V College of Art and Science",
+        "degree": "B.COM",
+        "field": "Computer Application",
+        "score": "CGPA — 8.25 / 10"
+      },
+      {
+        "id": "02",
+        "period": "JULY 2019 — APRIL 2021",
+        "institution": "Aaditya Junior College",
+        "degree": "C.E.C",
+        "field": "",
+        "score": "Marks — 905 / 1000\n90%"
+      },
+      {
+        "id": "03",
+        "period": "JULY 2018 — APRIL 2019",
+        "institution": "Vani Vidyalayam High School",
+        "degree": "10th",
+        "field": "",
+        "score": "CGPA — 7.7 / 10"
+      }
+    ]
+  },
+  "certifications": {
+    "heading": "Certifications<br>& continuous learning.",
+    "items": [
+      {
+        "title": "SOX",
+        "subtitle": "General & Application Controls",
+        "issuer": "Udemy"
+      },
+      {
+        "title": "TALLY PRIME",
+        "subtitle": "Certification",
+        "issuer": ""
+      },
+      {
+        "title": "MICROSOFT EXCEL",
+        "subtitle": "Data Analysis",
+        "issuer": "Coursera"
+      },
+      {
+        "title": "MICROSOFT EXCEL",
+        "subtitle": "Introduction to Data Analysis",
+        "issuer": "Coursera"
+      },
+      {
+        "title": "TYPING",
+        "subtitle": "35 WPM",
+        "issuer": "Typing Certification"
+      }
+    ]
+  },
+  "languages": {
+    "heading": "Communication<br>across languages.",
+    "items": [
+      {
+        "name": "ENGLISH",
+        "level": "Professional"
+      },
+      {
+        "name": "TELUGU",
+        "level": "Native"
+      },
+      {
+        "name": "HINDI",
+        "level": "Fluent"
+      }
+    ]
+  },
+  "highlights": [
+    {
+      "id": "01",
+      "metric": "6 MONTHS",
+      "label": "Professional Experience"
+    },
+    {
+      "id": "02",
+      "metric": "B.COM",
+      "label": "Computer Application"
+    },
+    {
+      "id": "03",
+      "metric": "8.25/10",
+      "label": "B.Com CGPA"
+    },
+    {
+      "id": "04",
+      "metric": "90%",
+      "label": "CEC Marks"
+    },
+    {
+      "id": "05",
+      "metric": "35 WPM",
+      "label": "Typing Speed"
+    }
+  ],
+  "careerFocus": {
+    "label": "CAREER OBJECTIVE",
+    "heading": "Focused on<br>US GAAP audit<br>engagements.",
+    "description": "Seeking to contribute to US GAAP audit engagements by supporting planning, execution, and documentation processes.",
+    "cards": [
+      {
+        "title": "PLANNING",
+        "desc": "Supporting audit engagement planning activities."
+      },
+      {
+        "title": "EXECUTION",
+        "desc": "Supporting audit execution and related activities."
+      },
+      {
+        "title": "DOCUMENTATION",
+        "desc": "Supporting audit documentation processes."
+      }
+    ]
+  },
+  "videos": [
+    {
+      "id": "1786202413238",
+      "title": "sample",
+      "description": "sample",
+      "filename": "1786202413121-846657662.mp4",
+      "url": "/uploads/1786202413121-846657662.mp4"
+    }
+  ]
+}

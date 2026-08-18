@@ -1,0 +1,769 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: DeploySurvey_Free100Users.spec.js >> Deploy survey to 100 Users for Free
+- Location: tests/DeploySurvey_Free100Users.spec.js:152:1
+
+# Error details
+
+```
+Error: FAILURE: Response count is 0! The survey response was not recorded by the backend. Found text: Responses Collected: 0 / 100
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e4]:
+    - generic [ref=e8]:
+      - generic [ref=e9]:
+        - img "Warning" [ref=e10]
+        - generic [ref=e11]: "Approaching Monthly Limit:"
+        - text: You've used 100 of 100 free responses this month.
+        - button "Upgrade Plan" [ref=e12] [cursor=pointer]
+        - text: to access 20 million verified users.
+      - button "Dismiss" [ref=e13] [cursor=pointer]:
+        - img "close" [ref=e14]
+    - main [ref=e16]:
+      - generic [ref=e18]:
+        - generic [ref=e19]:
+          - img "hercules-logo" [ref=e23] [cursor=pointer]
+          - generic [ref=e26]:
+            - button "Open sidebar" [ref=e27] [cursor=pointer]:
+              - img [ref=e28]
+            - generic: Open sidebar
+          - generic [ref=e31]:
+            - generic [ref=e32]:
+              - generic: New campaign
+              - button "New Campaign" [ref=e33] [cursor=pointer]:
+                - img [ref=e35]
+                - generic: New Campaign
+            - generic [ref=e38]:
+              - generic [ref=e39]:
+                - link "All campaigns All Campaigns" [ref=e40] [cursor=pointer]:
+                  - /url: /ai/chat/campaign-history
+                  - button [ref=e41]:
+                    - img [ref=e42]
+                  - generic: All campaigns
+                  - generic: All Campaigns
+                - link "Templates Research Templates" [ref=e49] [cursor=pointer]:
+                  - /url: /ai/chat/survey-presets?activeTab=templates
+                  - button [ref=e50]:
+                    - img [ref=e51]
+                  - generic: Templates
+                  - generic: Research Templates
+              - generic [ref=e55] [cursor=pointer]:
+                - button [ref=e56]:
+                  - img [ref=e57]
+                - generic: Recent campaigns
+                - generic:
+                  - text: Recents
+                  - img "arrow" [ref=e66]
+        - generic [ref=e70]:
+          - button "Share" [ref=e71] [cursor=pointer]
+          - button "U" [ref=e78] [cursor=pointer]:
+            - generic [ref=e80]: U
+      - generic [ref=e84]:
+        - generic [ref=e88]:
+          - generic [ref=e95]:
+            - paragraph [ref=e99]: Create a market research survey about mobile gaming habits to track brand awareness and loyalty.
+            - generic [ref=e103]: U
+          - generic [ref=e108]:
+            - generic [ref=e110]:
+              - button "Reading your inputs before touching the framework" [ref=e111] [cursor=pointer]:
+                - generic [ref=e115]: Reading your inputs before touching the framework
+              - generic [ref=e119]:
+                - img "done" [ref=e122]
+                - generic [ref=e124]:
+                  - generic [ref=e126]: Getting the logic right before the questions are written.
+                  - paragraph [ref=e131]: Your inputs are being parsed and structured — Hercules is building a clear picture of your goals, your category, and your constraints before anything else is built on top of them.
+            - paragraph [ref=e135]: Mobile gaming habits and brand loyalty are clear; I have a few targeted questions to shape the right tracking study.
+          - generic [ref=e141]:
+            - generic [ref=e142]:
+              - heading "1. Which gaming brand, game, publisher, platform, or category should this survey track? Please describe the brand set and the market context." [level=2] [ref=e143]
+              - paragraph [ref=e144]: This survey should track the gaming brand 'Epic Games' and its flagship game 'Fortnite', as well as the broader gaming market context of the battle royale genre. Epic Games is a prominent gaming company known for developing and publishing Fortnite, a highly popular and influential battle royale game that has revolutionized the gaming industry with its unique blend of gameplay mechanics, engaging visuals, and massive player base. The game's massive success has led to a significant increase in the popularity of the battle royale genre, with numerous other games attempting to replicate its success. By tracking Epic Games and Fortnite, this survey can gain valuable insights into the gaming preferences and behaviors of players, as well as the broader market trends and shifts in the gaming industry. Additionally, the survey can also explore the impact of Fortnite's in-game purchases, seasonal updates, and collaborations with other brands on player engagement and spending habits. Furthermore, the survey can also delve into the competitive landscape of the battle royale genre, including the market share and player base of other popular games such as PlayerUnknown's Battlegrounds (PUBG) and Apex Legends, to provide a comprehensive understanding of the gaming market and its trends.
+            - generic [ref=e145]:
+              - heading "2. Which gaming behaviors should the survey cover? Select all that apply." [level=2] [ref=e146]
+              - paragraph [ref=e147]: Mobile game usage frequency and session patterns, Game genres, titles, and platform choices, In-app purchases and spending behavior, Reasons for switching, uninstalling, or returning, Social, multiplayer, and community behavior
+            - generic [ref=e148]:
+              - heading "3. Which brand-health measures matter most? Select all that apply." [level=2] [ref=e149]
+              - paragraph [ref=e150]: Unaided and aided awareness, Familiarity and consideration, Current usage and recent usage, Brand associations and differentiation, Loyalty, advocacy, and likelihood to continue
+            - generic [ref=e151]:
+              - heading "4. Who should answer the survey? Select all that apply." [level=2] [ref=e152]
+              - paragraph [ref=e153]: Current mobile gamers, Occasional or lapsed mobile gamers, Players of the tracked brand or game, Players of competing games, Parents or household decision-makers for younger players
+            - generic [ref=e154]:
+              - heading "5. What is the single most important decision this research should support?" [level=2] [ref=e155]
+              - paragraph [ref=e156]: Guide marketing, partnerships, or campaign strategy
+            - generic [ref=e157]:
+              - heading "6. Is this intended as a one-time study or a recurring tracking survey, and when do you need the first wave completed?" [level=2] [ref=e158]
+              - paragraph [ref=e159]: Two or more planned waves
+          - generic [ref=e164]:
+            - generic [ref=e166]:
+              - button "The study's structural logic — being formalised now" [ref=e167] [cursor=pointer]:
+                - generic [ref=e171]: The study's structural logic — being formalised now
+              - generic [ref=e174]:
+                - generic [ref=e175]:
+                  - img "done" [ref=e178]
+                  - generic [ref=e180]:
+                    - generic [ref=e182]: Defining what success looks like before designing for it.
+                    - paragraph [ref=e187]: "The context engine is active — Hercules is reading your inputs and building an internal model of your research situation: what you want to prove, who you're studying, and what constraints exist."
+                - generic [ref=e188]:
+                  - img "done" [ref=e191]
+                  - generic [ref=e193]:
+                    - generic [ref=e195]: The logic of the research — being defined now.
+                    - paragraph [ref=e200]: Your goals are being turned into a research framework — constructs are being defined, hypotheses are being formed, and the structure of the study is being established.
+                - generic [ref=e201]:
+                  - img "done" [ref=e204]
+                  - generic [ref=e206]:
+                    - generic [ref=e208]: Strategic Research Framework
+                    - generic [ref=e213]:
+                      - heading "1. Core Objective & Business Context" [level=3] [ref=e214]
+                      - list [ref=e215]:
+                        - listitem [ref=e216]:
+                          - strong [ref=e217]: "Business problem:"
+                          - text: Track the strength of Epic Games and Fortnite among Indian mobile gamers within the wider battle royale market, while understanding how usage, social play, live-service updates, collaborations, and in-game spending influence brand loyalty.
+                        - listitem [ref=e218]:
+                          - strong [ref=e219]: "Why this matters now:"
+                          - text: Fortnite competes in a fast-moving category where player attention can shift between titles such as Fortnite, BGMI/PUBG, Free Fire, and Apex Legends. A recurring tracker is needed to distinguish short-term campaign or season effects from durable changes in awareness, consideration, usage, loyalty, and competitive position.
+                        - listitem [ref=e220]:
+                          - strong [ref=e221]: "Decision enabled:"
+                          - text: The research will guide marketing, partnership, collaboration, campaign, community, and retention strategy by showing which audiences are most valuable, what keeps them engaged, and where Fortnite is gaining or losing relevance.
+                        - listitem [ref=e222]:
+                          - strong [ref=e223]: "Tracking principle:"
+                          - text: Maintain an identical core brand-health module across waves, while allowing a small rotating module for current campaigns, collaborations, seasonal updates, monetisation initiatives, or emerging competitors.
+                      - heading "2. Secondary Research Snapshot" [level=3] [ref=e224]
+                      - list [ref=e225]:
+                        - listitem [ref=e226]:
+                          - strong [ref=e227]: "Mobile remains a major growth and monetisation engine:"
+                          - text: Newzoo forecasts mobile games revenue to reach $121.1 billion in 2026, indicating that mobile engagement and monetisation should remain central measures in this tracker. — Newzoo. (
+                          - link "newzoo.com" [ref=e228] [cursor=pointer]:
+                            - /url: https://newzoo.com/articles/global-games-market-2025
+                          - text: )
+                        - listitem [ref=e229]:
+                          - strong [ref=e230]: "The global games market continues to expand:"
+                          - text: Newzoo estimates the global games market at $188.8 billion in 2025, with growth shaped by changing platform dynamics and continued mobile monetisation. This supports tracking platform choice and movement between mobile, PC, and console rather than treating mobile behavior in isolation. — Newzoo. (
+                          - link "newzoo.com" [ref=e231] [cursor=pointer]:
+                            - /url: https://newzoo.com/articles/global-games-market-189-billion-2025/
+                          - text: )
+                        - listitem [ref=e232]:
+                          - strong [ref=e233]: "Battle royale is a multi-title competitive ecosystem:"
+                          - text: Newzoo’s battle royale analysis specifically compares leading PC and mobile titles and identifies regional differences in Fortnite and PUBG performance. The study should therefore measure unaided awareness, aided awareness, usage, consideration, and perceived differentiation across the competitive set. — Newzoo. (
+                          - link "resources.newzoo.com" [ref=e234] [cursor=pointer]:
+                            - /url: https://resources.newzoo.com/the-rise-of-battle-royale
+                          - text: )
+                        - listitem [ref=e235]:
+                          - strong [ref=e236]: "India is a high-reach but relatively low-monetisation gaming market:"
+                          - text: Available market reporting describes India as a very large mobile-download market, while revenue per player remains comparatively low. This makes payment behavior, purchase conversion, spend occasions, and barriers to spending important tracking variables rather than relying only on stated loyalty. — Sensor Tower reporting summarized by Game Developer Reports. (
+                          - link "gamedevreports.substack.com" [ref=e237] [cursor=pointer]:
+                            - /url: https://gamedevreports.substack.com/i/167151250/market-overview
+                          - text: )
+                        - listitem [ref=e238]:
+                          - strong [ref=e239]: "In-game monetisation and brand integrations are becoming more important in India:"
+                          - text: Recent Indian gaming coverage reports rising average revenue among paying users and a projected shift toward greater in-app-purchase contribution. The tracker should connect spending with perceived value, cosmetics, events, collaborations, and engagement rather than measuring spend as a standalone behavior. — The Economic Times, citing the Bitkraft–Redseer report. (
+                          - link "economictimes.indiatimes.com" [ref=e240] [cursor=pointer]:
+                            - /url: http://economictimes.indiatimes.com/industry/media/entertainment/online-gaming-india-krafton-bgmi-rooter-bitkraft-redseer-nazara-in-app-purchases-driving-growth/articleshow/126368318.cms
+                          - text: )
+                        - listitem [ref=e241]:
+                          - strong [ref=e242]: "Fortnite’s ecosystem extends beyond the core battle royale mode:"
+                          - text: Epic’s creator-economy model distributes engagement-based revenue to eligible island creators, making creator-made experiences and social participation relevant parts of Fortnite’s brand proposition. — Epic Games. (
+                          - link "fortnite.com" [ref=e243] [cursor=pointer]:
+                            - /url: https://www.fortnite.com/news/introducing-the-creator-economy-2-0
+                          - text: ","
+                          - link "fortnite.com" [ref=e244] [cursor=pointer]:
+                            - /url: https://www.fortnite.com/news/fortnite-engagement-payout-update?lang=en-US
+                          - text: )
+                      - heading "3. Research Type & Methodology" [level=3] [ref=e245]
+                      - list [ref=e246]:
+                        - listitem [ref=e247]:
+                          - strong [ref=e248]: "Study type:"
+                          - text: Brand Health / Tracking combined with Usage & Attitude, Competitive Landscape, and selected Customer Experience-style engagement measures.
+                        - listitem [ref=e249]:
+                          - strong [ref=e250]: "Discrete stimuli counted:"
+                          - text: Zero. The study is tracking existing brands, behaviors, perceptions, and market participation; it does not require respondents to evaluate specific advertisements, packs, concepts, or other discrete stimuli.
+                        - listitem [ref=e251]:
+                          - strong [ref=e252]: "Research design:"
+                          - text: A linear, modular tracking questionnaire with a consistent core across waves. Cell-based designs such as monadic, sequential monadic, A/B, paired comparison, and split-cell testing do not apply because there are no discrete stimuli to show.
+                        - listitem [ref=e253]:
+                          - strong [ref=e254]: "Why this approach:"
+                          - text: The central decision is to monitor movement in brand health and explain why that movement occurs. A modular tracking design will provide clean wave-to-wave comparison while linking awareness and consideration to actual play frequency, recent usage, switching, social behavior, live-service engagement, and spending.
+                        - listitem [ref=e255]:
+                          - strong [ref=e256]: "Alternatives considered:"
+                          - list [ref=e257]:
+                            - listitem [ref=e258]:
+                              - strong [ref=e259]: "Single-wave U&A study:"
+                              - text: Useful for a broad behavioral snapshot, but weaker for identifying whether Fortnite’s position is improving or declining over time.
+                            - listitem [ref=e260]:
+                              - strong [ref=e261]: "Concept or campaign testing:"
+                              - text: Appropriate when specific creative or partnership assets must be evaluated, but not suitable for the current always-on brand-health objective.
+                            - listitem [ref=e262]:
+                              - strong [ref=e263]: "Segmentation-first study:"
+                              - text: Could identify player personas in depth, but should follow the tracker or use a limited attitudinal battery because the immediate priority is monitoring brand and competitive movement.
+                        - listitem [ref=e264]:
+                          - strong [ref=e265]: "User control:"
+                          - text: If you prefer a different methodology, such as a standalone campaign test or a deeper player segmentation study, it can be switched before the research brief is generated.
+                        - listitem [ref=e266]:
+                          - strong [ref=e267]: "Survey design logic:"
+                          - text: "Use a modular funnel: category behavior before brand measures; unaided awareness before aided awareness; usage before attitudes; attitudes before loyalty and advocacy; and behavioral spend questions before asking for explanations. Keep the core battery stable across waves and rotate only timely modules such as seasonal updates, major collaborations, creator experiences, or campaign exposure."
+                        - listitem [ref=e268]:
+                          - strong [ref=e269]: "Wave design:"
+                          - text: Establish a baseline wave, then repeat the core instrument in subsequent waves. Use identical wording and scales for trend KPIs. Add wave identifiers and field-period markers so changes can be interpreted alongside season launches, partnerships, esports moments, and major product updates.
+                        - listitem [ref=e270]:
+                          - strong [ref=e271]: "Indian panel and device context:"
+                          - text: Surveys will be deployed to verified Indian respondents through the SuperJ mobile application and web. Age, gender, city, and NCCS targeting will be enforced by the audience system before the survey begins, so these should not be re-collected in the questionnaire.
+                        - listitem [ref=e272]:
+                          - strong [ref=e273]: "Quality controls:"
+                          - text: Include platform-compliant attention checks, speeder detection, straight-line detection, open-end gibberish screening, and checks for implausible gaming behavior. Use short screens, minimal grids, fully labeled five-point scales, behavioral validation, and tap-friendly response formats for smartphone completion.
+                      - heading "4. Target Audience Profile" [level=3] [ref=e274]
+                      - list [ref=e275]:
+                        - listitem [ref=e276]:
+                          - strong [ref=e277]: "Who we are asking:"
+                          - text: Indian mobile gamers spanning frequent, occasional, and lapsed players; current Fortnite players; players of competing battle royale titles; and relevant parents or household decision-makers for younger players where permission and platform policy allow.
+                        - listitem [ref=e278]:
+                          - strong [ref=e279]: "Behavioral coverage:"
+                          - text: Include players across different session frequencies, play durations, multiplayer patterns, game genres, platform mixes, recent game switching, uninstalling and returning, and in-app-purchase behavior.
+                        - listitem [ref=e280]:
+                          - strong [ref=e281]: "Competitive relevance:"
+                          - text: Ensure the audience includes people with direct experience of Fortnite and competing games such as BGMI/PUBG, Free Fire, and Apex Legends, rather than relying only on general gaming awareness.
+                        - listitem [ref=e282]:
+                          - strong [ref=e283]: "Why these people hold the answers:"
+                          - text: Current players can assess Fortnite’s live experience and loyalty drivers; lapsed players can explain churn and re-entry barriers; competitor players reveal conquest opportunities; and household decision-makers can illuminate spending permissions and perceptions around younger players.
+                        - listitem [ref=e284]:
+                          - strong [ref=e285]: "Must-have screening criteria:"
+                          - text: Recent mobile gaming activity; sufficient familiarity with at least one tracked game or gaming brand; ability to identify the games they currently or recently play; and, for player-level modules, a minimum recent usage threshold that is consistent across waves.
+                        - listitem [ref=e286]:
+                          - strong [ref=e287]: "Indian segmentation lens:"
+                          - text: Analyze results by metro and tier-1/2/3 location, region, NCCS, age band, gaming frequency, current Fortnite usage, competing-game usage, and payer versus non-payer status. These are audience cuts supplied or enforced through the platform’s targeting system where applicable.
+                      - heading "5. Key Information Areas & Data Architecture" [level=3] [ref=e288]
+                      - list [ref=e289]:
+                        - listitem [ref=e290]:
+                          - strong [ref=e291]: "Category and platform behavior:"
+                          - text: Capture mobile gaming frequency, session length, time of day, genres, titles, and platform use → reveals the size and habits of the addressable gaming audience → informs channel planning and audience prioritization.
+                        - listitem [ref=e292]:
+                          - strong [ref=e293]: "Unaided and aided brand funnel:"
+                          - text: Measure spontaneous awareness first, followed by aided awareness, familiarity, consideration, current usage, recent usage, and likelihood to continue → shows where Fortnite and Epic Games win or lose in the funnel → guides brand-building and acquisition strategy.
+                        - listitem [ref=e294]:
+                          - strong [ref=e295]: "Competitive repertoire and switching:"
+                          - text: Record games played alongside Fortnite, recent switching, uninstalling, returning, and reasons for movement → identifies competitive displacement and retention risks → supports conquest, win-back, and product communication decisions.
+                        - listitem [ref=e296]:
+                          - strong [ref=e297]: "Brand associations and differentiation:"
+                          - text: Measure perceptions such as fun, social connection, creativity, variety, competitiveness, cultural relevance, trust, value, and distinctiveness → explains what Fortnite owns versus what competitors own → guides positioning, partnerships, and campaign messaging.
+                        - listitem [ref=e298]:
+                          - strong [ref=e299]: "Live-service engagement:"
+                          - text: Track awareness and participation in seasonal updates, limited-time events, collaborations, creator-made experiences, esports, and community activities → identifies which ecosystem elements strengthen engagement → informs partnership and content investment.
+                        - listitem [ref=e300]:
+                          - strong [ref=e301]: "Social and community behavior:"
+                          - text: Measure squad play, friend invitations, voice or text interaction, creator influence, sharing, streaming, and community participation → reveals the social mechanisms behind retention and advocacy → supports community and creator strategy.
+                        - listitem [ref=e302]:
+                          - strong [ref=e303]: "In-app purchase behavior:"
+                          - text: Measure payer status, purchase frequency, recent purchase occasion, broad INR spend bands, purchase categories, perceived value, and barriers → links monetisation to engagement and brand perceptions → informs cosmetic, collaboration, offer, and value communication strategy.
+                        - listitem [ref=e304]:
+                          - strong [ref=e305]: "Loyalty and advocacy:"
+                          - text: Track likelihood to continue, recommend, invite friends, return after a break, and choose Fortnite over alternatives → provides leading indicators of retention and organic growth → supports investment decisions and wave-to-wave performance evaluation.
+                      - heading "6. Survey Flow & Question Design Approach" [level=3] [ref=e306]
+                      - list [ref=e307]:
+                        - listitem [ref=e308]:
+                          - strong [ref=e309]: "Phase 1 — Warm-up and Screening:"
+                          - text: Establish recent mobile gaming behavior, frequency, platforms, and relevant game usage. Use behavior-based qualification before asking brand opinions.
+                        - listitem [ref=e310]:
+                          - strong [ref=e311]: "Phase 2 — Category Context:"
+                          - text: Measure genres played, battle royale participation, session patterns, social play, and game repertoire. This creates the competitive context before Fortnite or Epic Games are named in detail.
+                        - listitem [ref=e312]:
+                          - strong [ref=e313]: "Phase 3 — Unaided Brand Health:"
+                          - text: Capture unaided awareness of gaming companies, games, and battle royale titles, followed by spontaneous associations and top-of-mind consideration.
+                        - listitem [ref=e314]:
+                          - strong [ref=e315]: "Phase 4 — Aided Funnel and Competitive Benchmarking:"
+                          - text: Measure aided awareness, familiarity, consideration, current usage, recent usage, preference, perceived differentiation, and brand associations for Epic Games, Fortnite, and selected competitors.
+                        - listitem [ref=e316]:
+                          - strong [ref=e317]: "Phase 5 — Fortnite Engagement Deep Dive:"
+                          - text: Among relevant respondents, assess play frequency, session behavior, multiplayer participation, seasonal content, collaborations, creator experiences, community behavior, switching, uninstalling, and returning.
+                        - listitem [ref=e318]:
+                          - strong [ref=e319]: "Phase 6 — Monetisation and Value:"
+                          - text: Measure whether respondents make in-app purchases, recent purchase behavior, broad INR spend bands, purchase motivations, value perceptions, and barriers. Use optional-feeling wording for spend questions and avoid making payment behavior feel judgmental.
+                        - listitem [ref=e320]:
+                          - strong [ref=e321]: "Phase 7 — Loyalty, Advocacy, and Open Ends:"
+                          - text: Measure likelihood to continue, recommend, invite friends, return, and choose Fortnite over alternatives. End with short open-ended probes on the strongest reason to play, the biggest frustration, and one change that would increase engagement.
+                        - listitem [ref=e322]:
+                          - strong [ref=e323]: "Phase 8 — Rotating Wave Module:"
+                          - text: Add a small wave-specific module for a campaign, collaboration, seasonal event, creator initiative, or competitive development. Keep this separate from the stable tracking core so trend KPIs remain comparable.
+                        - listitem [ref=e324]:
+                          - strong [ref=e325]: "Estimated structure:"
+                          - text: A smartphone-friendly instrument of approximately 15–25 questions, designed for an 8–12 minute completion window. The final question count will depend on routing between current players, lapsed players, competitor players, non-payers, payers, and parents or household decision-makers.
+                        - listitem [ref=e326]:
+                          - strong [ref=e327]: "Scale design:"
+                          - text: Prefer fully labeled five-point unipolar scales, behavioral frequency questions, forced trade-offs where useful, and short open-ended probes. Avoid long agree/disagree grids because positive-end responding and acquiescence can inflate apparent brand strength.
+                      - heading "7. Expected Insights & Business Decisions Enabled" [level=3] [ref=e328]
+                      - list [ref=e329]:
+                        - listitem [ref=e330]:
+                          - strong [ref=e331]: "You will be able to:"
+                          - text: Track unaided and aided awareness, familiarity, consideration, usage, loyalty, advocacy, and perceived differentiation for Epic Games and Fortnite across waves.
+                        - listitem [ref=e332]:
+                          - strong [ref=e333]: "You will be able to:"
+                          - text: Identify which Indian gamer segments are most engaged with Fortnite, which are drifting toward competitors, and which are high-potential non-users.
+                        - listitem [ref=e334]:
+                          - strong [ref=e335]: "You will be able to:"
+                          - text: Diagnose whether changes in loyalty are linked to play frequency, social participation, seasonal content, collaborations, creator experiences, value perceptions, or competitive activity.
+                        - listitem [ref=e336]:
+                          - strong [ref=e337]: "You will be able to:"
+                          - text: Quantify the role of in-app purchases, broad INR spending behavior, cosmetic value, and collaboration-driven excitement in engagement and retention.
+                        - listitem [ref=e338]:
+                          - strong [ref=e339]: "You will be able to decide:"
+                          - text: Which audiences should receive priority in marketing and campaign planning.
+                        - listitem [ref=e340]:
+                          - strong [ref=e341]: "You will be able to decide:"
+                          - text: Which partnerships, collaborations, creator programs, and community initiatives are most aligned with the strongest engagement drivers.
+                        - listitem [ref=e342]:
+                          - strong [ref=e343]: "You will be able to decide:"
+                          - text: Whether Fortnite’s positioning should emphasize social play, creativity, competition, cultural relevance, live events, variety, or another differentiated strength.
+                        - listitem [ref=e344]:
+                          - strong [ref=e345]: "You will be able to decide:"
+                          - text: Where retention, win-back, and competitive-conquest activity should be focused.
+                        - listitem [ref=e346]:
+                          - strong [ref=e347]: "Key hypotheses being tested:"
+                          - list [ref=e348]:
+                            - listitem [ref=e349]: Fortnite has stronger spontaneous awareness than most competing battle royale titles among active Indian mobile gamers.
+                            - listitem [ref=e350]: Fortnite’s differentiation is driven more by its ecosystem, collaborations, creativity, and social experience than by battle royale gameplay alone.
+                            - listitem [ref=e351]: Frequent multiplayer and community participation are associated with stronger loyalty and advocacy.
+                            - listitem [ref=e352]: Seasonal updates and collaborations increase engagement, but their effect may be stronger among existing players than among lapsed or competitor-only players.
+                            - listitem [ref=e353]: Spending is influenced by perceived cosmetic and event value, not only by play frequency.
+                            - listitem [ref=e354]: Lapsed players are more likely to return when the trigger is a major update, collaboration, friend invitation, or new content experience.
+                        - listitem [ref=e355]:
+                          - strong [ref=e356]: "KPIs to report:"
+                          - text: Unaided awareness; aided awareness; familiarity; consideration; current usage; recent usage; usage frequency; competitive repertoire; Fortnite share of recent play; switch-in and switch-out rates; key association scores; differentiation index; likelihood to continue; recommendation and advocacy indicators; multiplayer participation; seasonal or collaboration engagement; payer incidence; recent purchase incidence; broad spend bands; value perception; and top reasons for switching, returning, or purchasing.
+                        - listitem [ref=e357]:
+                          - strong [ref=e358]: "Tracking outputs:"
+                          - text: Report absolute wave scores, wave-over-wave movement, competitor gaps, segment differences, and driver relationships. Interpret changes against field timing and major gaming-market events rather than treating every movement as a permanent brand shift.
+            - paragraph [ref=e362]: I've put together a Strategic Research Framework for the Epic Games and Fortnite brand-health tracking study — take a look above.
+          - generic [ref=e369]:
+            - paragraph [ref=e373]: Yes, generate the research brief
+            - generic [ref=e377]: U
+          - generic [ref=e382]:
+            - generic [ref=e384]:
+              - button "Who gets asked what — being decided" [ref=e385] [cursor=pointer]:
+                - generic [ref=e389]: Who gets asked what — being decided
+              - generic [ref=e392]:
+                - generic [ref=e393]:
+                  - img "done" [ref=e396]
+                  - generic [ref=e398]:
+                    - generic [ref=e400]: Goals, KPIs, methodology, audience — all being locked in.
+                    - paragraph [ref=e405]: The respondent profile is being built — Hercules is defining who gets asked, what qualifying criteria apply, and how the screener will ensure the right people are reached.
+                - generic [ref=e406]:
+                  - img "done" [ref=e409]
+                  - generic [ref=e411]:
+                    - generic [ref=e413]: What the research needs to be — being defined now.
+                    - paragraph [ref=e418]: Hercules is going back to secondary sources — more context is needed before the brief can close, and targeted searches are being run to provide it.
+                - generic [ref=e419]:
+                  - img "done" [ref=e422]
+                  - generic [ref=e424]:
+                    - generic [ref=e426]: The brief is being constructed from what you've shared.
+                    - paragraph [ref=e431]: Hercules is laying out the survey flow — establishing which sections the instrument will contain, in what order they'll appear, and how the study will be structured from start to finish.
+                - generic [ref=e432]:
+                  - img "done" [ref=e435]
+                  - generic [ref=e437]:
+                    - generic [ref=e439]: Goals to brief — the full construction.
+                    - paragraph [ref=e444]: Hercules is building the routing architecture — defining who sees what, based on what criteria, and mapping the conditional logic that governs the survey flow.
+            - generic [ref=e445]:
+              - paragraph [ref=e448]: This is a strong opportunity to establish a repeatable brand-health tracker for Epic Games and Fortnite among Indian mobile gamers. The brief below carries forward the approved framework, covering awareness, competitive usage, live-service engagement, loyalty, advocacy, switching, social play, and in-app spending. I have retained a zero-stimulus tracking design because the study measures existing brand and usage behavior rather than testing concepts or advertising assets. Please review the methodology and audience assumptions below and share any changes before we generate the survey.
+              - generic [ref=e450] [cursor=pointer]:
+                - generic [ref=e451]:
+                  - paragraph [ref=e453]: Version 1
+                  - generic [ref=e454]:
+                    - button "Share brief" [ref=e455]:
+                      - img "share" [ref=e456]
+                    - button "Download brief" [ref=e457]:
+                      - img "download" [ref=e458]
+                    - button "Copy brief" [ref=e459]:
+                      - img "copy" [ref=e460]
+                - generic [ref=e463]:
+                  - 'heading "Research Brief: Fortnite & Epic Games Brand Health Among Indian Mobile Gamers" [level=1] [ref=e464]'
+                  - heading "star icon Background & Context" [level=3] [ref=e465]:
+                    - generic [ref=e466]:
+                      - img "star icon" [ref=e467]
+                      - strong [ref=e469]: Background & Context
+                  - paragraph [ref=e470]: Epic Games and Fortnite operate in a fast-moving mobile gaming environment where player attention can move between Fortnite, BGMI/PUBG, Free Fire, Apex Legends, and other live-service title...
+                - img "toggle" [ref=e473]
+              - paragraph [ref=e476]: Please review the selected tracking methodology, city coverage, age structure, and behavioral audience filters. If the framework looks right, we can move forward to generate the survey instrument. You can still request changes to the sample, audience, wave structure, or methodology before launch.
+          - generic [ref=e483]:
+            - paragraph [ref=e487]: Yes, create the survey.
+            - generic [ref=e491]: U
+          - generic [ref=e496]:
+            - generic [ref=e498]:
+              - button "The conditional logic — being wired to the actual questions" [ref=e499] [cursor=pointer]:
+                - generic [ref=e503]: The conditional logic — being wired to the actual questions
+              - generic [ref=e506]:
+                - generic [ref=e507]:
+                  - img "done" [ref=e510]
+                  - generic [ref=e512]:
+                    - generic [ref=e514]: Goals, audience, methodology — all in one place.
+                    - paragraph [ref=e519]: "The survey flow is being mapped — Hercules is establishing the structure of the study: which sections will appear, in what order, and how the logical sequence of the instrument will serve the research objectives."
+                - generic [ref=e520]:
+                  - img "done" [ref=e523]
+                  - generic [ref=e525]:
+                    - generic [ref=e527]: The research plan is being put together.
+                    - paragraph [ref=e532]: The routing logic is being mapped — Hercules is establishing the branching paths through the instrument and defining the conditions that determine who gets routed where.
+                - generic [ref=e533]:
+                  - img "done" [ref=e536]
+                  - generic [ref=e538]:
+                    - generic [ref=e540]: The survey is being built — deliberately and in full.
+                    - paragraph [ref=e545]: Hercules is generating the questions — working from the brief and the research design to produce a survey calibrated to the target respondent.
+                - generic [ref=e546]:
+                  - img "done" [ref=e549]
+                  - generic [ref=e551]:
+                    - generic [ref=e553]: The instrument is being designed.
+                    - paragraph [ref=e558]: The routing compilation layer is active — Hercules is translating abstract routing rules into concrete logic tied to actual question IDs, ensuring the survey behaves correctly in the field.
+            - generic [ref=e559]:
+              - generic [ref=e561]:
+                - heading "Survey ready" [level=3] [ref=e562]
+                - paragraph [ref=e563]:
+                  - text: The survey draft
+                  - strong [ref=e564]: “Is Fortnite Winning India’s Gamers?”
+                  - text: is ready with
+                  - strong [ref=e565]: 22 respondent-facing questions
+                  - text: . It follows the approved zero-stimulus tracking design and is structured for consistent measurement across future waves.
+                - heading "Research strategy" [level=3] [ref=e566]
+                - paragraph [ref=e567]:
+                  - text: This is a
+                  - strong [ref=e568]: brand health tracker
+                  - text: for Epic Games and Fortnite among Indian mobile gamers, combining brand equity, competitive benchmarking, usage, engagement, loyalty, advocacy, switching, social play, and monetisation measures. Wave-level results will help the business understand where Fortnite is gaining or losing salience, usage, preference, loyalty, advocacy, and competitive share—and guide acquisition, retention, win-back, and growth priorities.
+                - heading "Survey structure" [level=3] [ref=e569]
+                - paragraph [ref=e570]:
+                  - text: "Respondents move through the mandated brand-equity funnel:"
+                  - strong [ref=e571]: unaided recall
+                  - text: ", followed by aided awareness and non-aware termination;"
+                  - strong [ref=e572]: familiarity and usage
+                  - text: ;
+                  - strong [ref=e573]: perception and equity
+                  - text: ;
+                  - strong [ref=e574]: emotional connection
+                  - text: ; and finally
+                  - strong [ref=e575]: loyalty and advocacy
+                  - text: . The questionnaire is organised across Salience, Familiarity & Usage, Perception Equity, Emotional Connection, and Loyalty & Advocacy while keeping core wording, brand lists, scales, and KPI definitions stable for tracking.
+                - heading "Routing & logic" [level=3] [ref=e576]
+                - paragraph [ref=e577]:
+                  - text: "Smart branching and screening logic are built in:"
+                  - strong [ref=e578]: 1 routing rule
+                  - text: handles the required branching and screening gates, and
+                  - strong [ref=e579]: 1 dynamic carry-forward filter
+                  - text: helps tailor follow-up responses based on earlier answers.
+                - heading "Review invitation" [level=3] [ref=e580]
+                - paragraph [ref=e581]: Please review the draft and let me know if you would like any wording, response options, brand lists, KPI treatment, or routing logic refined before launch.
+              - generic [ref=e583]:
+                - generic [ref=e585] [cursor=pointer]:
+                  - generic [ref=e586]:
+                    - paragraph [ref=e587]: Your Research Study is in progress
+                    - button "pause" [ref=e588]:
+                      - img "pause" [ref=e589]
+                  - generic [ref=e590]:
+                    - text: You will be notified when all responses are collected
+                    - generic [ref=e591]:
+                      - generic [ref=e592]: "Completion: 0%"
+                      - generic [ref=e593]: "Responses Collected: 0 / 100"
+                    - generic [ref=e596]:
+                      - paragraph [ref=e597]: "Estimated Timeline Completion: 1 day left"
+                      - button "View Responses" [ref=e598]:
+                        - img [ref=e599]
+                        - generic [ref=e601]: View Responses
+                - generic [ref=e602]:
+                  - generic [ref=e603] [cursor=pointer]:
+                    - text: View Audience
+                    - img [ref=e606]
+                  - generic [ref=e608] [cursor=pointer]:
+                    - text: View Responses
+                    - img [ref=e611]
+                  - generic [ref=e613] [cursor=pointer]:
+                    - text: View Survey
+                    - img [ref=e616]
+              - generic [ref=e620]: AI Content Review Complete
+          - generic [ref=e622]:
+            - generic [ref=e623]: Share this Survey with friends
+            - generic [ref=e624]: Invite participants to answer this survey and collect their feedback in real-time.
+            - generic [ref=e625]:
+              - generic [ref=e626] [cursor=pointer]:
+                - generic [ref=e627]: https://superj.app/survey/6a7ed25e15203e92a622fd59
+                - img "copy" [ref=e629]
+              - generic [ref=e631] [cursor=pointer]:
+                - img [ref=e632]
+                - text: Share
+        - generic [ref=e639]:
+          - generic [ref=e642]:
+            - generic [ref=e644]: All India General PopulationAudience set has been applied to this campaign
+            - img "close" [ref=e645] [cursor=pointer]
+          - generic [ref=e648]:
+            - textbox "Ask Hercules a question" [disabled] [ref=e650]:
+              - /placeholder: Ask Hercules...
+            - generic [ref=e651]:
+              - button "upload button" [disabled] [ref=e653] [cursor=pointer]:
+                - img [ref=e655]
+              - generic [ref=e660]:
+                - button "submit button":
+                  - generic:
+                    - img
+  - contentinfo "Site index" [ref=e661]:
+    - navigation [ref=e662]:
+      - link "Home" [ref=e663] [cursor=pointer]:
+        - /url: /
+      - link "Hercules AI" [ref=e664] [cursor=pointer]:
+        - /url: /ai
+      - link "Pricing" [ref=e665] [cursor=pointer]:
+        - /url: /pricing
+      - link "About" [ref=e666] [cursor=pointer]:
+        - /url: /about
+      - link "Research Case Studies" [ref=e667] [cursor=pointer]:
+        - /url: /research
+      - link "Blog" [ref=e668] [cursor=pointer]:
+        - /url: /blog
+      - link "Alternatives" [ref=e669] [cursor=pointer]:
+        - /url: /alternatives
+      - link "Market Research India" [ref=e670] [cursor=pointer]:
+        - /url: /solutions/india
+      - link "Help" [ref=e671] [cursor=pointer]:
+        - /url: /help
+      - link "About Hercules" [ref=e672] [cursor=pointer]:
+        - /url: /help/abouthercules
+      - link "About Superj" [ref=e673] [cursor=pointer]:
+        - /url: /help/aboutsuperj
+      - link "Account Management" [ref=e674] [cursor=pointer]:
+        - /url: /help/accountsmanagement
+      - link "Credit Pricing" [ref=e675] [cursor=pointer]:
+        - /url: /help/creditspricing
+      - link "FAQ" [ref=e676] [cursor=pointer]:
+        - /url: /help/faq
+      - link "Privacy Policy" [ref=e677] [cursor=pointer]:
+        - /url: /privacy
+      - link "Terms of Service" [ref=e678] [cursor=pointer]:
+        - /url: /terms
+      - link "Amul Case Study" [ref=e679] [cursor=pointer]:
+        - /url: /research/amul
+      - link "ICICI Prudential Case Study" [ref=e680] [cursor=pointer]:
+        - /url: /research/icici
+      - link "SBI Case Study" [ref=e681] [cursor=pointer]:
+        - /url: /research/sbi
+      - link "Greenply Case Study" [ref=e682] [cursor=pointer]:
+        - /url: /research/greenply
+      - link "Kotak Case Study" [ref=e683] [cursor=pointer]:
+        - /url: /research/kotak
+      - link "Imperial Blue Case Study" [ref=e684] [cursor=pointer]:
+        - /url: /research/imperial-blue
+      - link "SurveyMonkey Alternative" [ref=e685] [cursor=pointer]:
+        - /url: /alternatives/surveymonkey
+      - link "Kantar Alternative" [ref=e686] [cursor=pointer]:
+        - /url: /alternatives/kantar
+      - link "Nielsen Alternative" [ref=e687] [cursor=pointer]:
+        - /url: /alternatives/nielsen
+      - link "Typeform Alternative" [ref=e688] [cursor=pointer]:
+        - /url: /alternatives/typeform
+      - link "Google Forms Alternative" [ref=e689] [cursor=pointer]:
+        - /url: /alternatives/google-forms
+      - link "Qualtrics Alternative" [ref=e690] [cursor=pointer]:
+        - /url: /alternatives/qualtrics
+      - link "Medallia Alternative" [ref=e691] [cursor=pointer]:
+        - /url: /alternatives/medallia
+      - link "Zoho Survey Alternative" [ref=e692] [cursor=pointer]:
+        - /url: /alternatives/zoho-survey
+      - link "Microsoft Forms Alternative" [ref=e693] [cursor=pointer]:
+        - /url: /alternatives/microsoft-forms
+      - link "Pollfish Alternative" [ref=e694] [cursor=pointer]:
+        - /url: /alternatives/pollfish
+      - link "Market Research Mumbai" [ref=e695] [cursor=pointer]:
+        - /url: /solutions/mumbai
+      - link "Market Research Delhi" [ref=e696] [cursor=pointer]:
+        - /url: /solutions/delhi
+      - link "Market Research Hyderabad" [ref=e697] [cursor=pointer]:
+        - /url: /solutions/hyderabad
+      - link "Market Research Pune" [ref=e698] [cursor=pointer]:
+        - /url: /solutions/pune
+      - link "Market Research Chennai" [ref=e699] [cursor=pointer]:
+        - /url: /solutions/chennai
+      - link "Market Research Bangalore" [ref=e700] [cursor=pointer]:
+        - /url: /solutions/bangalore
+      - link "Market Research Kolkata" [ref=e701] [cursor=pointer]:
+        - /url: /solutions/kolkata
+      - link "FMCG Market Research India" [ref=e702] [cursor=pointer]:
+        - /url: /solutions/fmcg
+      - link "BFSI Consumer Research" [ref=e703] [cursor=pointer]:
+        - /url: /solutions/bfsi
+      - link "Market Research for Startups" [ref=e704] [cursor=pointer]:
+        - /url: /solutions/startups
+      - link "Pharma Market Research India" [ref=e705] [cursor=pointer]:
+        - /url: /solutions/pharma
+      - link "E-commerce Consumer Research" [ref=e706] [cursor=pointer]:
+        - /url: /solutions/ecommerce
+      - link "Poseidon AI Research" [ref=e707] [cursor=pointer]:
+        - /url: /poseidon
+      - link "Product Concept Testing India" [ref=e708] [cursor=pointer]:
+        - /url: /use-cases/product-testing
+      - link "Brand Tracking Surveys India" [ref=e709] [cursor=pointer]:
+        - /url: /use-cases/brand-tracking
+      - link "Customer Satisfaction Surveys India" [ref=e710] [cursor=pointer]:
+        - /url: /use-cases/customer-satisfaction
+      - link "Ad Testing India" [ref=e711] [cursor=pointer]:
+        - /url: /use-cases/ad-testing
+      - link "Employee Satisfaction Surveys India" [ref=e712] [cursor=pointer]:
+        - /url: /use-cases/employee-surveys
+      - link "Political Polling India" [ref=e713] [cursor=pointer]:
+        - /url: /use-cases/political-polling
+      - link "Academic Research Surveys India" [ref=e714] [cursor=pointer]:
+        - /url: /use-cases/academic-research
+      - link "How to Improve Data Collection with Online Surveys" [ref=e715] [cursor=pointer]:
+        - /url: /blog/how-to-improve-your-data-collection-strategy-with-online-surveys
+      - link "Data-Backed Decision Making for Business Growth Guide" [ref=e716] [cursor=pointer]:
+        - /url: /blog/how-to-use-data-backed-decision-making-for-business-growth
+      - link "Top 10 Survey Tools for Market Research in 2026" [ref=e717] [cursor=pointer]:
+        - /url: /blog/top-10-survey-tools-for-market-research-in-2026
+      - link "Complete Guide to Effective Customer Feedback Surveys" [ref=e718] [cursor=pointer]:
+        - /url: /blog/a-complete-guide-to-conducting-effective-customer-feedback-surveys
+      - 'link "AI in Employee Surveys: Better HR Insights in 2026" [ref=e719] [cursor=pointer]':
+        - /url: /blog/leveraging-ai-in-employee-surveys-for-better-hr-insights
+      - link "Best AI-Powered Survey Generators for 2026 [Full List]" [ref=e720] [cursor=pointer]:
+        - /url: /blog/list-of-the-best-ai-powered-survey-generators-for-2026
+      - 'link "Survey Analytics: Tips for Better Data Interpretation" [ref=e721] [cursor=pointer]':
+        - /url: /blog/understanding-survey-analytics-tips-for-better-data-interpretation
+      - 'link "Future of Market Research: Key Trends to Watch in 2026" [ref=e722] [cursor=pointer]':
+        - /url: /blog/the-future-of-market-research-trends-to-watch-in-2026
+      - 'link "Designing High-Impact Customer Surveys: Step-by-Step" [ref=e723] [cursor=pointer]':
+        - /url: /blog/step-by-step-guide-to-designing-high-impact-customer-surveys
+      - link "How to Use Data to Drive Strategic Business Decisions" [ref=e724] [cursor=pointer]:
+        - /url: /blog/how-to-use-data-to-drive-strategic-business-decisions
+      - 'link "Hercules: The Ultimate Research Assistant for Data-Driven Teams" [ref=e725] [cursor=pointer]':
+        - /url: /blog/hercules-the-ultimate-research-assistant-for-data-driven-teams
+      - 'link "Compare Top Survey Platforms: Features, Pricing, and Usability" [ref=e726] [cursor=pointer]':
+        - /url: /blog/compare-top-survey-platforms-features-pricing-and-usability
+      - link "Best Practices for Choosing a Market Research Tool" [ref=e727] [cursor=pointer]:
+        - /url: /blog/best-practices-for-choosing-a-market-research-tool
+      - link "Why Your Business Needs an AI-Driven Survey Builder" [ref=e728] [cursor=pointer]:
+        - /url: /blog/why-your-business-needs-an-ai-driven-survey-builder
+      - link "Top Features to Look for in a Customer Feedback Platform" [ref=e729] [cursor=pointer]:
+        - /url: /blog/top-features-to-look-for-in-a-customer-feedback-platform
+      - link "Maximize Your Survey Outcomes with Hercules Works Solutions" [ref=e730] [cursor=pointer]:
+        - /url: /blog/maximize-your-survey-outcomes-with-hercules-works-solutions
+      - link "How Hercules Enhances Data Accuracy and Insights" [ref=e731] [cursor=pointer]:
+        - /url: /blog/how-hercules-enhances-data-accuracy-and-insights
+      - link "Transform Your Business with the Leading Data Analytics Platform" [ref=e732] [cursor=pointer]:
+        - /url: /blog/transform-your-business-with-the-leading-data-analytics-platform
+      - 'link "Hercules vs. Competitors: Which Survey Tool Is Best for Your Business?" [ref=e733] [cursor=pointer]':
+        - /url: /blog/hercules-vs-competitors-which-survey-tool-is-best-for-your-business
+      - link "Unlock Actionable Insights with Hercules Advanced Survey Analytics" [ref=e734] [cursor=pointer]:
+        - /url: /blog/unlock-actionable-insights-with-hercules-advanced-survey-analytics
+  - alert [ref=e735]
+```
+
+# Test source
+
+```ts
+  304 |     }
+  305 | 
+  306 |         console.log('Waiting 2 seconds before opening in new tab...');
+  307 |         await page.waitForTimeout(2000);
+  308 | 
+  309 |         console.log('Opening live survey in a fresh Super J context for the consumer...');
+  310 |     const superjContext = await browser.newContext();
+  311 |     const livePage = await superjContext.newPage();
+  312 |     livePage.setDefaultTimeout(300000); // 5 minutes global timeout for this page
+  313 |     await livePage.goto(liveSurveyUrl);
+  314 |     
+  315 |     console.log('Forcing Super J Login, Onboarding, and Survey interactions...');
+  316 |     
+  317 |     try {
+  318 |         console.log('[Test] Attempting Login for fresh consumer...');
+  319 |         const LoginPage = require('../pages/LoginPage');
+  320 |         const DataGeneratorUtil = require('../utils/DataGeneratorUtil');
+  321 |         
+  322 |         const loginPage = new LoginPage(livePage);
+  323 |         const randomPhone = process.env.TEST_PHONE || DataGeneratorUtil.generateRandomPhoneNumber();
+  324 |         console.log(`[Test] Using phone number: ${randomPhone}`);
+  325 |         await loginPage.login(randomPhone, '777777');
+  326 |         
+  327 |         // Wait for redirect after login
+  328 |         console.log('[Test] Waiting 15 seconds for post-OTP redirect...');
+  329 |         await livePage.waitForTimeout(15000);
+  330 |     } catch (e) {
+  331 |         console.log('[Test] Login failed or skipped:', e.message);
+  332 |     }
+  333 | 
+  334 |     try {
+  335 |         console.log('[Test] Attempting Onboarding...');
+  336 |         const OnboardingUtil = require('../utils/OnboardingUtil');
+  337 |         const onboardingUtil = new OnboardingUtil(livePage);
+  338 |         await onboardingUtil.completeOnboarding('1997', targetCity, 'Male');
+  339 |         
+  340 |         console.log('[Test] Waiting 5 seconds for post-onboarding redirect...');
+  341 |         await livePage.waitForTimeout(5000);
+  342 |         
+  343 |         console.log(`[Test] Force-redirecting back to survey URL to bypass redirect bug: ${liveSurveyUrl}`);
+  344 |         await livePage.goto(liveSurveyUrl);
+  345 |         await livePage.waitForTimeout(5000);
+  346 |     } catch (e) {
+  347 |         console.log('[Test] Onboarding failed or skipped:', e.message);
+  348 |     }
+  349 | 
+  350 |     try {
+  351 |         console.log('[Test] Attempting to click Start Survey...');
+  352 |         const LandingPage = require('../pages/LandingPage');
+  353 |         const landingPage = new LandingPage(livePage);
+  354 |         await landingPage.clickStartSurvey(2);
+  355 |     } catch (e) {
+  356 |         console.log('[Test] Click Start Survey failed:', e.message);
+  357 |     }
+  358 |     
+  359 |     console.log('Answering survey using SurveyEngine...');
+  360 |     const SurveyEngine = require('../utils/SurveyEngine');
+  361 |     const surveyEngine = new SurveyEngine(livePage, { surveyLogics });
+  362 |     const result = await surveyEngine.run();
+  363 |     console.log(`Survey Engine finished with result: ${JSON.stringify(result)}`);
+  364 | 
+  365 |     console.log('[Test] Waiting 10 seconds for the survey completion network request to save to backend before closing browser...');
+  366 |     await livePage.waitForTimeout(10000);
+  367 | 
+  368 |     console.log('[Test] Closing consumer context to free memory before verifying B2B dashboard...');
+  369 |     await superjContext.close().catch(() => {});
+  370 | 
+  371 |     await test.step('Verify Response Count in B2B Dashboard', async () => {
+  372 |         console.log('\n--- VERIFYING RESPONSE COUNT IN B2B HERCULES ---');
+  373 |         await page.bringToFront();
+  374 |         
+  375 |         // Wait 10 seconds first for the backend DB to sync
+  376 |         console.log('Waiting 10 seconds for backend database to update...');
+  377 |         await page.waitForTimeout(10000);
+  378 |         
+  379 |         console.log('Reloading Hercules B2B page to fetch updated response count...');
+  380 |         await page.reload();
+  381 |         await page.waitForLoadState('networkidle');
+  382 |         await page.waitForTimeout(5000); // Wait for data to load
+  383 |         
+  384 |         const responsesLabel = page.locator("//span[contains(text(), 'Responses Collected:')] | //p[contains(text(), 'Responses Collected:')] | //div[contains(text(), 'Responses Collected:')]").first();
+  385 |         await responsesLabel.scrollIntoViewIfNeeded().catch(() => {});
+  386 |         
+  387 |         if (await responsesLabel.isVisible().catch(()=>false)) {
+  388 |             const labelText = await responsesLabel.innerText().catch(() => "");
+  389 |             
+  390 |             const countLocator = page.locator("//span[contains(text(), 'Responses Collected:')]/following-sibling::*").first()
+  391 |                 .or(page.locator("//span[contains(text(), 'Responses Collected:')]/.."))
+  392 |                 .first();
+  393 |             const countText = await countLocator.innerText().catch(() => "");
+  394 |             
+  395 |             console.log(`Responses Collected Label: "${labelText}", Count: "${countText}"`);
+  396 |             
+  397 |             // Extract the first number from the countText (excluding title prefix)
+  398 |             const firstNumMatch = countText.replace(/Responses Collected:/i, '').match(/\d+/);
+  399 |             const firstNum = firstNumMatch ? parseInt(firstNumMatch[0], 10) : 0;
+  400 |             
+  401 |             if (firstNum > 0) {
+  402 |                 console.log(`SUCCESS: Verified that the response count has successfully reflected on Hercules B2B! (Count: ${firstNum})`);
+  403 |             } else {
+> 404 |                 throw new Error(`FAILURE: Response count is 0! The survey response was not recorded by the backend. Found text: ${countText}`);
+      |                       ^ Error: FAILURE: Response count is 0! The survey response was not recorded by the backend. Found text: Responses Collected: 0 / 100
+  405 |             }
+  406 |         } else {
+  407 |             throw new Error('FAILURE: "Responses Collected:" label not found on the active page.');
+  408 |         }
+  409 |         
+  410 |         // Capture screenshot of Hercules B2B after reload
+  411 |         await page.screenshot({ path: 'scratch/b2b_after_responses.png', fullPage: true });
+  412 |     });
+  413 | });
+  414 | 
+```

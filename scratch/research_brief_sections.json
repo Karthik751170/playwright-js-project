@@ -1,0 +1,82 @@
+[
+  {
+    "locator": "//h3[text()='Core Objective & Business Context']",
+    "heading": "Core Objective & Business Context",
+    "generatedText": "Goal: Diagnose remote workplace drivers of fatigue, workload distribution, and work-life balance to build proactive retention strategies and optimize team productivity.\nContext: Remote tech organizations face heightened risks of digital fatigue, blurred work-life boundaries, and silent burnout, making baseline measurement essential before morale issues turn into voluntary attrition.\nDecision enabled: Allows executive leadership and HR to re-align resource allocation, adjust meeting/working norm policies, and deploy targeted wellness or workload-redistribution initiatives."
+  },
+  {
+    "locator": "//h3[text()='Secondary Research Snapshot']",
+    "heading": "Secondary Research Snapshot",
+    "generatedText": "Tech Sector Burnout Prevalence: Industry studies reveal that over 60% of tech professionals in remote environments experience moderate to severe burnout due to 'always-on' digital culture and asynchronous communication friction.\nRetention Impact: Unmanaged workload pressure is cited as the leading driver of talent churn in software engineering and product roles, with replacement costs exceeding 1.5x annual salary per departed engineer."
+  },
+  {
+    "locator": "//h3[text()='Research Type & Methodology']",
+    "heading": "Research Type & Methodology",
+    "generatedText": "Study type: Employee / Internal Research (Engagement & Burnout Diagnostic).\nResearch design: Linear structured internal questionnaire using standardized 5-point unipolar agreement and frequency scales, designed for complete anonymity.\nWhy this approach: Internal surveys require clear behavioral anchoring without complex stimulus testing. A linear modular survey maximizes completion rates and ensures psychometric validity across sensitive topics like workload and management support.\nSurvey design logic: Anonymous, single-pass modular structure starting with broad workplace sentiment, progressing to specific workload and boundary friction points, and closing with open-ended feedback.\nQuality controls: Anonymity protection mechanisms, speeder filtering, and non-identifiable demographic grouping to guarantee psychological safety."
+  },
+  {
+    "locator": "//h3[text()='Target Audience Profile']",
+    "heading": "Target Audience Profile",
+    "generatedText": "Who we are asking: All current full-time and contract employees across software engineering, product design, QA, DevOps, and business functions in the remote tech organization.\nWhy they matter: Company-wide participation provides a clean cross-sectional baseline, highlighting specific department-level or tenure-level variances in workload stress.\nScreening criteria: Active employment status; zero personal identifying information collected to maintain 100% response integrity."
+  },
+  {
+    "locator": "//h3[text()='Key Information Areas & Data Architecture']",
+    "heading": "Key Information Areas & Data Architecture",
+    "generatedText": "Workload & Hours Distribution: Average weekly working hours, after-hours communication frequency, and task prioritization support -> Identifies systemic overwork patterns -> Informs workload balancing policies.\nWork-Life Boundary Friction: Ability to disconnect after working hours, weekend communication expectations, and flexibility perception -> Reveals root causes of digital fatigue -> Drives communication charter guidelines.\nBurnout Risk Signal (Maslach-adapted): Emotional exhaustion frequency, feelings of detachment, and accomplishment levels -> Flags high-risk burnout pods -> Enables early HR intervention.\nManager & Operational Support: Clarity of goals, tool efficiency, and manager responsiveness -> Identifies operational bottlenecks contributing to unnecessary effort -> Guides engineering management training."
+  },
+  {
+    "locator": "//h3[text()='Survey Flow & Question Design Approach']",
+    "heading": "Survey Flow & Question Design Approach",
+    "generatedText": "Phase 1 — Warm-up & Overall Engagement: Job satisfaction, company alignment, and remote work sentiment (3 questions).\nPhase 2 — Workload & Task Friction: Capacity ratings, deadline pressure, and prioritization assistance (4 questions).\nPhase 3 — Work-Life Integration & Boundaries: Disconnect capability, after-hours messages, and schedule flexibility (4 questions).\nPhase 4 — Burnout & Well-being Diagnostic: Psychometric battery assessing exhaustion, stress levels, and psychological safety (4 questions).\nPhase 5 — Actions & Open Directives: What one change would most improve your daily routine? (2 questions).\nEstimated length: 17 questions, taking approximately 6-8 minutes to complete on desktop or mobile."
+  },
+  {
+    "locator": "//h3[text()='Expected Insights & Business Decisions Enabled']",
+    "heading": "Expected Insights & Business Decisions Enabled",
+    "generatedText": "You will be able to: Quantify the exact percentage of your organization currently operating at high burnout risk and pinpoint specific operational friction points.\nYou will be able to decide: Policy updates regarding core working hours, asynchronous communication norms, meeting-free focus blocks, and headcount planning.\nKPIs to report: Employee Net Promoter Score (eNPS), Burnout Risk Index, Work-Life Balance Satisfaction Score, and Manager Support Rating."
+  },
+  {
+    "locator": "//h3[text()='Background & Context']",
+    "heading": "Background & Context",
+    "generatedText": "Remote tech organizations face heightened risks of digital fatigue, blurred work-life boundaries, and silent burnout. Industry data indicates that over 60% of remote tech professionals experience moderate to severe burnout driven by an 'always-on' culture and asynchronous communication friction. Unmanaged workload stress is a primary driver of voluntary engineering attrition, where replacement costs exceed 1.5× annual salary per engineer. Establishing an anonymous, structured baseline measurement is essential to diagnose friction points before fatigue impacts team productivity and retention."
+  },
+  {
+    "locator": "//h3[text()='Research Objectives']",
+    "heading": "Research Objectives",
+    "generatedText": "Based on the framework, here are the strategic and tactical goals of this internal research study:\n\n\nStrategic Objectives:\n\nStrategic Objective: Diagnose workplace drivers of fatigue, workload distribution, and work-life balance to build proactive retention strategies and optimize team productivity.\nStrategic Objective: Enable leadership and HR to re-align resource allocation, adjust working/meeting norms, and deploy targeted wellness initiatives.\n\n\nTactical Objectives:\n\nObjective: Quantify average weekly working hours, after-hours communication frequency, and task prioritization support.\nObjective: Measure employee ability to disconnect after working hours and overall flexibility perception.\nObjective: Track Maslach-adapted burnout signals including emotional exhaustion frequency, detachment, and accomplishment levels.\nObjective: Evaluate goal clarity, tool efficiency, and manager responsiveness across remote departments."
+  },
+  {
+    "locator": "//h3[text()='Type of Study']",
+    "heading": "Type of Study",
+    "generatedText": "We will conduct an Employee / Internal Research (Engagement & Burnout Diagnostic) using a linear structured questionnaire with standardized 5-point unipolar agreement and frequency scales, engineered for complete anonymity and psychological safety."
+  },
+  {
+    "locator": "//h3[text()='Survey Design Approach (Marketing Research Methodology)']",
+    "heading": "Survey Design Approach (Marketing Research Methodology)",
+    "generatedText": "Design Selection:\nThis study utilizes a Linear Structured Questionnaire with zero stimulus cells. Because this is an internal diagnostic mapping organizational health rather than testing external media or product variants, cell-based designs (monadic, conjoint) are not applicable.\n\nWhy this design fits:\nA linear modular survey maximizes completion rates (6-8 minutes), minimizes cognitive load, and maintains psychometric validity across sensitive topics like workload pressure and management support.\n\nAlternatives Considered:\n\n\nSequential Monadic / Monadic Cells: Rejected — there are no creative or product stimuli to evaluate in cell split configurations.\nMaxDiff Prioritization: Rejected — rating scales provide standard baseline indicators across all diagnostic dimensions without forcing artificial trade-offs between essential workplace well-being factors.\n\n\nYou can request a different methodology before generating the survey.\n\nSurvey Routing Logic:\n\n\nSkip Logic: Bypasses non-applicable departmental questions based on preliminary functional role selection.\nTermination Logic: None (all active full-time and contract team members are eligible to complete the diagnostic).\nCompletion Logic: Diagnostic concludes after open-ended feedback and submission confirmation.\n\n\nQuality Controls:\n\n\nAnonymity Protections: Zero personal identifying information (PII) collected; aggregate reporting applied to small departmental cohorts.\nSpeeder Filtering: Responses completed in under 40% of median completion time flagged for exclusion.\nStraight-lining Detection: Pattern recognition applied to 5-point battery grids."
+  },
+  {
+    "locator": "//h3[text()='Question Flow & Survey Phases']",
+    "heading": "Question Flow & Survey Phases",
+    "generatedText": "Phase 1 — Warm-Up & Overall Engagement (3 Questions): Captures overall job satisfaction, company vision alignment, and sentiment toward remote work culture.\nPhase 2 — Workload & Task Friction (4 Questions): Evaluates daily workload capacity, deadline pressure, prioritization assistance, and tool friction.\nPhase 3 — Work-Life Integration & Boundaries (4 Questions): Measures capability to disconnect after working hours, after-hours communication expectations, and schedule flexibility.\nPhase 4 — Burnout & Well-Being Diagnostic (4 Questions): Psychometric battery assessing emotional exhaustion frequency, detachment risk, stress levels, and psychological safety.\nPhase 5 — Actions & Open Directives (2 Questions): Gathers actionable open-ended feedback on the single operational change that would most improve daily working routine."
+  },
+  {
+    "locator": "//h3[text()='Key Data Points to Measure']",
+    "heading": "Key Data Points to Measure",
+    "generatedText": "Primary Metrics (KPIs):\n\n\nEmployee Net Promoter Score (eNPS): enables baseline loyalty and advocacy benchmarking\nBurnout Risk Index: enables early identification of high-fatigue departmental pods\nWork-Life Balance Satisfaction Score: enables tracking of boundary maintenance and digital fatigue\nManager Support Rating: enables evaluation of goal clarity and prioritization assistance\n\n\nSupporting Metrics (Contextual Data):\n\n\nAfter-Hours Ping Frequency: provides context on asynchronous communication norms\nMeeting Burden vs Focus Time Ratio: provides context on daily operational friction\nTool Efficiency & Friction Score: identifies technical bottlenecks impacting velocity\n\n\nAdvanced Analytics We'll Apply:\n\n\nCross-Tabulation Analysis: To identify variances in burnout risk by tenure and department.\nSentiment Analysis: To categorize open-ended operational feedback into actionable policy themes."
+  },
+  {
+    "locator": "//h3[text()='Expected Insights & Outcomes']",
+    "heading": "Expected Insights & Outcomes",
+    "generatedText": "By the end of this study, you will possess the data to:\n\n\nValidate: The exact proportion of the remote workforce operating at elevated burnout risk due to after-hours connectivity and meeting overload.\nDecide: Concrete policy adjustments regarding core working hours, asynchronous communication charters, meeting-free focus blocks, and headcount planning.\nStrategize: Department-specific manager training and workload-redistribution initiatives.\nKey Hypotheses Being Tested:\n\nHigh after-hours message frequency directly correlates with emotional exhaustion risk in engineering and product teams.\nClear prioritization support from managers mitigates burnout even during high-workload sprint cycles.\n\n\nKPIs to Report: eNPS, Burnout Risk Index, Work-Life Balance Satisfaction Score, and Manager Support Rating."
+  },
+  {
+    "locator": "//h3[text()='Methodology See why']",
+    "heading": "Methodology See why",
+    "generatedText": "We will deploy a 17-question, approximately 6-8 minute survey on the SuperJ mobile application and the web to 400 verified remote tech team respondents over a 2-week field window.\n\nRationale for Sample Size:\nAn n = 400 sample provides a robust statistical baseline with a margin of error of approximately ±4.9% at a 95% confidence level, enabling reliable subgroup cuts across departments.\n\nData Collection Approach: SuperJ mobile application and web panel, with targeting enforced before survey start.\nQuality Controls: Anonymity protection, speeder detection, straight-lining checks, and open-end gibberish filtering."
+  },
+  {
+    "locator": "//h3[text()='Target Audience See why']",
+    "heading": "Target Audience See why",
+    "generatedText": "Total Sample Size: 400 respondents\n\nGeographic Focus: Major Indian Tech Hubs (Bangalore, Hyderabad, Pune, Delhi)\n\nDemographics:\n\n\nGender: 50% Male / 50% Female (200 Male / 200 Female)\nAge Range: 18-24 (80) | 24-35 (240) | 35-45 (80)\nSocioeconomic Class: NCCS A1 (200) / NCCS A2 (200)\n\n\nBehavioral/Psychographic Filters:\n\n\nFull-time or contract employees in software engineering, product design, QA, DevOps, or tech business operations.\nCurrently working in a remote or hybrid tech work model.\n\n\nScreening Criteria: Active employment status in a remote/hybrid tech role; 100% anonymous responses with zero personal identifying information collected."
+  }
+]

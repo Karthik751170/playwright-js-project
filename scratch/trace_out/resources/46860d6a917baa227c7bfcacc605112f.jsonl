@@ -1,0 +1,7 @@
+{"type":"send","time":1786695180762.641,"opcode":1,"data":"{\"protocol\":\"json\",\"version\":1}\u001e"}
+{"type":"receive","time":1786695181155.104,"opcode":1,"data":"{}\u001e"}
+{"type":"send","time":1786695181155.604,"opcode":1,"data":"{\"type\":6}\u001e"}
+{"type":"send","time":1786695181155.892,"opcode":1,"data":"{\"arguments\":[{\"subscriptionType\":\"Server\",\"entityId\":\"kzdzyaot\"}],\"target\":\"Subscribe\",\"type\":1}\u001e{\"arguments\":[{\"subscriptionType\":\"Server\",\"entityId\":\"kzdzyaot\"}],\"target\":\"Unsubscribe\",\"type\":1}\u001e{\"arguments\":[{\"subscriptionType\":\"Server\",\"entityId\":\"kzdzyaot\"}],\"target\":\"Subscribe\",\"type\":1}\u001e"}
+{"type":"send","time":1786695182293.152,"opcode":1,"data":"{\"arguments\":[{\"subscriptionType\":\"Server\",\"entityId\":\"kzdzyaot\"}],\"target\":\"Unsubscribe\",\"type\":1}\u001e{\"arguments\":[{\"subscriptionType\":\"Server\",\"entityId\":\"kzdzyaot\"}],\"target\":\"Subscribe\",\"type\":1}\u001e"}
+{"type":"receive","time":1786695196351.174,"opcode":1,"data":"{\"type\":6}\u001e"}
+{"type":"send","time":1786695197296.577,"opcode":1,"data":"{\"type\":6}\u001e"}

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karthik U - Portfolio</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="background-container">
+        <!-- Background handled via CSS with overlay -->
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar glassmorphism">
+        <div class="nav-brand">KU</div>
+        <ul class="nav-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#experience">Experience</a></li>
+            <li><a href="#projects">Projects</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+        <div class="hamburger">
+            <i class="fa-solid fa-bars"></i>
+        </div>
+    </nav>
+
+    <!-- Main Content Wrapper -->
+    <main class="content-wrapper">
+        
+        <!-- Hero Section -->
+        <section id="home" class="hero section reveal">
+            <div class="hero-content glassmorphism">
+                <div class="avatar-container">
+                    <img src="assets/profile.jpg" alt="Karthik U" class="avatar">
+                </div>
+                <h1 class="name">Karthik U</h1>
+                <h2 class="title">Software Engineer at JupiterMeta Labs</h2>
+                <p class="location"><i class="fa-solid fa-location-dot"></i> India</p>
+                <div class="hero-actions">
+                    <a href="#projects" class="btn primary-btn">View My Work</a>
+                    <a href="#contact" class="btn secondary-btn">Contact Me</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="section reveal">
+            <div class="section-card glassmorphism">
+                <h2 class="section-heading">About Me</h2>
+                <p class="about-text">
+                    I am a passionate Software Engineer focused on building robust, scalable web applications and delivering exceptional user experiences. 
+                    I specialize in modern web technologies, backend integrations, and UI/UX implementation. Constantly learning and adapting to new challenges, 
+                    I aim to write clean code that solves real-world problems.
+                </p>
+                <h3 class="subsection-heading">Core Skills</h3>
+                <div class="skills-grid">
+                    <span class="skill-tag">JavaScript / ES6+</span>
+                    <span class="skill-tag">HTML5 & CSS3</span>
+                    <span class="skill-tag">React.js</span>
+                    <span class="skill-tag">Node.js</span>
+                    <span class="skill-tag">UI/UX Design</span>
+                    <span class="skill-tag">Git & GitHub</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Experience Section -->
+        <section id="experience" class="section reveal">
+            <div class="section-card glassmorphism">
+                <h2 class="section-heading">Experience</h2>
+                
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <h3 class="job-title">Software Engineer</h3>
+                            <h4 class="company-name">JupiterMeta Labs</h4>
+                            <span class="job-duration">Present</span>
+                            <p class="job-desc">Developing cutting-edge web applications, collaborating with cross-functional teams, and optimizing software architecture for scalability and performance.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <h3 class="job-title">Software Engineer (Contract)</h3>
+                            <h4 class="company-name">WeRize Pvt Ltd</h4>
+                            <span class="job-duration">2 Months</span>
+                            <p class="job-desc">Worked on focused, high-impact features during a short-term contract. Implemented UI components and integrated APIs.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Projects Section -->
+        <section id="projects" class="section reveal">
+            <h2 class="section-heading text-center">Featured Projects</h2>
+            <div class="projects-grid">
+                
+                <!-- Project Card 1 -->
+                <div class="project-card glassmorphism">
+                    <div class="project-img-placeholder">
+                        <i class="fa-solid fa-code"></i>
+                    </div>
+                    <div class="project-info">
+                        <h3>E-Commerce Dashboard</h3>
+                        <p>A comprehensive admin dashboard for managing products, viewing analytics, and tracking orders in real-time.</p>
+                        <div class="project-tech">
+                            <span>React</span>
+                            <span>Node.js</span>
+                        </div>
+                        <a href="#" class="btn primary-btn small-btn">View Project</a>
+                    </div>
+                </div>
+
+                <!-- Project Card 2 -->
+                <div class="project-card glassmorphism">
+                    <div class="project-img-placeholder">
+                        <i class="fa-solid fa-mobile-screen"></i>
+                    </div>
+                    <div class="project-info">
+                        <h3>Social Network App</h3>
+                        <p>A highly interactive platform allowing users to post updates, comment, and connect using a modern tech stack.</p>
+                        <div class="project-tech">
+                            <span>MongoDB</span>
+                            <span>Express</span>
+                        </div>
+                        <a href="#" class="btn primary-btn small-btn">View Project</a>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="section reveal">
+            <div class="section-card glassmorphism text-center">
+                <h2 class="section-heading">Get In Touch</h2>
+                <p class="contact-text">I'm currently open for new opportunities. Whether you have a question or just want to say hi, I'll try my best to get back to you!</p>
+                <div class="contact-links">
+                    <a href="https://www.linkedin.com/in/karthik-u-b19b6027a/" target="_blank" class="contact-icon"><i class="fa-brands fa-linkedin"></i></a>
+                    <a href="#" class="contact-icon"><i class="fa-brands fa-github"></i></a>
+                    <a href="mailto:hello@example.com" class="contact-icon"><i class="fa-solid fa-envelope"></i></a>
+                </div>
+                <a href="mailto:hello@example.com" class="btn primary-btn">Say Hello</a>
+            </div>
+        </section>
+        
+        <footer class="footer">
+            <p>&copy; 2026 Karthik U. Built with passion.</p>
+        </footer>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

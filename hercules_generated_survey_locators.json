@@ -1,0 +1,44 @@
+[
+  {
+    "tag": "P",
+    "text": "Create a survey titled \"Quick Education Product Feedback Survey\". Context: We are conducting a survey to gather insights on product feedback within the Education sector. Your feedback will help us improve our offerings and better serve your needs.",
+    "placeholder": "",
+    "id": ""
+  },
+  {
+    "tag": "BUTTON",
+    "text": "Reading your inputs before touching the framework",
+    "placeholder": "",
+    "id": ""
+  },
+  {
+    "tag": "P",
+    "text": "Your inputs are being parsed and structured — Hercules is building a clear picture of your goals, your category, and your constraints before anything else is built on top of them.",
+    "placeholder": "",
+    "id": ""
+  },
+  {
+    "tag": "P",
+    "text": "I can help design your Education Product Feedback Survey, but I need a few details about your specific education product and target users to tailor the questionnaire effectively.",
+    "placeholder": "",
+    "id": ""
+  },
+  {
+    "tag": "H2",
+    "text": "What specific education product, app, platform, or service is this survey for, and what core problem does it solve?",
+    "placeholder": "",
+    "id": ""
+  },
+  {
+    "tag": "INPUT",
+    "text": "",
+    "placeholder": "Add your own…",
+    "id": ""
+  },
+  {
+    "tag": "BUTTON",
+    "text": "Skip",
+    "placeholder": "",
+    "id": ""
+  }
+]

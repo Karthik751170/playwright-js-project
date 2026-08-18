@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard | Mailosaur</title>
+
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0" />
+  <meta name="description"
+    content="The Mailosaur Dashboard lets you manage your Mailosaur account, configure fake SMTP servers and do manual email & SMS testing." />
+
+  <meta property="og:title" content="Dashboard | Mailosaur" />
+  <meta property="og:site_name" content="Mailosaur" />
+  <meta property="og:description"
+    content="The Mailosaur Dashboard lets you manage your Mailosaur account, configure fake SMTP servers and do manual email & SMS testing." />
+  <meta property="og:type" content="website" />
+  <meta name="og:locale" content="en_US" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:url" content="https://mailosaur.com" />
+  <link rel="canonical" href="https://mailosaur.com" />
+
+  <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap-index.xml">
+
+  <link rel="icon" href="/app/favicon.ico" />
+  <link rel="apple-touch-icon" href="/app/apple-touch-icon.png" />
+  <link rel="manifest" href="/app/manifest.json" />
+
+  <meta name="theme-color" content="#004550" />
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    .editorpane-warning {
+      background: #ffbb00;
+      position: absolute;
+      width: 100% !important;
+      left: 0 !important;
+    }
+  </style>
+  <script type="module" crossorigin src="/app/assets/index-CQ4EOMwo.js"></script>
+  <link rel="stylesheet" crossorigin href="/app/assets/index-BGYBBxcG.css">
+</head>
+
+<body>
+  <noscript>
+    <h1>Mailosaur Dashboard</h1>
+    <h2>JavaScript is currently disabled</h2>
+    <p>
+      You need to enable JavaScript to run Mailosaur. Please enable it in your
+      browser settings.
+    </p>
+    <a href="/">Back to Site</a>
+  </noscript>
+  <div id="root"></div>
+  <script>
+    (function (arr) {
+      arr.forEach(function (item) {
+        if (item.hasOwnProperty('append')) {
+          return;
+        }
+        Object.defineProperty(item, 'append', {
+          configurable: true,
+          enumerable: true,
+          writable: true,
+          value: function append() {
+            var argArr = Array.prototype.slice.call(arguments),
+              docFrag = document.createDocumentFragment();
+
+            argArr.forEach(function (argItem) {
+              var isNode = argItem instanceof Node;
+              docFrag.appendChild(
+                isNode ? argItem : document.createTextNode(String(argItem))
+              );
+            });
+
+            this.appendChild(docFrag);
+          },
+        });
+      });
+    })([Element.prototype, Document.prototype, DocumentFragment.prototype]);
+  </script>
+  <script src="https://js.stripe.com/v3/"></script>
+  <script>
+    window.hsConversationsSettings = {
+      loadImmediately: false,
+    };
+  </script>
+  <script>
+    (() => {
+      if (window.callPhantom || window._phantom) {
+        window.acid = '_ph';
+        return;
+      }
+
+      if (
+        window.navigator.webdriver ||
+        window.document.documentElement.getAttribute('webdriver')
+      ) {
+        window.acid = '_wd';
+        return;
+      }
+
+      if (/HeadlessChrome/.test(window.navigator.userAgent)) {
+        window.acid = '_hc';
+        return;
+      }
+
+      if (window.Cypress) {
+        window.acid = '_cy';
+        return;
+      }
+
+      if (Object.keys(window).some(k => /^(cdc|wdc|\$cdc|\$wdc)_/.test(k))) {
+        window.acid = '_s';
+        return;
+      }
+
+      // BEGIN: ANALYTICS
+      // Tags are managed in GTM (GTM-N3D8XSM3); this bootstraps GTM and
+      // bridges HubSpot consent into Google Consent Mode v2.
+      window.dataLayer = window.dataLayer || [];
+
+      // eslint-disable-next-line
+      function gtag() {
+        // eslint-disable-next-line
+        dataLayer.push(arguments);
+      }
+      // Expose gtag so the app's click tracking can emit GA4 events.
+      window.gtag = gtag;
+
+      gtag('consent', 'default', {
+        analytics_storage: 'denied',
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        // Give HubSpot's banner time to update consent before any tag fires.
+        wait_for_update: 500,
+        // Use region, to specify where this default should be applied.
+        region: [
+          'AT',
+          'BE',
+          'BG',
+          'HR',
+          'CY',
+          'CZ',
+          'DK',
+          'EE',
+          'FI',
+          'FR',
+          'DE',
+          'GR',
+          'HU',
+          'IS',
+          'IE',
+          'IT',
+          'LV',
+          'LI',
+          'LT',
+          'LU',
+          'MT',
+          'NL',
+          'NO',
+          'PL',
+          'PT',
+          'RO',
+          'SK',
+          'SI',
+          'ES',
+          'SE',
+          'GB',
+          'CH',
+        ],
+      });
+
+      const hs = document.createElement('script');
+      hs.setAttribute('src', '//js-eu1.hs-scripts.com/20078598.js');
+      hs.setAttribute('id', 'hs-script-loader');
+      hs.setAttribute('async', true);
+      hs.setAttribute('defer', true);
+      document.body.appendChild(hs);
+
+      const _hsp = (window._hsp = window._hsp || []);
+
+      _hsp.push([
+        'addPrivacyConsentListener',
+        cc => {
+          const hasAnalyticsConsent =
+            cc && (cc.allowed || (cc.categories && cc.categories.analytics));
+          const hasAdsConsent =
+            cc &&
+            (cc.allowed || (cc.categories && cc.categories.advertisement));
+
+          gtag('consent', 'update', {
+            ad_storage: hasAdsConsent ? 'granted' : 'denied',
+            analytics_storage: hasAnalyticsConsent ? 'granted' : 'denied',
+            ad_user_data: hasAdsConsent ? 'granted' : 'denied',
+            ad_personalization: hasAdsConsent ? 'granted' : 'denied',
+          });
+
+          // Triggers consent-gated tags once consent is known.
+          window.dataLayer.push({ event: 'consent_update' });
+        },
+      ]);
+
+      // Load Google Tag Manager.
+      (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+        const f = d.getElementsByTagName(s)[0];
+        const j = d.createElement(s);
+        const dl = l !== 'dataLayer' ? `&l=${l}` : '';
+        j.async = true;
+        j.src = `https://www.googletagmanager.com/gtm.js?id=${i}${dl}`;
+        f.parentNode.insertBefore(j, f);
+      })(window, document, 'script', 'dataLayer', 'GTM-N3D8XSM3');
+
+      // Expose GA4 client_id + session_id for backend attribution
+      // (sent as X-Mailosaur-Acid / X-Mailosaur-Asid request headers).
+      gtag('get', 'G-QC49K5N26W', 'client_id', cid => {
+        window.acid = cid;
+      });
+      gtag('get', 'G-QC49K5N26W', 'session_id', sid => {
+        window.asid = sid;
+      });
+      // END: ANALYTICS
+    })();
+  </script>
+</body>
+
+</html>

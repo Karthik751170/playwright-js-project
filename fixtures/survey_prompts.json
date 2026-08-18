@@ -1,0 +1,462 @@
+[
+  {
+    "title": "Annual Healthcare Market Research Survey",
+    "description": "We are conducting a survey to gather insights on market research within the Healthcare sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Brief Healthcare User Experience Survey",
+    "description": "We are conducting a survey to gather insights on user experience within the Healthcare sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Strategic Healthcare Feature Request Survey",
+    "description": "We are conducting a survey to gather insights on feature request within the Healthcare sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Insightful Healthcare Service Quality Survey",
+    "description": "We are conducting a survey to gather insights on service quality within the Healthcare sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Comprehensive E-commerce Customer Satisfaction Survey",
+    "description": "We are conducting a survey to gather insights on customer satisfaction within the E-commerce sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "In-depth E-commerce Employee Engagement Survey",
+    "description": "We are conducting a survey to gather insights on employee engagement within the E-commerce sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Quick E-commerce Product Feedback Survey",
+    "description": "We are conducting a survey to gather insights on product feedback within the E-commerce sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Quarterly E-commerce Brand Awareness Survey",
+    "description": "We are conducting a survey to gather insights on brand awareness within the E-commerce sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Brief E-commerce User Experience Survey",
+    "description": "We are conducting a survey to gather insights on user experience within the E-commerce sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Strategic E-commerce Feature Request Survey",
+    "description": "We are conducting a survey to gather insights on feature request within the E-commerce sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Actionable E-commerce Post-Purchase Experience Survey",
+    "description": "We are conducting a survey to gather insights on post-purchase experience within the E-commerce sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Comprehensive Technology Customer Satisfaction Survey",
+    "description": "We are conducting a survey to gather insights on customer satisfaction within the Technology sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Annual Technology Market Research Survey",
+    "description": "We are conducting a survey to gather insights on market research within the Technology sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Quarterly Technology Brand Awareness Survey",
+    "description": "We are conducting a survey to gather insights on brand awareness within the Technology sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Detailed Technology Pricing Strategy Survey",
+    "description": "We are conducting a survey to gather insights on pricing strategy within the Technology sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Strategic Technology Feature Request Survey",
+    "description": "We are conducting a survey to gather insights on feature request within the Technology sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Insightful Technology Service Quality Survey",
+    "description": "We are conducting a survey to gather insights on service quality within the Technology sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Actionable Technology Post-Purchase Experience Survey",
+    "description": "We are conducting a survey to gather insights on post-purchase experience within the Technology sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Quick Retail Product Feedback Survey",
+    "description": "We are conducting a survey to gather insights on product feedback within the Retail sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Quarterly Retail Brand Awareness Survey",
+    "description": "We are conducting a survey to gather insights on brand awareness within the Retail sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Brief Retail User Experience Survey",
+    "description": "We are conducting a survey to gather insights on user experience within the Retail sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Detailed Retail Pricing Strategy Survey",
+    "description": "We are conducting a survey to gather insights on pricing strategy within the Retail sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Strategic Retail Feature Request Survey",
+    "description": "We are conducting a survey to gather insights on feature request within the Retail sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Insightful Retail Service Quality Survey",
+    "description": "We are conducting a survey to gather insights on service quality within the Retail sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Actionable Retail Post-Purchase Experience Survey",
+    "description": "We are conducting a survey to gather insights on post-purchase experience within the Retail sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Comprehensive Education Customer Satisfaction Survey",
+    "description": "We are conducting a survey to gather insights on customer satisfaction within the Education sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "In-depth Education Employee Engagement Survey",
+    "description": "We are conducting a survey to gather insights on employee engagement within the Education sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Detailed Education Pricing Strategy Survey",
+    "description": "We are conducting a survey to gather insights on pricing strategy within the Education sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Strategic Education Feature Request Survey",
+    "description": "We are conducting a survey to gather insights on feature request within the Education sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Insightful Education Service Quality Survey",
+    "description": "We are conducting a survey to gather insights on service quality within the Education sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Actionable Education Post-Purchase Experience Survey",
+    "description": "We are conducting a survey to gather insights on post-purchase experience within the Education sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Comprehensive Finance Customer Satisfaction Survey",
+    "description": "We are conducting a survey to gather insights on customer satisfaction within the Finance sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "In-depth Finance Employee Engagement Survey",
+    "description": "We are conducting a survey to gather insights on employee engagement within the Finance sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Actionable Finance Post-Purchase Experience Survey",
+    "description": "We are conducting a survey to gather insights on post-purchase experience within the Finance sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Comprehensive Real Estate Customer Satisfaction Survey",
+    "description": "We are conducting a survey to gather insights on customer satisfaction within the Real Estate sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "In-depth Real Estate Employee Engagement Survey",
+    "description": "We are conducting a survey to gather insights on employee engagement within the Real Estate sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Quick Real Estate Product Feedback Survey",
+    "description": "We are conducting a survey to gather insights on product feedback within the Real Estate sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Annual Real Estate Market Research Survey",
+    "description": "We are conducting a survey to gather insights on market research within the Real Estate sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Quarterly Real Estate Brand Awareness Survey",
+    "description": "We are conducting a survey to gather insights on brand awareness within the Real Estate sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Strategic Real Estate Feature Request Survey",
+    "description": "We are conducting a survey to gather insights on feature request within the Real Estate sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Insightful Real Estate Service Quality Survey",
+    "description": "We are conducting a survey to gather insights on service quality within the Real Estate sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Comprehensive Automotive Customer Satisfaction Survey",
+    "description": "We are conducting a survey to gather insights on customer satisfaction within the Automotive sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "In-depth Automotive Employee Engagement Survey",
+    "description": "We are conducting a survey to gather insights on employee engagement within the Automotive sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Quick Automotive Product Feedback Survey",
+    "description": "We are conducting a survey to gather insights on product feedback within the Automotive sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Annual Automotive Market Research Survey",
+    "description": "We are conducting a survey to gather insights on market research within the Automotive sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Quarterly Automotive Brand Awareness Survey",
+    "description": "We are conducting a survey to gather insights on brand awareness within the Automotive sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Brief Automotive User Experience Survey",
+    "description": "We are conducting a survey to gather insights on user experience within the Automotive sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Detailed Automotive Pricing Strategy Survey",
+    "description": "We are conducting a survey to gather insights on pricing strategy within the Automotive sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Insightful Automotive Service Quality Survey",
+    "description": "We are conducting a survey to gather insights on service quality within the Automotive sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Actionable Automotive Post-Purchase Experience Survey",
+    "description": "We are conducting a survey to gather insights on post-purchase experience within the Automotive sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "In-depth Hospitality Employee Engagement Survey",
+    "description": "We are conducting a survey to gather insights on employee engagement within the Hospitality sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Quick Hospitality Product Feedback Survey",
+    "description": "We are conducting a survey to gather insights on product feedback within the Hospitality sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Quarterly Hospitality Brand Awareness Survey",
+    "description": "We are conducting a survey to gather insights on brand awareness within the Hospitality sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Strategic Hospitality Feature Request Survey",
+    "description": "We are conducting a survey to gather insights on feature request within the Hospitality sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Comprehensive Fitness Customer Satisfaction Survey",
+    "description": "We are conducting a survey to gather insights on customer satisfaction within the Fitness sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Quick Fitness Product Feedback Survey",
+    "description": "We are conducting a survey to gather insights on product feedback within the Fitness sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Quarterly Fitness Brand Awareness Survey",
+    "description": "We are conducting a survey to gather insights on brand awareness within the Fitness sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Insightful Fitness Service Quality Survey",
+    "description": "We are conducting a survey to gather insights on service quality within the Fitness sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Actionable Fitness Post-Purchase Experience Survey",
+    "description": "We are conducting a survey to gather insights on post-purchase experience within the Fitness sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Brief Entertainment User Experience Survey",
+    "description": "We are conducting a survey to gather insights on user experience within the Entertainment sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Detailed Entertainment Pricing Strategy Survey",
+    "description": "We are conducting a survey to gather insights on pricing strategy within the Entertainment sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Insightful Entertainment Service Quality Survey",
+    "description": "We are conducting a survey to gather insights on service quality within the Entertainment sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Actionable Entertainment Post-Purchase Experience Survey",
+    "description": "We are conducting a survey to gather insights on post-purchase experience within the Entertainment sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Comprehensive Travel Customer Satisfaction Survey",
+    "description": "We are conducting a survey to gather insights on customer satisfaction within the Travel sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "In-depth Travel Employee Engagement Survey",
+    "description": "We are conducting a survey to gather insights on employee engagement within the Travel sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Quick Travel Product Feedback Survey",
+    "description": "We are conducting a survey to gather insights on product feedback within the Travel sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Quarterly Travel Brand Awareness Survey",
+    "description": "We are conducting a survey to gather insights on brand awareness within the Travel sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Detailed Travel Pricing Strategy Survey",
+    "description": "We are conducting a survey to gather insights on pricing strategy within the Travel sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Strategic Travel Feature Request Survey",
+    "description": "We are conducting a survey to gather insights on feature request within the Travel sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Comprehensive Logistics Customer Satisfaction Survey",
+    "description": "We are conducting a survey to gather insights on customer satisfaction within the Logistics sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Annual Logistics Market Research Survey",
+    "description": "We are conducting a survey to gather insights on market research within the Logistics sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Detailed Logistics Pricing Strategy Survey",
+    "description": "We are conducting a survey to gather insights on pricing strategy within the Logistics sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Strategic Logistics Feature Request Survey",
+    "description": "We are conducting a survey to gather insights on feature request within the Logistics sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Insightful Logistics Service Quality Survey",
+    "description": "We are conducting a survey to gather insights on service quality within the Logistics sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Comprehensive Marketing Customer Satisfaction Survey",
+    "description": "We are conducting a survey to gather insights on customer satisfaction within the Marketing sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "In-depth Marketing Employee Engagement Survey",
+    "description": "We are conducting a survey to gather insights on employee engagement within the Marketing sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Quick Marketing Product Feedback Survey",
+    "description": "We are conducting a survey to gather insights on product feedback within the Marketing sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Annual Marketing Market Research Survey",
+    "description": "We are conducting a survey to gather insights on market research within the Marketing sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Strategic Marketing Feature Request Survey",
+    "description": "We are conducting a survey to gather insights on feature request within the Marketing sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Insightful Marketing Service Quality Survey",
+    "description": "We are conducting a survey to gather insights on service quality within the Marketing sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Actionable Marketing Post-Purchase Experience Survey",
+    "description": "We are conducting a survey to gather insights on post-purchase experience within the Marketing sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "In-depth SaaS Employee Engagement Survey",
+    "description": "We are conducting a survey to gather insights on employee engagement within the SaaS sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Brief SaaS User Experience Survey",
+    "description": "We are conducting a survey to gather insights on user experience within the SaaS sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Detailed SaaS Pricing Strategy Survey",
+    "description": "We are conducting a survey to gather insights on pricing strategy within the SaaS sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Comprehensive Food & Beverage Customer Satisfaction Survey",
+    "description": "We are conducting a survey to gather insights on customer satisfaction within the Food & Beverage sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "In-depth Food & Beverage Employee Engagement Survey",
+    "description": "We are conducting a survey to gather insights on employee engagement within the Food & Beverage sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Quick Food & Beverage Product Feedback Survey",
+    "description": "We are conducting a survey to gather insights on product feedback within the Food & Beverage sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Annual Food & Beverage Market Research Survey",
+    "description": "We are conducting a survey to gather insights on market research within the Food & Beverage sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Brief Food & Beverage User Experience Survey",
+    "description": "We are conducting a survey to gather insights on user experience within the Food & Beverage sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Detailed Food & Beverage Pricing Strategy Survey",
+    "description": "We are conducting a survey to gather insights on pricing strategy within the Food & Beverage sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Actionable Food & Beverage Post-Purchase Experience Survey",
+    "description": "We are conducting a survey to gather insights on post-purchase experience within the Food & Beverage sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Comprehensive Gaming Customer Satisfaction Survey",
+    "description": "We are conducting a survey to gather insights on customer satisfaction within the Gaming sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "In-depth Gaming Employee Engagement Survey",
+    "description": "We are conducting a survey to gather insights on employee engagement within the Gaming sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Quick Gaming Product Feedback Survey",
+    "description": "We are conducting a survey to gather insights on product feedback within the Gaming sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Brief Gaming User Experience Survey",
+    "description": "We are conducting a survey to gather insights on user experience within the Gaming sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Actionable Gaming Post-Purchase Experience Survey",
+    "description": "We are conducting a survey to gather insights on post-purchase experience within the Gaming sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "In-depth Cybersecurity Employee Engagement Survey",
+    "description": "We are conducting a survey to gather insights on employee engagement within the Cybersecurity sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Quarterly Cybersecurity Brand Awareness Survey",
+    "description": "We are conducting a survey to gather insights on brand awareness within the Cybersecurity sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Brief Cybersecurity User Experience Survey",
+    "description": "We are conducting a survey to gather insights on user experience within the Cybersecurity sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Detailed Cybersecurity Pricing Strategy Survey",
+    "description": "We are conducting a survey to gather insights on pricing strategy within the Cybersecurity sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Strategic Cybersecurity Feature Request Survey",
+    "description": "We are conducting a survey to gather insights on feature request within the Cybersecurity sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Actionable Cybersecurity Post-Purchase Experience Survey",
+    "description": "We are conducting a survey to gather insights on post-purchase experience within the Cybersecurity sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Quick Agriculture Product Feedback Survey",
+    "description": "We are conducting a survey to gather insights on product feedback within the Agriculture sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Annual Agriculture Market Research Survey",
+    "description": "We are conducting a survey to gather insights on market research within the Agriculture sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Brief Agriculture User Experience Survey",
+    "description": "We are conducting a survey to gather insights on user experience within the Agriculture sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Detailed Agriculture Pricing Strategy Survey",
+    "description": "We are conducting a survey to gather insights on pricing strategy within the Agriculture sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Insightful Agriculture Service Quality Survey",
+    "description": "We are conducting a survey to gather insights on service quality within the Agriculture sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Actionable Agriculture Post-Purchase Experience Survey",
+    "description": "We are conducting a survey to gather insights on post-purchase experience within the Agriculture sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Quick Telecommunications Product Feedback Survey",
+    "description": "We are conducting a survey to gather insights on product feedback within the Telecommunications sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Quarterly Telecommunications Brand Awareness Survey",
+    "description": "We are conducting a survey to gather insights on brand awareness within the Telecommunications sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Brief Telecommunications User Experience Survey",
+    "description": "We are conducting a survey to gather insights on user experience within the Telecommunications sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Detailed Telecommunications Pricing Strategy Survey",
+    "description": "We are conducting a survey to gather insights on pricing strategy within the Telecommunications sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Strategic Telecommunications Feature Request Survey",
+    "description": "We are conducting a survey to gather insights on feature request within the Telecommunications sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Insightful Telecommunications Service Quality Survey",
+    "description": "We are conducting a survey to gather insights on service quality within the Telecommunications sector. Your feedback will help us improve our offerings and better serve your needs."
+  },
+  {
+    "title": "Actionable Telecommunications Post-Purchase Experience Survey",
+    "description": "We are conducting a survey to gather insights on post-purchase experience within the Telecommunications sector. Your feedback will help us improve our offerings and better serve your needs."
+  }
+]

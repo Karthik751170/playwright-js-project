@@ -1,0 +1,1262 @@
+[
+  {
+    "tag": "img",
+    "text": "",
+    "className": "ml-[12px] min-[1025px]:ml-0 -mt-[5px] min-[1025px]:mt-0",
+    "placeholder": "",
+    "alt": "hercules-logo"
+  },
+  {
+    "tag": "a",
+    "text": "Research",
+    "className": "h-[22px] shrink-0 whitespace-nowrap text-center text-[14px] font-normal leading-[160%] tracking-[0] text-[#1C1C1C] hover:text-[#5C5C5C]",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Pricing",
+    "className": "h-[22px] shrink-0 whitespace-nowrap text-center text-[14px] font-normal leading-[160%] tracking-[0] text-[#1C1C1C] hover:text-[#5C5C5C]",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "About Us",
+    "className": "h-[22px] shrink-0 whitespace-nowrap text-center text-[14px] font-normal leading-[160%] tracking-[0] text-[#1C1C1C] hover:text-[#5C5C5C]",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Super J",
+    "className": "group relative box-border flex w-[105px] shrink-0 flex-row items-center justify-center rounded-[40px] border-[1.5px] border-black bg-white p-[4px] text-black transition-[border-color] [transition-delay:180ms] [transition-duration:120ms] ease-out hover:border-transparent hover:[transition-delay:0ms] hover:[transition-duration:150ms] h-[38px]",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "span",
+    "text": "Super J",
+    "className": "relative z-[1] flex",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "span",
+    "text": "Super J",
+    "className": "flex h-[25.2px] flex-row items-center gap-[4.8px] rounded-[20px] px-[6.4px] py-[1.6px] transition-colors [transition-delay:180ms] [transition-duration:0ms] ease-out group-hover:text-white group-hover:[transition-delay:0ms] group-hover:[transition-duration:0ms]",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "span",
+    "text": "Super J",
+    "className": "urbanist_e04b95d3-module__pC_r-a__className shrink-0 whitespace-nowrap text-[15.4473px] font-extrabold leading-[140%]",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "button",
+    "text": "K",
+    "className": "relative z-[1] flex shrink-0 cursor-pointer items-center justify-center",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "span",
+    "text": "Karthik",
+    "className": "capitalize",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "textarea",
+    "text": "",
+    "className": "w-[100%] resize-none outline-none border-none bg-transparent font-inter text-[16px] text-[#3E3E3E] font-normal leading-[140%] placeholder:text-[#9CA3AF] max-h-[400px] mb-1 caret-black",
+    "placeholder": "Ask Hercules...",
+    "alt": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "className": "z-10 col-start-1 row-start-1 justify-self-center opacity-100 group-hover:opacity-0",
+    "placeholder": "",
+    "alt": "icon"
+  },
+  {
+    "tag": "span",
+    "text": "A/B Test Video Ads with any User Group",
+    "className": "font-inter font-medium leading-[1.4] tracking-normal text-center group-hover:text-[#2A2A2A] text-[#666666] -mb-[1px] text-sm",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "className": "z-10 col-start-1 row-start-1 justify-self-center opacity-100 group-hover:opacity-0",
+    "placeholder": "",
+    "alt": "icon"
+  },
+  {
+    "tag": "span",
+    "text": "Quick insights on which product packaging is bette",
+    "className": "font-inter font-medium leading-[1.4] tracking-normal text-center group-hover:text-[#2A2A2A] text-[#666666] -mb-[1px] text-sm",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "className": "z-10 col-start-1 row-start-1 justify-self-center opacity-100 group-hover:opacity-0",
+    "placeholder": "",
+    "alt": "icon"
+  },
+  {
+    "tag": "span",
+    "text": "Check public sentiment on political news",
+    "className": "font-inter font-medium leading-[1.4] tracking-normal text-center group-hover:text-[#2A2A2A] text-[#666666] -mb-[1px] text-sm",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "className": "z-10 col-start-1 row-start-1 justify-self-center opacity-100 group-hover:opacity-0",
+    "placeholder": "",
+    "alt": "icon"
+  },
+  {
+    "tag": "span",
+    "text": "Understand GenZ behaviour around snacking",
+    "className": "font-inter font-medium leading-[1.4] tracking-normal text-center group-hover:text-[#2A2A2A] text-[#666666] -mb-[1px] text-sm",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "input",
+    "text": "",
+    "className": "ml-[16px] pr-3 py-[4px] rounded-tr-[8px] rounded-br-[8px] w-full focus:outline-none font-inter font-normal text-[16px] md:text-[13px] lg:text-[14px] leading-[140%] tracking-[0] text-left placeholder:text-[#949494] ",
+    "placeholder": "Search...",
+    "alt": ""
+  },
+  {
+    "tag": "button",
+    "text": "All",
+    "className": "text-[#000000] font-inter font-normal text-[13px] lg:text-[14px] leading-[140%] tracking-[0] px-[12px] lg:px-[18px] text-center flex items-center gap-[10px] py-2  justify-between w-full h-full ",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "className": "",
+    "placeholder": "",
+    "alt": "dropdown arrow"
+  },
+  {
+    "tag": "button",
+    "text": "Newest First",
+    "className": "text-[#000000] font-inter font-normal text-[13px] lg:text-[14px] leading-[140%] tracking-[0] px-[12px] lg:px-[18px] text-center flex items-center gap-[10px] py-2  justify-between w-full h-full ",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "className": "",
+    "placeholder": "",
+    "alt": "dropdown arrow"
+  },
+  {
+    "tag": "span",
+    "text": "New Chat (2026-07-23 09:40)",
+    "className": "pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-1 w-max max-w-xs bg-[#111111] text-white text-[10px] font-normal px-[8px] py-[5px] rounded-[3px] text-center z-10 opacity-0 peer-hover:opacity-100 before:content-[''] before:absolute before:-bottom-[6px] before:left-1/2 before:-translate-x-1/2 before:border-x-[6px] before:border-x-transparent before:border-t-[8px] before:border-t-[#111111]",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "button",
+    "text": "...",
+    "className": "relative ml-[15px] rounded-[6px] cursor-pointer w-[20px] h-[20px] flex items-center justify-center hover:bg-[#E3EFFB] opacity-100 lg:opacity-0 group-hover:opacity-100",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "span",
+    "text": "...",
+    "className": "font-medium text-[16px] flex items-center justify-center -mt-[60%]",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "span",
+    "text": "New Chat (2026-07-23 09:40)",
+    "className": "pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-1 w-max max-w-xs bg-[#111111] text-white text-[10px] font-normal px-[8px] py-[5px] rounded-[3px] text-center z-10 opacity-0 peer-hover:opacity-100 before:content-[''] before:absolute before:-bottom-[6px] before:left-1/2 before:-translate-x-1/2 before:border-x-[6px] before:border-x-transparent before:border-t-[8px] before:border-t-[#111111]",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "button",
+    "text": "...",
+    "className": "relative ml-[15px] rounded-[6px] cursor-pointer w-[20px] h-[20px] flex items-center justify-center hover:bg-[#E3EFFB] opacity-100 lg:opacity-0 group-hover:opacity-100",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "span",
+    "text": "...",
+    "className": "font-medium text-[16px] flex items-center justify-center -mt-[60%]",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "button",
+    "text": "Research Templates",
+    "className": "group relative flex items-center gap-2 md:px-4 px-[13px] md:py-2 py-[2px] text-[14px] md:text-sm font-medium transition-colors duration-200\n    text-black",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "className": "opacity-100 group-hover:opacity-100 transition-opacity duration-200",
+    "placeholder": "",
+    "alt": "work card"
+  },
+  {
+    "tag": "span",
+    "text": "Research Templates",
+    "className": "max-w-[120px] truncate md:max-w-none md:whitespace-normal",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "button",
+    "text": "Saved Audiences",
+    "className": "group relative flex items-center gap-2 md:px-4 px-[13px] md:py-2 py-[2px] text-[14px] md:text-sm font-medium transition-colors duration-200\n    text-[#868686] hover:text-black",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "className": "opacity-45 group-hover:opacity-100 transition-opacity duration-200",
+    "placeholder": "",
+    "alt": "work card"
+  },
+  {
+    "tag": "span",
+    "text": "Saved Audiences",
+    "className": "max-w-[120px] truncate md:max-w-none md:whitespace-normal",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "button",
+    "text": "All",
+    "className": "group relative bg-[#F8F8F8] border-[#E1E1E1] border rounded-[38px] px-4 h-[37px] shadow-[0px_2px_3px_0px_#00000008] cursor-pointer capitalize hover:bg-[#F8F8F8] hover:border-[#E1E1E1] transition-colors",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "button",
+    "text": "Augmented Reality Experiences",
+    "className": "group relative bg-white border-[#E8E8E8] border rounded-[38px] px-4 h-[37px] shadow-[0px_2px_3px_0px_#00000008] cursor-pointer capitalize hover:bg-[#F8F8F8] hover:border-[#E1E1E1] transition-colors",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "button",
+    "text": "Community & Social Impact",
+    "className": "group relative bg-white border-[#E8E8E8] border rounded-[38px] px-4 h-[37px] shadow-[0px_2px_3px_0px_#00000008] cursor-pointer capitalize hover:bg-[#F8F8F8] hover:border-[#E1E1E1] transition-colors",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "button",
+    "text": "New Idea Testing",
+    "className": "group relative bg-white border-[#E8E8E8] border rounded-[38px] px-4 h-[37px] shadow-[0px_2px_3px_0px_#00000008] cursor-pointer capitalize hover:bg-[#F8F8F8] hover:border-[#E1E1E1] transition-colors",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "button",
+    "text": "Lifestyle & Behaviour",
+    "className": "group relative bg-white border-[#E8E8E8] border rounded-[38px] px-4 h-[37px] shadow-[0px_2px_3px_0px_#00000008] cursor-pointer capitalize hover:bg-[#F8F8F8] hover:border-[#E1E1E1] transition-colors",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "button",
+    "text": "Film Sentiment Analysis",
+    "className": "group relative bg-white border-[#E8E8E8] border rounded-[38px] px-4 h-[37px] shadow-[0px_2px_3px_0px_#00000008] cursor-pointer capitalize hover:bg-[#F8F8F8] hover:border-[#E1E1E1] transition-colors",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "button",
+    "text": "Real-Time Usage Analysis",
+    "className": "group relative bg-white border-[#E8E8E8] border rounded-[38px] px-4 h-[37px] shadow-[0px_2px_3px_0px_#00000008] cursor-pointer capitalize hover:bg-[#F8F8F8] hover:border-[#E1E1E1] transition-colors",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "button",
+    "text": "Lifestyle & Preference",
+    "className": "group relative bg-white border-[#E8E8E8] border rounded-[38px] px-4 h-[37px] shadow-[0px_2px_3px_0px_#00000008] cursor-pointer capitalize hover:bg-[#F8F8F8] hover:border-[#E1E1E1] transition-colors",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "button",
+    "text": "Digital Purchase Behaviour",
+    "className": "group relative bg-white border-[#E8E8E8] border rounded-[38px] px-4 h-[37px] shadow-[0px_2px_3px_0px_#00000008] cursor-pointer capitalize hover:bg-[#F8F8F8] hover:border-[#E1E1E1] transition-colors",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "button",
+    "text": "all",
+    "className": "group relative bg-[#F8F8F8] border-[#E1E1E1] border rounded-[38px] px-4 h-[37px] shadow-[0px_2px_3px_0px_#00000008] cursor-pointer capitalize hover:bg-[#F8F8F8] hover:border-[#E1E1E1] transition-colors",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "button",
+    "text": "augmented reality experiences",
+    "className": "group relative bg-white border-[#E8E8E8] border rounded-[38px] px-4 h-[37px] shadow-[0px_2px_3px_0px_#00000008] cursor-pointer capitalize hover:bg-[#F8F8F8] hover:border-[#E1E1E1] transition-colors",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "button",
+    "text": "community & social impact",
+    "className": "group relative bg-white border-[#E8E8E8] border rounded-[38px] px-4 h-[37px] shadow-[0px_2px_3px_0px_#00000008] cursor-pointer capitalize hover:bg-[#F8F8F8] hover:border-[#E1E1E1] transition-colors",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "button",
+    "text": "new idea testing",
+    "className": "group relative bg-white border-[#E8E8E8] border rounded-[38px] px-4 h-[37px] shadow-[0px_2px_3px_0px_#00000008] cursor-pointer capitalize hover:bg-[#F8F8F8] hover:border-[#E1E1E1] transition-colors",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "button",
+    "text": "lifestyle & behaviour",
+    "className": "group relative bg-white border-[#E8E8E8] border rounded-[38px] px-4 h-[37px] shadow-[0px_2px_3px_0px_#00000008] cursor-pointer capitalize hover:bg-[#F8F8F8] hover:border-[#E1E1E1] transition-colors",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "button",
+    "text": "film sentiment analysis",
+    "className": "group relative bg-white border-[#E8E8E8] border rounded-[38px] px-4 h-[37px] shadow-[0px_2px_3px_0px_#00000008] cursor-pointer capitalize hover:bg-[#F8F8F8] hover:border-[#E1E1E1] transition-colors",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "button",
+    "text": "real-time usage analysis",
+    "className": "group relative bg-white border-[#E8E8E8] border rounded-[38px] px-4 h-[37px] shadow-[0px_2px_3px_0px_#00000008] cursor-pointer capitalize hover:bg-[#F8F8F8] hover:border-[#E1E1E1] transition-colors",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "button",
+    "text": "lifestyle & preference",
+    "className": "group relative bg-white border-[#E8E8E8] border rounded-[38px] px-4 h-[37px] shadow-[0px_2px_3px_0px_#00000008] cursor-pointer capitalize hover:bg-[#F8F8F8] hover:border-[#E1E1E1] transition-colors",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "button",
+    "text": "digital purchase behaviour",
+    "className": "group relative bg-white border-[#E8E8E8] border rounded-[38px] px-4 h-[37px] shadow-[0px_2px_3px_0px_#00000008] cursor-pointer capitalize hover:bg-[#F8F8F8] hover:border-[#E1E1E1] transition-colors",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "className": "object-cover",
+    "placeholder": "",
+    "alt": "Evil Huntar AR Game Concept Testing"
+  },
+  {
+    "tag": "button",
+    "text": "View",
+    "className": "absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 rounded-[8.61px] shadow-[0px_4px_4px_0px_#00000066] bg-[#00000073]",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "span",
+    "text": "View",
+    "className": "text-black text-[12px] font-medium bg-white px-3 rounded-full py-1.5 shadow-lg",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "className": "object-cover",
+    "placeholder": "",
+    "alt": "Sai Kiran"
+  },
+  {
+    "tag": "span",
+    "text": "Evil Huntar AR Game Concept Testing",
+    "className": "pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-1 w-max max-w-xs bg-[#111111] text-white text-[10px] font-normal px-[8px] py-[5px] rounded-[3px] text-center z-10 opacity-0 peer-hover:opacity-100 before:content-[''] before:absolute before:-bottom-[6px] before:left-1/2 before:-translate-x-1/2 before:border-x-[6px] before:border-x-transparent before:border-t-[8px] before:border-t-[#111111]",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "className": "object-cover",
+    "placeholder": "",
+    "alt": "Women's Decision-Making in Indian Families"
+  },
+  {
+    "tag": "button",
+    "text": "View",
+    "className": "absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 rounded-[8.61px] shadow-[0px_4px_4px_0px_#00000066] bg-[#00000073]",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "span",
+    "text": "View",
+    "className": "text-black text-[12px] font-medium bg-white px-3 rounded-full py-1.5 shadow-lg",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "className": "object-cover",
+    "placeholder": "",
+    "alt": "Srivarsha Baddam"
+  },
+  {
+    "tag": "span",
+    "text": "Women's Decision-Making in Indian Families",
+    "className": "pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-1 w-max max-w-xs bg-[#111111] text-white text-[10px] font-normal px-[8px] py-[5px] rounded-[3px] text-center z-10 opacity-0 peer-hover:opacity-100 before:content-[''] before:absolute before:-bottom-[6px] before:left-1/2 before:-translate-x-1/2 before:border-x-[6px] before:border-x-transparent before:border-t-[8px] before:border-t-[#111111]",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "className": "object-cover",
+    "placeholder": "",
+    "alt": "The Side Hustle Motivations & Landscape"
+  },
+  {
+    "tag": "button",
+    "text": "View",
+    "className": "absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 rounded-[8.61px] shadow-[0px_4px_4px_0px_#00000066] bg-[#00000073]",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "span",
+    "text": "View",
+    "className": "text-black text-[12px] font-medium bg-white px-3 rounded-full py-1.5 shadow-lg",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "className": "object-cover",
+    "placeholder": "",
+    "alt": "Tanisha Kapoor"
+  },
+  {
+    "tag": "span",
+    "text": "The Side Hustle Motivations & Landscape",
+    "className": "pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-1 w-max max-w-xs bg-[#111111] text-white text-[10px] font-normal px-[8px] py-[5px] rounded-[3px] text-center z-10 opacity-0 peer-hover:opacity-100 before:content-[''] before:absolute before:-bottom-[6px] before:left-1/2 before:-translate-x-1/2 before:border-x-[6px] before:border-x-transparent before:border-t-[8px] before:border-t-[#111111]",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "className": "object-cover",
+    "placeholder": "",
+    "alt": "AI Parshurama Teaser: Audience Perception"
+  },
+  {
+    "tag": "button",
+    "text": "View",
+    "className": "absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 rounded-[8.61px] shadow-[0px_4px_4px_0px_#00000066] bg-[#00000073]",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "span",
+    "text": "View",
+    "className": "text-black text-[12px] font-medium bg-white px-3 rounded-full py-1.5 shadow-lg",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "className": "object-cover",
+    "placeholder": "",
+    "alt": "Sai Kiran"
+  },
+  {
+    "tag": "span",
+    "text": "AI Parshurama Teaser: Audience Perception",
+    "className": "pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-1 w-max max-w-xs bg-[#111111] text-white text-[10px] font-normal px-[8px] py-[5px] rounded-[3px] text-center z-10 opacity-0 peer-hover:opacity-100 before:content-[''] before:absolute before:-bottom-[6px] before:left-1/2 before:-translate-x-1/2 before:border-x-[6px] before:border-x-transparent before:border-t-[8px] before:border-t-[#111111]",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "className": "object-cover",
+    "placeholder": "",
+    "alt": "A Study of Dhurandhar"
+  },
+  {
+    "tag": "button",
+    "text": "View",
+    "className": "absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 rounded-[8.61px] shadow-[0px_4px_4px_0px_#00000066] bg-[#00000073]",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "span",
+    "text": "View",
+    "className": "text-black text-[12px] font-medium bg-white px-3 rounded-full py-1.5 shadow-lg",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "className": "object-cover",
+    "placeholder": "",
+    "alt": "Siddhanth Mohandas"
+  },
+  {
+    "tag": "span",
+    "text": "A Study of Dhurandhar",
+    "className": "pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-1 w-max max-w-xs bg-[#111111] text-white text-[10px] font-normal px-[8px] py-[5px] rounded-[3px] text-center z-10 opacity-0 peer-hover:opacity-100 before:content-[''] before:absolute before:-bottom-[6px] before:left-1/2 before:-translate-x-1/2 before:border-x-[6px] before:border-x-transparent before:border-t-[8px] before:border-t-[#111111]",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "className": "object-cover",
+    "placeholder": "",
+    "alt": "Indian Snacking Behaviour - Diary Study"
+  },
+  {
+    "tag": "button",
+    "text": "View",
+    "className": "absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 rounded-[8.61px] shadow-[0px_4px_4px_0px_#00000066] bg-[#00000073]",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "span",
+    "text": "View",
+    "className": "text-black text-[12px] font-medium bg-white px-3 rounded-full py-1.5 shadow-lg",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "className": "object-cover",
+    "placeholder": "",
+    "alt": "Siddhanth Mohandas"
+  },
+  {
+    "tag": "span",
+    "text": "Indian Snacking Behaviour - Diary Study",
+    "className": "pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-1 w-max max-w-xs bg-[#111111] text-white text-[10px] font-normal px-[8px] py-[5px] rounded-[3px] text-center z-10 opacity-0 peer-hover:opacity-100 before:content-[''] before:absolute before:-bottom-[6px] before:left-1/2 before:-translate-x-1/2 before:border-x-[6px] before:border-x-transparent before:border-t-[8px] before:border-t-[#111111]",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "className": "object-cover",
+    "placeholder": "",
+    "alt": "Tiger (or) Zandu - A Study on Pain Balms"
+  },
+  {
+    "tag": "button",
+    "text": "View",
+    "className": "absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 rounded-[8.61px] shadow-[0px_4px_4px_0px_#00000066] bg-[#00000073]",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "span",
+    "text": "View",
+    "className": "text-black text-[12px] font-medium bg-white px-3 rounded-full py-1.5 shadow-lg",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "className": "object-cover",
+    "placeholder": "",
+    "alt": "Manasa Rajan"
+  },
+  {
+    "tag": "span",
+    "text": "Tiger (or) Zandu - A Study on Pain Balms",
+    "className": "pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-1 w-max max-w-xs bg-[#111111] text-white text-[10px] font-normal px-[8px] py-[5px] rounded-[3px] text-center z-10 opacity-0 peer-hover:opacity-100 before:content-[''] before:absolute before:-bottom-[6px] before:left-1/2 before:-translate-x-1/2 before:border-x-[6px] before:border-x-transparent before:border-t-[8px] before:border-t-[#111111]",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "className": "object-cover",
+    "placeholder": "",
+    "alt": "Holiday Gifting - Urban Indian Trends"
+  },
+  {
+    "tag": "button",
+    "text": "View",
+    "className": "absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 rounded-[8.61px] shadow-[0px_4px_4px_0px_#00000066] bg-[#00000073]",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "span",
+    "text": "View",
+    "className": "text-black text-[12px] font-medium bg-white px-3 rounded-full py-1.5 shadow-lg",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "className": "object-cover",
+    "placeholder": "",
+    "alt": "Manasa Rajan"
+  },
+  {
+    "tag": "span",
+    "text": "Holiday Gifting - Urban Indian Trends",
+    "className": "pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-1 w-max max-w-xs bg-[#111111] text-white text-[10px] font-normal px-[8px] py-[5px] rounded-[3px] text-center z-10 opacity-0 peer-hover:opacity-100 before:content-[''] before:absolute before:-bottom-[6px] before:left-1/2 before:-translate-x-1/2 before:border-x-[6px] before:border-x-transparent before:border-t-[8px] before:border-t-[#111111]",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "className": "object-cover",
+    "placeholder": "",
+    "alt": "Digital Subscriptions - The Indian Edition"
+  },
+  {
+    "tag": "button",
+    "text": "View",
+    "className": "absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 rounded-[8.61px] shadow-[0px_4px_4px_0px_#00000066] bg-[#00000073]",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "span",
+    "text": "View",
+    "className": "text-black text-[12px] font-medium bg-white px-3 rounded-full py-1.5 shadow-lg",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "className": "object-cover",
+    "placeholder": "",
+    "alt": "Manasa Rajan"
+  },
+  {
+    "tag": "span",
+    "text": "Digital Subscriptions - The Indian Edition",
+    "className": "pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-1 w-max max-w-xs bg-[#111111] text-white text-[10px] font-normal px-[8px] py-[5px] rounded-[3px] text-center z-10 opacity-0 peer-hover:opacity-100 before:content-[''] before:absolute before:-bottom-[6px] before:left-1/2 before:-translate-x-1/2 before:border-x-[6px] before:border-x-transparent before:border-t-[8px] before:border-t-[#111111]",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Privacy Policy",
+    "className": "hover:text-black transition-colors",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Terms & Conditions",
+    "className": "hover:text-black transition-colors",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Research Case Studies",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Pricing",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Blog",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "How It Works",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "India Market Research",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "SurveyMonkey Alternative",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Poseidon AI Research",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Home",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Hercules AI",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Pricing",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "About",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Research Case Studies",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Blog",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Alternatives",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Market Research India",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Help",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "About Hercules",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "About Superj",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Account Management",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Credit Pricing",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "FAQ",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Privacy Policy",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Terms of Service",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Amul Case Study",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "ICICI Prudential Case Study",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "SBI Case Study",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Greenply Case Study",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Kotak Case Study",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Imperial Blue Case Study",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "SurveyMonkey Alternative",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Kantar Alternative",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Nielsen Alternative",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Typeform Alternative",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Google Forms Alternative",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Qualtrics Alternative",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Medallia Alternative",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Zoho Survey Alternative",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Microsoft Forms Alternative",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Pollfish Alternative",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Market Research Mumbai",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Market Research Delhi",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Market Research Hyderabad",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Market Research Pune",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Market Research Chennai",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Market Research Bangalore",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Market Research Kolkata",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "FMCG Market Research India",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "BFSI Consumer Research",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Market Research for Startups",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Pharma Market Research India",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "E-commerce Consumer Research",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Poseidon AI Research",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Product Concept Testing India",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Brand Tracking Surveys India",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Customer Satisfaction Surveys India",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Ad Testing India",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Employee Satisfaction Surveys India",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Political Polling India",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Academic Research Surveys India",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "How to Improve Data Collection with Online Surveys",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Data-Backed Decision Making for Business Growth Gu",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Top 10 Survey Tools for Market Research in 2026",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Complete Guide to Effective Customer Feedback Surv",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "AI in Employee Surveys: Better HR Insights in 2026",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Best AI-Powered Survey Generators for 2026 [Full L",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Survey Analytics: Tips for Better Data Interpretat",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Future of Market Research: Key Trends to Watch in ",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Designing High-Impact Customer Surveys: Step-by-St",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "How to Use Data to Drive Strategic Business Decisi",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Hercules: The Ultimate Research Assistant for Data",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Compare Top Survey Platforms: Features, Pricing, a",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Best Practices for Choosing a Market Research Tool",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Why Your Business Needs an AI-Driven Survey Builde",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Top Features to Look for in a Customer Feedback Pl",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Maximize Your Survey Outcomes with Hercules Works ",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "How Hercules Enhances Data Accuracy and Insights",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Transform Your Business with the Leading Data Anal",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Hercules vs. Competitors: Which Survey Tool Is Bes",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  },
+  {
+    "tag": "a",
+    "text": "Unlock Actionable Insights with Hercules Advanced ",
+    "className": "",
+    "placeholder": "",
+    "alt": ""
+  }
+]

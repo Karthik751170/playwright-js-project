@@ -1,0 +1,9 @@
+{"type":"send","time":1786695142903.6067,"opcode":1,"data":"{\"protocol\":\"json\",\"version\":1}\u001e"}
+{"type":"receive","time":1786695143295.2488,"opcode":1,"data":"{}\u001e"}
+{"type":"send","time":1786695143297.1868,"opcode":1,"data":"{\"type\":6}\u001e"}
+{"type":"send","time":1786695143297.6428,"opcode":1,"data":"{\"arguments\":[{\"subscriptionType\":\"Server\",\"entityId\":\"kzdzyaot\"}],\"target\":\"Subscribe\",\"type\":1}\u001e{\"arguments\":[{\"subscriptionType\":\"Server\",\"entityId\":\"kzdzyaot\"}],\"target\":\"Unsubscribe\",\"type\":1}\u001e{\"arguments\":[{\"subscriptionType\":\"Server\",\"entityId\":\"kzdzyaot\"}],\"target\":\"Subscribe\",\"type\":1}\u001e"}
+{"type":"receive","time":1786695158222.4077,"opcode":1,"data":"{\"type\":6}\u001e"}
+{"type":"send","time":1786695158301.7456,"opcode":1,"data":"{\"type\":6}\u001e"}
+{"type":"receive","time":1786695166739.6987,"opcode":1,"data":"{\"type\":1,\"target\":\"Event\",\"arguments\":[{\"entityType\":\"Server\",\"eventType\":\"EmailReceived\",\"entityId\":\"kzdzyaot\",\"parentEntityId\":\"d8914cb1-354b-41c5-b2f0-7e7c58ad5f47\",\"relatedId\":\"019fff54-a62e-431d-8d07-0457bd0df7bc\"}]}\u001e"}
+{"type":"receive","time":1786695173224.0088,"opcode":1,"data":"{\"type\":6}\u001e"}
+{"type":"send","time":1786695173304.6777,"opcode":1,"data":"{\"type\":6}\u001e"}

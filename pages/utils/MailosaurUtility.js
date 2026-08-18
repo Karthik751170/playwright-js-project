@@ -1,0 +1,138 @@
+class MailosaurUtility {
+  constructor(page, context) {
+    this.page = page;
+    this.context = context;
+  }
+
+  async login(email, password, serverId) {
+    console.log('Logging into Mailosaur UI...');
+    await this.page.goto(`https://mailosaur.com/app/servers/${serverId}`, { waitUntil: 'domcontentloaded' });
+    
+    const emailInput = this.page.locator('input[type="email"], input[name="email"]');
+    await emailInput.waitFor({ state: 'visible' });
+    await emailInput.fill(email);
+    
+    const mailPasswordInput = this.page.locator('input[type="password"], input[name="password"]');
+    if (await mailPasswordInput.count() === 0 || !(await mailPasswordInput.first().isVisible())) {
+        await this.page.keyboard.press('Enter');
+        await mailPasswordInput.first().waitFor({ state: 'visible', timeout: 10000 });
+    }
+    await mailPasswordInput.first().fill(password);
+    await this.page.keyboard.press('Enter');
+    
+    console.log('Waiting for Mailosaur Inbox to load...');
+    await this.page.waitForURL(`**/app/servers/${serverId}**`, { timeout: 25000 }).catch(() => {});
+    await this.page.waitForTimeout(5000); // React hydration
+    
+    // We assume the first server is the one we want, and click it if we are on the server list
+    const inboxServerLink = this.page.locator('a[href*="/app/servers/"]');
+    if (await inboxServerLink.count() > 0) {
+        await inboxServerLink.first().click();
+    }
+  }
+
+  async waitForAndClickEmail(username) {
+      console.log(`Waiting for Hercules email to appear in Mailosaur inbox for: ${username}...`);
+      
+      // As requested by user: Wait 15 seconds and refresh the page ONCE
+      console.log('Waiting 15 seconds for email to arrive, then refreshing inbox once...');
+      await this.page.waitForTimeout(15000);
+      await this.page.reload({ waitUntil: 'domcontentloaded' });
+      console.log('Inbox refreshed!');
+
+      // 1. Wait for the new message alert banner specifically
+      const newMsgAlert = this.page.getByTestId('new-message-alert');
+      try {
+          console.log('Waiting for new message alert...');
+          await newMsgAlert.waitFor({ state: 'visible', timeout: 5000 });
+          await newMsgAlert.click({ force: true });
+      } catch (e) {
+          console.log('No new message alert banner appeared, perhaps it loaded directly.');
+      }
+
+      // 2. Click the row in the inbox
+      try {
+          console.log(`Looking for email row containing username: ${username}`);
+          // Find a table row that contains the specific username
+          const emailRow = this.page.locator(`tr:has-text("${username}")`).first();
+          await emailRow.waitFor({ state: 'visible', timeout: 10000 });
+          await emailRow.click();
+      } catch (e) {
+          console.log('Fallback to top email row...');
+          // Highly robust fallback for mailosaur UI (usually first row in the tbody)
+          const topEmailRow = this.page.locator('tbody > tr').first();
+          await topEmailRow.waitFor({ state: 'visible', timeout: 10000 });
+          await topEmailRow.click();
+      }
+      
+      console.log('Email arrived! Clicking the email dynamically...');
+  }
+
+  async fetchVerificationLink(tempEmail) {
+    console.log(`Waiting for Hercules email to appear in Mailosaur inbox for: ${tempEmail}...`);
+    
+    // As requested by user: Wait 15 seconds and refresh the page ONCE before looking for the email
+    console.log('Waiting 15 seconds for email to arrive, then refreshing inbox once...');
+    await this.page.waitForTimeout(15000);
+    await this.page.reload({ waitUntil: 'domcontentloaded' });
+    console.log('Inbox refreshed!');
+    
+    // Wait for the new message alert banner to appear and click it to load the new email
+    console.log('Waiting for new message alert...');
+    const newMessageAlert = this.page.getByTestId('new-message-alert');
+    if (await newMessageAlert.isVisible({ timeout: 25000 }).catch(() => false)) {
+         await newMessageAlert.click({ force: true });
+         await this.page.waitForTimeout(2000);
+    } else {
+         console.log('No new message alert banner appeared, perhaps it loaded directly.');
+    }
+    
+    // Grab the specific email row corresponding to our tempEmail
+    const username = tempEmail.split('@')[0];
+    console.log(`Looking for email row containing username: ${username}`);
+    let emailRow = this.page.getByText(username).first();
+    
+    if (!await emailRow.isVisible({ timeout: 15000 }).catch(()=>false)) {
+        console.log(`Fallback to top email row...`);
+        emailRow = this.page.locator("[class='grid-cols-subgrid col-span-3 gap-x-4 md:gap-x-5 xl:gap-x-6 py-5 pr-5 hidden md:grid']").first();
+    }
+    
+    console.log('Email arrived! Clicking the email dynamically...');
+    await emailRow.scrollIntoViewIfNeeded().catch(() => {});
+    await emailRow.click({ force: true });
+    
+    // Wait for the email details page to load
+    await this.page.waitForURL('**/messages/**', { timeout: 15000 });
+    
+    console.log('Waiting for email body to load...');
+    if (!this.page.isClosed()) {
+        await this.page.waitForTimeout(3000).catch(() => {});
+    }
+    
+    console.log('Extracting the verification link from the email...');
+    
+    let verificationUrl;
+    try {
+        const iframe = this.page.frameLocator('iframe').first();
+        // Use a highly robust text match that ignores exact arrow symbols
+        const verifyLink = iframe.locator("a:has-text('Verify')").first();
+        await verifyLink.waitFor({ state: 'attached', timeout: 25000 });
+        
+        verificationUrl = await verifyLink.getAttribute('href');
+    } catch (e) {
+        console.log('Not found in iframe, trying main document with stricter locator...');
+        let verifyLink = this.page.locator('a:has-text("Verify")').filter({ hasNot: this.page.locator('.grid-cols-subgrid') }).first();
+        
+        if (await verifyLink.isVisible({ timeout: 5000 }).catch(()=>false)) {
+            verificationUrl = await verifyLink.getAttribute('href');
+        } else {
+            throw new Error('Verify link not found');
+        }
+    }
+    
+    console.log(`Extracted Verification URL: ${verificationUrl}`);
+    return verificationUrl;
+  }
+}
+
+module.exports = MailosaurUtility;

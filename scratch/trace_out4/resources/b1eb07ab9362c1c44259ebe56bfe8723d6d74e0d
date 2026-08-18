@@ -1,0 +1,911 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: DeploySurvey_Free100Users.spec.js >> Deploy survey to 100 Users for Free
+- Location: tests/DeploySurvey_Free100Users.spec.js:152:1
+
+# Error details
+
+```
+Error: FAILURE: Response count is 0! The survey response was not recorded by the backend. Found text: Responses Collected: 0 / 100
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e4]:
+    - generic [ref=e8]:
+      - generic [ref=e9]:
+        - img "Warning" [ref=e10]
+        - generic [ref=e11]: "Approaching Monthly Limit:"
+        - text: You've used 100 of 100 free responses this month.
+        - button "Upgrade Plan" [ref=e12] [cursor=pointer]
+        - text: to access 20 million verified users.
+      - button "Dismiss" [ref=e13] [cursor=pointer]:
+        - img "close" [ref=e14]
+    - main [ref=e16]:
+      - generic [ref=e18]:
+        - generic [ref=e19]:
+          - img "hercules-logo" [ref=e23] [cursor=pointer]
+          - generic [ref=e26]:
+            - button "Open sidebar" [ref=e27] [cursor=pointer]:
+              - img [ref=e28]
+            - generic: Open sidebar
+          - generic [ref=e31]:
+            - generic [ref=e32]:
+              - generic: New campaign
+              - button "New Campaign" [ref=e33] [cursor=pointer]:
+                - img [ref=e35]
+                - generic: New Campaign
+            - generic [ref=e38]:
+              - generic [ref=e39]:
+                - link "All campaigns All Campaigns" [ref=e40] [cursor=pointer]:
+                  - /url: /ai/chat/campaign-history
+                  - button [ref=e41]:
+                    - img [ref=e42]
+                  - generic: All campaigns
+                  - generic: All Campaigns
+                - link "Templates Research Templates" [ref=e49] [cursor=pointer]:
+                  - /url: /ai/chat/survey-presets?activeTab=templates
+                  - button [ref=e50]:
+                    - img [ref=e51]
+                  - generic: Templates
+                  - generic: Research Templates
+              - generic [ref=e55] [cursor=pointer]:
+                - button [ref=e56]:
+                  - img [ref=e57]
+                - generic: Recent campaigns
+                - generic:
+                  - text: Recents
+                  - img "arrow" [ref=e66]
+        - generic [ref=e70]:
+          - button "Share" [ref=e71] [cursor=pointer]
+          - button "U" [ref=e78] [cursor=pointer]:
+            - generic [ref=e80]: U
+      - generic [ref=e84]:
+        - generic [ref=e88]:
+          - generic [ref=e95]:
+            - paragraph [ref=e99]: Create a market research survey about dietary habits and meal prep to gauge interest in new features.
+            - generic [ref=e103]: U
+          - generic [ref=e108]:
+            - generic [ref=e110]:
+              - button "Nothing skipped — context is being read in full" [ref=e111] [cursor=pointer]:
+                - generic [ref=e115]: Nothing skipped — context is being read in full
+              - generic [ref=e119]:
+                - img "done" [ref=e122]
+                - generic [ref=e124]:
+                  - generic [ref=e126]: Not jumping to questions — building the framework first.
+                  - paragraph [ref=e131]: The context engine is reading your inputs and building a structured understanding of what this research needs to achieve, who it's studying, and what constraints it's working within.
+            - paragraph [ref=e135]: I understand the survey is about dietary habits, meal preparation, and interest in new features. I need a little more context to design the right research approach.
+          - generic [ref=e141]:
+            - generic [ref=e142]:
+              - heading "1. What product, service, app, or platform will these new features belong to? Please describe what it currently offers and what you are considering adding." [level=2] [ref=e143]
+              - paragraph [ref=e144]: The product in question is an all-in-one digital workspace platform called 'Elevate', which currently offers a suite of tools and features for remote teams to collaborate, communicate, and manage projects efficiently. Elevate provides a centralized hub for team members to access shared files, calendars, and task lists, as well as integrate with popular third-party apps like Google Drive, Slack, and Trello. The platform also includes features such as automated workflows, customizable dashboards, and real-time analytics to help teams stay organized and on track. With the new features we're considering adding, we aim to enhance the user experience, improve collaboration, and increase productivity for our users. Specifically, we're looking to integrate AI-powered project management tools, a built-in time tracking system, and a more intuitive user interface to make it easier for users to find the features they need. These additions will not only make Elevate more competitive in the market but also provide our users with a more comprehensive and user-friendly experience.
+            - generic [ref=e145]:
+              - heading "2. Which feature areas should the survey explore? Select all that apply." [level=2] [ref=e146]
+              - paragraph [ref=e147]: Meal planning and recipe suggestions, Grocery lists, shopping, or delivery, Nutrition, calorie, or dietary tracking, Personalised plans based on goals or restrictions
+            - generic [ref=e148]:
+              - heading "3. Who should answer the survey? Select all that apply." [level=2] [ref=e149]
+              - paragraph [ref=e150]: People who regularly cook at home, People who meal-prep in advance, People following a specific diet or nutrition goal, Existing users of the product or service, Potential users who do not use it today
+            - generic [ref=e151]:
+              - heading "4. What is the single most important decision this research should support?" [level=2] [ref=e152]
+              - paragraph [ref=e153]: Understand unmet meal-preparation needs
+            - generic [ref=e154]:
+              - heading "5. What should the survey mainly measure? Select all that apply." [level=2] [ref=e155]
+              - paragraph [ref=e156]: Current dietary habits and meal-prep routines, Pain points and barriers, Interest in proposed features, Willingness to pay or preferred pricing
+            - generic [ref=e157]:
+              - heading "6. What is the timeline for this research?" [level=2] [ref=e158]
+              - paragraph [ref=e159]: Medium-term (about 1 month)
+          - generic [ref=e164]:
+            - generic [ref=e166]:
+              - button "The context layer is live — reading your inputs now" [ref=e167] [cursor=pointer]:
+                - generic [ref=e171]: The context layer is live — reading your inputs now
+              - generic [ref=e175]:
+                - img "done" [ref=e178]
+                - generic [ref=e180]:
+                  - generic [ref=e182]: The research framework is being constructed now.
+                  - paragraph [ref=e187]: Hercules is taking in your full context — goals, constraints, category, audience — and organising it into a structured foundation before the framework is built.
+            - paragraph [ref=e191]: Thanks — I noticed a mismatch between the product description and the meal-preparation topics, so I need to confirm the subject before designing the research.
+          - generic [ref=e197]:
+            - generic [ref=e198]:
+              - 'heading "1. What product, service, or experience should this survey focus on: Elevate, the digital workspace for remote teams, or a separate meal-planning and nutrition product? Please describe the correct subject and the features being considered." [level=2] [ref=e199]'
+              - paragraph [ref=e200]: The product in question is an e-learning platform called 'LearnSphere' that offers a comprehensive online education experience for students of all ages. Currently, LearnSphere provides access to a vast library of video courses, interactive quizzes, and personalized learning plans. It also features a social learning component that enables students to connect with peers and instructors, as well as a progress tracking system that helps students stay on top of their studies. The platform is designed to be user-friendly and accessible on both desktop and mobile devices, with a clean and intuitive interface that makes it easy for students to navigate and find the resources they need. We are considering adding several new features to LearnSphere, including a virtual reality (VR) component that would allow students to immerse themselves in interactive 3D environments and simulations, a real-time language translation feature that would enable students to communicate with instructors and peers who speak different languages, and a personalized career coaching service that would help students identify their strengths and interests and create a customized career development plan. We also plan to integrate LearnSphere with popular productivity and organization tools, such as Google Calendar and Trello, to help students stay organized and manage their time more effectively.
+            - generic [ref=e201]:
+              - heading "2. What is the primary decision this research should support?" [level=2] [ref=e202]
+              - paragraph [ref=e203]: Identify unmet meal-preparation and nutrition needs
+          - generic [ref=e208]:
+            - generic [ref=e210]:
+              - button "Everything on the table — being assessed before anything moves" [ref=e211] [cursor=pointer]:
+                - generic [ref=e215]: Everything on the table — being assessed before anything moves
+              - generic [ref=e219]:
+                - img "done" [ref=e222]
+                - generic [ref=e224]:
+                  - generic [ref=e226]: What this study is actually trying to prove — being formalised.
+                  - paragraph [ref=e231]: The context engine is loading — Hercules is organising your inputs into a structured view of your research situation before the framework layer is activated.
+            - paragraph [ref=e235]: I can identify LearnSphere clearly, but the selected research decision refers to meal preparation and nutrition, so I need to resolve that mismatch before designing the study.
+          - generic [ref=e241]:
+            - generic [ref=e242]:
+              - heading "1. What should this survey ultimately help LearnSphere decide? Please describe the main decision in your own words, especially how the findings should guide the proposed VR, translation, career coaching, or productivity-tool features." [level=2] [ref=e243]
+              - paragraph [ref=e244]: Our product is an all-in-one, cloud-based project management and collaboration platform called 'ProjectPro'. It currently offers a range of features, including task assignment and tracking, team member onboarding and management, real-time file sharing and version control, automated workflows and approval processes, customizable dashboards and reporting, and integration with popular third-party tools such as Google Drive, Slack, and Trello. ProjectPro is designed to help teams of all sizes streamline their workflows, improve communication, and increase productivity. We are considering adding several new features to ProjectPro, including a built-in time tracking and billing system, a more advanced analytics and reporting module, and a mobile app for on-the-go access to project information. The new features will be designed to further enhance the platform's capabilities and make it an even more indispensable tool for teams and organizations.
+            - generic [ref=e245]:
+              - heading "2. Which one is the primary research objective for LearnSphere?" [level=2] [ref=e246]
+              - paragraph [ref=e247]: Evaluate LearnSphere’s overall user experience and satisfaction
+          - generic [ref=e252]:
+            - generic [ref=e254]:
+              - button "Full context read before anything gets built" [ref=e255] [cursor=pointer]:
+                - generic [ref=e259]: Full context read before anything gets built
+              - generic [ref=e263]:
+                - img "done" [ref=e266]
+                - generic [ref=e268]:
+                  - generic [ref=e270]: Building clarity about what needs to be proven before proving it.
+                  - paragraph [ref=e275]: Your inputs are being read in full — Hercules is building a structured understanding of your research situation before anything is designed around it.
+            - paragraph [ref=e279]:
+              - text: Thanks — I see a mismatch between
+              - strong [ref=e280]: LearnSphere
+              - text: and
+              - strong [ref=e281]: ProjectPro
+              - text: ", so I need to confirm the subject before designing the study."
+          - generic [ref=e287]:
+            - generic [ref=e288]:
+              - heading "1. Which product should this survey focus on, and what is its correct name? Please describe the product or service in your own words." [level=2] [ref=e289]
+              - paragraph [ref=e290]: The product in question is an e-learning platform called 'LearnSphere' that offers a comprehensive online education experience for students of all ages. Currently, LearnSphere provides a vast library of video courses, interactive quizzes, and personalized learning plans tailored to individual students' needs. It also features a social learning component that allows students to connect with peers, ask questions, and collaborate on projects. The platform is accessible on both web and mobile devices, making it convenient for students to learn on-the-go. Our team is considering adding several new features to LearnSphere, including an AI-powered adaptive learning engine that can adjust the difficulty level and content of courses based on a student's performance, a virtual reality (VR) and augmented reality (AR) component that can enhance the learning experience through immersive simulations, and a gamification feature that rewards students for achieving milestones and completing challenging tasks. We also plan to integrate LearnSphere with popular productivity and organization tools, such as Google Calendar and Trello, to help students better manage their time and stay organized. Additionally, we aim to expand the platform's content offerings to include more courses and resources on emerging technologies, such as artificial intelligence, blockchain, and cybersecurity.
+            - generic [ref=e291]:
+              - heading "2. What should the survey primarily evaluate?" [level=2] [ref=e292]
+              - paragraph [ref=e293]: Both current satisfaction and interest in new features
+          - generic [ref=e298]:
+            - generic [ref=e300]:
+              - button "Taking stock of what's been shared" [ref=e301] [cursor=pointer]:
+                - generic [ref=e305]: Taking stock of what's been shared
+              - generic [ref=e309]:
+                - img "done" [ref=e312]
+                - generic [ref=e314]:
+                  - generic [ref=e316]: Framework first — questions later.
+                  - paragraph [ref=e321]: Before any framework is built, Hercules reads the full context — goals, audience signals, category dynamics, and anything else shared — so the structure it builds is grounded in your actual situation.
+            - paragraph [ref=e325]: Thanks — LearnSphere and the combined focus on current satisfaction plus interest in new features are clear. I need a few more details to design the right study and avoid treating all learners or features alike.
+          - generic [ref=e331]:
+            - generic [ref=e332]:
+              - heading "1. Who should answer this survey? Select all that apply." [level=2] [ref=e333]
+              - paragraph [ref=e334]: Current LearnSphere students, Parents or guardians who influence learning decisions, Students who tried LearnSphere but are now inactive, People who use other online learning platforms but not LearnSphere
+            - generic [ref=e335]:
+              - heading "2. Which LearnSphere experiences should the satisfaction section cover? Select all that apply." [level=2] [ref=e336]
+              - paragraph [ref=e337]: Video courses and content quality, Interactive quizzes and assessments, Personalized learning plans, Social learning, peer questions, and collaboration, Web and mobile app experience
+            - generic [ref=e338]:
+              - heading "3. Which feature areas should be evaluated for learner interest? Select all that apply." [level=2] [ref=e339]
+              - paragraph [ref=e340]: AI-powered adaptive learning, VR and AR immersive simulations, Gamification, rewards, and milestones, Google Calendar or Trello integrations
+            - generic [ref=e341]:
+              - heading "4. What is the single most important decision this research should support?" [level=2] [ref=e342]
+              - paragraph [ref=e343]: Identify improvements needed in the current LearnSphere experience
+            - generic [ref=e344]:
+              - heading "5. What stage are these proposed features at right now?" [level=2] [ref=e345]
+              - paragraph [ref=e346]: Early ideas requiring initial demand assessment
+            - generic [ref=e347]:
+              - heading "6. What would you do differently depending on the survey results? Please describe the decision or action in your own words." [level=2] [ref=e348]
+              - paragraph [ref=e349]: The product in question is an e-commerce platform called 'GreenCycle' that specializes in sustainable and eco-friendly household products. Currently, GreenCycle offers a wide range of products, including reusable bags, refillable water bottles, bamboo toothbrushes, and biodegradable cleaning supplies. The platform allows customers to browse and purchase products through its user-friendly website and mobile app. GreenCycle also features a rewards program, where customers can earn points for every purchase and redeem them for discounts and free products. Additionally, the platform offers a 'Product of the Month' subscription service, where customers can receive a new, eco-friendly product every month. We are considering adding new features to GreenCycle, including a 'Product Recommendation' algorithm that suggests products to customers based on their purchase history and preferences, a 'Sustainability Score' feature that rates products based on their environmental impact, and a 'Community Forum' where customers can discuss sustainable living and share tips and advice.
+          - generic [ref=e354]:
+            - generic [ref=e356]:
+              - button "Your inputs are being processed — nothing assumed yet" [ref=e357] [cursor=pointer]:
+                - generic [ref=e361]: Your inputs are being processed — nothing assumed yet
+              - generic [ref=e365]:
+                - img "done" [ref=e368]
+                - generic [ref=e370]:
+                  - generic [ref=e372]: Structural thinking before survey writing.
+                  - paragraph [ref=e377]: The context layer is active — your goals, constraints, and category context are being read, organised, and structured before any framework is built.
+            - paragraph [ref=e381]: I see a mismatch between the LearnSphere answers and the GreenCycle description, so I need to confirm the actual subject before designing the study.
+          - generic [ref=e387]:
+            - generic [ref=e388]:
+              - 'heading "1. Which product or service is this survey actually about? Please describe the one you want to research: LearnSphere, GreenCycle, or another product/service." [level=2] [ref=e389]'
+              - paragraph [ref=e390]: The product in question is an e-learning platform called 'LearnSphere' that offers a comprehensive online education experience for students of all ages. Currently, LearnSphere provides access to a vast library of video lectures, interactive quizzes, and personalized learning plans, all tailored to meet the unique needs of each student. The platform also features a social learning component, allowing students to connect with peers and instructors, as well as a progress tracking system to monitor their academic growth. With the new features we are considering adding, we aim to enhance the overall user experience, increase engagement, and provide more effective learning outcomes. Specifically, we are looking to integrate AI-powered adaptive learning tools, real-time feedback mechanisms, and gamification elements to make the learning process more enjoyable and interactive. We also plan to expand our content offerings to include more specialized courses and certifications, as well as partner with leading educational institutions to provide students with access to high-quality, industry-recognized content. Ultimately, our goal is to create a seamless, intuitive, and supportive learning environment that empowers students to achieve their full potential and succeed in their academic and professional pursuits.
+            - generic [ref=e391]:
+              - heading "2. What is the single most important decision this research should support?" [level=2] [ref=e392]
+              - paragraph [ref=e393]: Improve the current customer or learner experience
+          - generic [ref=e398]:
+            - generic [ref=e400]:
+              - button "Loading your context before building anything" [ref=e401] [cursor=pointer]:
+                - generic [ref=e405]: Loading your context before building anything
+              - generic [ref=e409]:
+                - img "done" [ref=e412]
+                - generic [ref=e414]:
+                  - generic [ref=e416]: What does this research actually need to prove?
+                  - paragraph [ref=e421]: "The context engine is pulling in all inputs: your stated goals, the category you're working in, any prior research context, and any constraints you've mentioned — then building a working model of what this research needs to do."
+            - paragraph [ref=e425]: Thanks — LearnSphere and the goal of improving the learner experience are clear. I need a few more specifics to distinguish current experience issues from feature-prioritization needs and design the right study.
+          - generic [ref=e431]:
+            - generic [ref=e432]:
+              - heading "1. Who should answer this survey? Select all that apply." [level=2] [ref=e433]
+              - paragraph [ref=e434]: Current LearnSphere students, Former or inactive LearnSphere students, Parents or guardians who influence learning decisions, Teachers, instructors, or academic administrators, Potential users who do not currently use LearnSphere
+            - generic [ref=e435]:
+              - heading "2. Which parts of the LearnSphere experience should the research examine? Select all that apply." [level=2] [ref=e436]
+              - paragraph [ref=e437]: Content quality and course relevance, Video lectures, quizzes, and learning plans, AI-powered adaptive learning tools, Real-time feedback and progress tracking, Social learning with peers and instructors, Gamification and engagement
+            - generic [ref=e438]:
+              - heading "3. What is the single most important decision the research should support?" [level=2] [ref=e439]
+              - paragraph [ref=e440]: Improve learner engagement and course completion
+            - generic [ref=e441]:
+              - heading "4. What has triggered this research now? Select all that apply." [level=2] [ref=e442]
+              - paragraph [ref=e443]: Learner feedback or complaints, Low engagement or course completion, Feature planning for the next product release, Competitive pressure from other e-learning platforms, Expansion into certifications or institutional partnerships
+            - generic [ref=e444]:
+              - heading "5. How familiar are the people you want to survey with LearnSphere?" [level=2] [ref=e445]
+              - paragraph [ref=e446]: A mix of current, former, and potential users
+            - generic [ref=e447]:
+              - heading "6. What is the timeline for using the research results?" [level=2] [ref=e448]
+              - paragraph [ref=e449]: No strict deadline
+          - generic [ref=e454]:
+            - generic [ref=e456]:
+              - button "Constructs, hypotheses, and measurement logic — coming together" [ref=e457] [cursor=pointer]:
+                - generic [ref=e461]: Constructs, hypotheses, and measurement logic — coming together
+              - generic [ref=e464]:
+                - generic [ref=e465]:
+                  - img "done" [ref=e468]
+                  - generic [ref=e470]:
+                    - generic [ref=e472]: The architecture of your research — being defined now.
+                    - paragraph [ref=e477]: Hercules is taking in everything you've provided — your goals, your business context, your research history — and organising it into a structured starting point before anything is built.
+                - generic [ref=e478]:
+                  - img "done" [ref=e481]
+                  - generic [ref=e483]:
+                    - generic [ref=e485]: The research needs a backbone — building it now.
+                    - paragraph [ref=e490]: Hercules is generating the research framework — constructs are being defined, hypotheses are being formed, and the logical architecture of the study is taking shape.
+                - generic [ref=e491]:
+                  - img "done" [ref=e494]
+                  - generic [ref=e496]:
+                    - generic [ref=e498]: Strategic Research Framework
+                    - generic [ref=e503]:
+                      - heading "1. Core Objective & Business Context" [level=3] [ref=e504]
+                      - list [ref=e505]:
+                        - listitem [ref=e506]:
+                          - strong [ref=e507]: "Business problem:"
+                          - text: LearnSphere needs to understand why learners do not sustain engagement or complete courses, and which parts of the learning experience most influence continued progress.
+                        - listitem [ref=e508]:
+                          - strong [ref=e509]: "Research scope:"
+                          - text: The study will examine content relevance, learning formats, adaptive tools, progress feedback, social learning, gamification, and the experience of current, former, potential, and decision-influencing stakeholders.
+                        - listitem [ref=e510]:
+                          - strong [ref=e511]: "Why this matters now:"
+                          - text: The research has been triggered by learner complaints, low engagement or completion, upcoming feature planning, competitive pressure, and possible expansion into certifications or institutional partnerships. These pressures require LearnSphere to distinguish genuine experience problems from unmet expectations or differences between learner groups.
+                        - listitem [ref=e512]:
+                          - strong [ref=e513]: "What knowing the answer enables:"
+                          - text: LearnSphere will be able to identify the strongest barriers to course completion, separate issues affecting current learners from reasons for inactivity or non-adoption, and prioritize product improvements that are most likely to increase sustained engagement.
+                        - listitem [ref=e514]:
+                          - strong [ref=e515]: "Important stakeholder distinction:"
+                          - text: Learners should provide the primary experience and completion evidence. Parents or guardians, teachers, and academic administrators should be routed to separate role-appropriate modules rather than being combined into a single learner satisfaction score.
+                      - heading "2. Secondary Research Snapshot" [level=3] [ref=e516]
+                      - list [ref=e517]:
+                        - listitem [ref=e518]:
+                          - strong [ref=e519]: "Digital learning engagement requires more than platform access:"
+                          - text: The OECD identifies engagement as a central challenge in digital learning and highlights the need to measure engagement and design interventions when disengagement begins. This supports measuring specific drop-off moments, not only overall satisfaction. — OECD Digital Education Outlook (
+                          - link "oecd.org" [ref=e520] [cursor=pointer]:
+                            - /url: https://www.oecd.org/en/publications/oecd-digital-education-outlook-2021_589b283f-en/full-report/component-7.html
+                          - text: )
+                        - listitem [ref=e521]:
+                          - strong [ref=e522]: "India has a large and increasingly structured digital-learning ecosystem:"
+                          - text: The Government of India’s PM e-VIDYA initiative brings together multiple digital and online education channels and is designed to benefit nearly 25 crore school-going children. LearnSphere should therefore benchmark against both commercial platforms and public or institution-linked learning alternatives. — Ministry of Education, Government of India (
+                          - link "pmevidya.education.gov.in" [ref=e523] [cursor=pointer]:
+                            - /url: https://pmevidya.education.gov.in/
+                          - text: )
+                        - listitem [ref=e524]:
+                          - strong [ref=e525]: "Institutional and educator use is strategically relevant:"
+                          - text: DIKSHA operates across 35 states and union territories and provides large volumes of curriculum-linked digital content, showing why teacher, administrator, curriculum alignment, and partnership expectations may become important for LearnSphere’s expansion plans. — Press Information Bureau, Government of India (
+                          - link "dsel.education.gov.in" [ref=e526] [cursor=pointer]:
+                            - /url: http://dsel.education.gov.in/sites/default/files/update/PIB2036640.pdf
+                          - text: )
+                        - listitem [ref=e527]:
+                          - strong [ref=e528]: "AI and personalized support are becoming important parts of online learning value propositions:"
+                          - text: Coursera’s 2025 learner-outcomes research reports that 94% of full-time professionals who completed GenAI content reported a positive impact at work, while 94% of users of its AI coaching feature said it improved their learning experience. These are provider-sponsored findings, so LearnSphere should test whether its own AI tools create measurable engagement value rather than assuming that AI is inherently motivating. — Coursera and The Harris Poll (
+                          - link "coursera.org" [ref=e529] [cursor=pointer]:
+                            - /url: https://www.coursera.org/enterprise/resources/ebook/learner-outcomes
+                          - text: ","
+                          - link "assets.ctfassets.net" [ref=e530] [cursor=pointer]:
+                            - /url: https://assets.ctfassets.net/00atxywtfxvd/2eocGVEBKQlIHuLNaSuK1l/18f31949bff069d78a22daf8869566b7/2025-coursera-learner-outcomes-report.pdf
+                          - text: )
+                        - listitem [ref=e531]:
+                          - strong [ref=e532]: "Competitive pressure is likely to come from several directions:"
+                          - text: LearnSphere may compete not only with direct online-learning platforms but also with public digital resources, institutional learning systems, creator-led content, coaching platforms, and informal peer-learning communities. The survey should therefore measure alternatives used and the specific reasons users switch or divide their learning time.
+                      - heading "3. Research Type & Methodology" [level=3] [ref=e533]
+                      - list [ref=e534]:
+                        - listitem [ref=e535]:
+                          - strong [ref=e536]: "Study type:"
+                          - text: Mixed-method
+                          - strong [ref=e537]: Customer Experience / Learner Experience
+                          - text: ","
+                          - strong [ref=e538]: Usage & Attitude
+                          - text: ", and"
+                          - strong [ref=e539]: Feature or Experience Prioritization
+                          - text: research.
+                        - listitem [ref=e540]:
+                          - strong [ref=e541]: "Stimulus count:"
+                          - text: The current brief contains zero discrete stimuli to show. The listed areas are experience domains, not specific concepts, screens, feature designs, or competing assets. Therefore, cell-based designs such as monadic, sequential monadic, A/B, or paired comparison do not apply at this stage.
+                        - listitem [ref=e542]:
+                          - strong [ref=e543]: "Research design:"
+                          - text: A linear, modular questionnaire with role-based routing and a general-to-specific funnel.
+                        - listitem [ref=e544]:
+                          - strong [ref=e545]: "Why this approach:"
+                          - text: The main decision is how to improve learner engagement and course completion, which requires behavioral evidence, journey diagnosis, satisfaction drivers, and barriers rather than a simple preference test. A modular design will allow current learners, inactive learners, potential users, parents, and educators to answer only the sections relevant to their relationship with LearnSphere.
+                        - listitem [ref=e546]:
+                          - strong [ref=e547]: "Feature-prioritization overlay:"
+                          - text: If LearnSphere provides a defined list of at least five candidate features or improvements, a MaxDiff exercise should be added to produce a clearer preference hierarchy. This should be treated as a prioritization module, not as a stimulus-cell test.
+                        - listitem [ref=e548]:
+                          - strong [ref=e549]: "Alternatives considered:"
+                          - list [ref=e550]:
+                            - listitem [ref=e551]:
+                              - strong [ref=e552]: "Pure monadic testing:"
+                              - text: Not selected because no discrete concepts, designs, or feature prototypes are currently specified.
+                            - listitem [ref=e553]:
+                              - strong [ref=e554]: "Sequential monadic testing:"
+                              - text: Not selected because respondents are not being asked to evaluate multiple independent assets.
+                            - listitem [ref=e555]:
+                              - strong [ref=e556]: "Conjoint or choice-based conjoint:"
+                              - text: Not selected because the current decision concerns experience improvement and completion barriers, not quantified trade-offs between product configurations and prices.
+                            - listitem [ref=e557]:
+                              - strong [ref=e558]: "Standalone NPS or CSAT survey:"
+                              - text: Not selected because a single score would not explain the behavioral causes of disengagement, inactivity, or incomplete courses.
+                        - listitem [ref=e559]:
+                          - strong [ref=e560]: "User control:"
+                          - text: If you prefer a different methodology, such as adding a MaxDiff feature-prioritization exercise or testing specific product prototypes, the design can be switched before the research brief is generated.
+                        - listitem [ref=e561]:
+                          - strong [ref=e562]: "Survey design logic:"
+                          - text: Begin with recent behavior and usage context, then measure the learning journey, followed by satisfaction and engagement drivers. Ask unaided barriers and reasons before presenting structured response options where possible. Current and former learners should receive different paths; potential users should not be asked to rate experiences they have not had. Parents, teachers, and administrators should receive role-specific questions about influence, learning outcomes, implementation, and support needs.
+                        - listitem [ref=e563]:
+                          - strong [ref=e564]: "Quality controls:"
+                          - text: Use platform attention checks, speeder detection, straight-line detection, minimum completion-time rules, and open-ended gibberish screening. Long or complex batteries should be split across short mobile-friendly screens, with answer options randomized where order effects are not meaningful.
+                        - listitem [ref=e565]:
+                          - strong [ref=e566]: "Fielding context:"
+                          - text: The survey will be deployed to verified Indian respondents through the SuperJ mobile application and web. Age, gender, city, and NCCS targeting should be enforced by the audience system rather than recollected in the questionnaire. Routing, randomization, quotas, attention checks, and media support are available if later product or interface assets are added.
+                      - heading "4. Target Audience Profile" [level=3] [ref=e567]
+                      - list [ref=e568]:
+                        - listitem [ref=e569]:
+                          - strong [ref=e570]: "Current LearnSphere students:"
+                          - text: Active learners with recent platform experience who can evaluate content quality, learning formats, feedback, adaptive tools, social learning, and the moments that support or interrupt progress.
+                        - listitem [ref=e571]:
+                          - strong [ref=e572]: "Former or inactive LearnSphere students:"
+                          - text: People who have stopped using LearnSphere or failed to complete a course. They are essential for identifying disengagement triggers, unmet expectations, friction points, competing alternatives, and realistic win-back opportunities.
+                        - listitem [ref=e573]:
+                          - strong [ref=e574]: "Potential users:"
+                          - text: People who fit the intended learning need but do not currently use LearnSphere. They can reveal awareness, category expectations, perceived barriers, competing solutions, and what proof would be needed to try the platform.
+                        - listitem [ref=e575]:
+                          - strong [ref=e576]: "Parents or guardians:"
+                          - text: Individuals who influence learning decisions, particularly where the learner is a minor or where household approval, payment, trust, safety, or academic credibility affects adoption.
+                        - listitem [ref=e577]:
+                          - strong [ref=e578]: "Teachers, instructors, and academic administrators:"
+                          - text: Stakeholders who can assess curriculum fit, teaching usefulness, learner monitoring, feedback quality, institutional integration, and partnership readiness.
+                        - listitem [ref=e579]:
+                          - strong [ref=e580]: "Why these groups matter:"
+                          - text: Engagement and completion are not shaped only by the learner interface. Trust, course relevance, instructional quality, feedback, household influence, and institutional support may all affect sustained use.
+                        - listitem [ref=e581]:
+                          - strong [ref=e582]: "Must-have screening criteria:"
+                          - text: Confirm respondent role, familiarity with LearnSphere, current or past usage, recent course or learning activity where applicable, involvement in learning decisions, and whether the respondent has enough experience to answer the relevant module.
+                        - listitem [ref=e583]:
+                          - strong [ref=e584]: "Reporting principle:"
+                          - text: Results should be reported separately by stakeholder role and LearnSphere relationship. Combining all groups into one overall average would risk masking the reasons different groups support, reject, or abandon the platform.
+                      - heading "5. Key Information Areas & Data Architecture" [level=3] [ref=e585]
+                      - list [ref=e586]:
+                        - listitem [ref=e587]:
+                          - strong [ref=e588]: "Engagement and completion behavior:"
+                          - text: Capture recent login or learning frequency, course-start behavior, lesson completion, quiz participation, progress consistency, and where applicable the point at which learning stopped. → Reveals the difference between stated engagement and actual learning behavior. → Drives targeted retention and completion interventions.
+                        - listitem [ref=e589]:
+                          - strong [ref=e590]: "Learning journey friction:"
+                          - text: Measure difficulty finding the right course, onboarding clarity, navigation, lesson length, technical interruptions, scheduling barriers, and resuming unfinished learning. → Identifies operational friction that may be mistaken for low motivation. → Drives journey and interface improvements.
+                        - listitem [ref=e591]:
+                          - strong [ref=e592]: "Content quality and course relevance:"
+                          - text: Assess relevance to learner goals, clarity, depth, difficulty, curriculum fit, instructor quality, and perceived usefulness. → Shows whether learners disengage because the content does not deliver enough value. → Drives curriculum refresh, course design, and content investment.
+                        - listitem [ref=e593]:
+                          - strong [ref=e594]: "Learning format effectiveness:"
+                          - text: Compare perceived usefulness of video lectures, quizzes, learning plans, practice activities, and other instructional formats using behavioral and outcome-oriented questions. → Identifies which formats support understanding and continued progress. → Drives learning-design priorities rather than popularity-led feature decisions.
+                        - listitem [ref=e595]:
+                          - strong [ref=e596]: "Adaptive learning, feedback, and progress visibility:"
+                          - text: Measure whether AI recommendations, personalized paths, real-time feedback, reminders, dashboards, and progress tracking are noticed, understood, trusted, and acted upon. → Separates feature awareness from genuine behavioral impact. → Drives improvements to personalization, feedback timing, transparency, and motivation loops.
+                        - listitem [ref=e597]:
+                          - strong [ref=e598]: "Social learning and gamification:"
+                          - text: Assess the role of peer interaction, instructor access, discussion, badges, streaks, points, challenges, and recognition. → Reveals which engagement mechanisms create meaningful learning momentum versus superficial activity. → Drives community and gamification design decisions.
+                        - listitem [ref=e599]:
+                          - strong [ref=e600]: "Reasons for inactivity and alternatives:"
+                          - text: Capture primary and secondary reasons for stopping or not starting, competing platforms or offline options used, and what would make the respondent return or try LearnSphere. → Reveals churn triggers, switching dynamics, and unmet expectations. → Drives retention, win-back, positioning, and acquisition strategy.
+                        - listitem [ref=e601]:
+                          - strong [ref=e602]: "Feature and improvement prioritization:"
+                          - text: If a defined list is supplied, use MaxDiff or a structured forced trade-off to prioritize improvements such as better content relevance, shorter lessons, stronger feedback, improved AI recommendations, peer interaction, certifications, or institutional tools. → Produces a relative priority hierarchy instead of inflated ratings across every feature. → Drives the next product-release roadmap.
+                      - heading "6. Survey Flow & Question Design Approach" [level=3] [ref=e603]
+                      - list [ref=e604]:
+                        - listitem [ref=e605]:
+                          - strong [ref=e606]: "Phase 1 — Warm-up and screening:"
+                          - text: Approximately 2-3 questions covering respondent role, LearnSphere familiarity, current or past usage, and recent learning activity. This establishes credibility before asking detailed evaluations.
+                        - listitem [ref=e607]:
+                          - strong [ref=e608]: "Phase 2 — Learning context and goals:"
+                          - text: Approximately 3-4 questions covering learning objective, course type, expected outcome, study frequency, and the role of parents, teachers, or administrators where relevant. This provides the context needed to interpret completion behavior.
+                        - listitem [ref=e609]:
+                          - strong [ref=e610]: "Phase 3 — Current experience and journey:"
+                          - text: Approximately 5-7 questions covering discovery, onboarding, course selection, content relevance, lesson experience, quizzes, learning plans, navigation, technical friction, and resuming interrupted learning. Current learners should answer the full path; former learners should be routed toward the point of drop-off.
+                        - listitem [ref=e611]:
+                          - strong [ref=e612]: "Phase 4 — Engagement and completion drivers:"
+                          - text: Approximately 5-7 questions covering motivation, progress visibility, feedback, adaptive learning, social learning, gamification, instructor support, workload, confidence, and perceived learning progress. Behavioral anchors should be used so respondents identify what actually happened rather than simply agreeing that a feature sounds useful.
+                        - listitem [ref=e613]:
+                          - strong [ref=e614]: "Phase 5 — Stakeholder-specific modules:"
+                          - list [ref=e615]:
+                            - listitem [ref=e616]:
+                              - strong [ref=e617]: "Potential users:"
+                              - text: Awareness, alternatives, expectations, perceived barriers, trust, and trial requirements.
+                            - listitem [ref=e618]:
+                              - strong [ref=e619]: "Parents or guardians:"
+                              - text: Influence on choice, trust, safety, value, payment, academic credibility, and evidence of learner progress.
+                            - listitem [ref=e620]:
+                              - strong [ref=e621]: "Teachers or administrators:"
+                              - text: Curriculum fit, monitoring, feedback, teacher workload, implementation requirements, data visibility, and institutional partnership needs.
+                        - listitem [ref=e622]:
+                          - strong [ref=e623]: "Phase 6 — Improvement priorities and close:"
+                          - text: Approximately 3-5 questions covering the single most important improvement, return or recommendation likelihood, open-ended reasons, and—if supplied—MaxDiff prioritization of candidate features. Close with an action-oriented improvement question rather than only a general satisfaction score.
+                        - listitem [ref=e624]:
+                          - strong [ref=e625]: "Question design principles:"
+                          - text: Use fully labelled 5-point unipolar scales where possible, avoid long agree/disagree grids, keep screens short for mobile completion, randomize non-ordered attribute lists, and use forced-choice or behavioral questions to validate positive claims.
+                        - listitem [ref=e626]:
+                          - strong [ref=e627]: "Estimated length:"
+                          - text: Approximately 18-25 questions for the main learner path, with shorter role-specific paths where possible. Target completion time is 8-12 minutes; modules should be cut rather than allowing the survey to become burdensome.
+                      - heading "7. Expected Insights & Business Decisions Enabled" [level=3] [ref=e628]
+                      - list [ref=e629]:
+                        - listitem [ref=e630]:
+                          - strong [ref=e631]: "You will be able to:"
+                          - text: Identify the strongest behavioral and experience-level predictors of course engagement and completion.
+                        - listitem [ref=e632]:
+                          - strong [ref=e633]: "You will be able to:"
+                          - text: Quantify where current learners experience friction across onboarding, course discovery, lessons, quizzes, progress tracking, feedback, and resuming unfinished learning.
+                        - listitem [ref=e634]:
+                          - strong [ref=e635]: "You will be able to:"
+                          - text: Diagnose why former or inactive learners stopped using LearnSphere and distinguish product friction from content, motivation, scheduling, trust, or competitive reasons.
+                        - listitem [ref=e636]:
+                          - strong [ref=e637]: "You will be able to:"
+                          - text: Compare the needs of current learners, former learners, potential users, parents or guardians, and educators without blending incompatible perspectives.
+                        - listitem [ref=e638]:
+                          - strong [ref=e639]: "You will be able to:"
+                          - text: Determine whether AI-powered learning tools, progress tracking, social learning, and gamification are noticed, trusted, valued, and linked to continued use.
+                        - listitem [ref=e640]:
+                          - strong [ref=e641]: "You will be able to:"
+                          - text: Build an evidence-based priority list for the next product release, using MaxDiff if a defined set of candidate improvements is supplied.
+                        - listitem [ref=e642]:
+                          - strong [ref=e643]: "You will be able to decide:"
+                          - text: Which learner-experience problems should receive priority to improve engagement and course completion.
+                        - listitem [ref=e644]:
+                          - strong [ref=e645]: "You will be able to decide:"
+                          - text: Whether the next release should focus more heavily on content relevance, learning design, feedback and progress visibility, adaptive learning, social features, gamification, or journey friction.
+                        - listitem [ref=e646]:
+                          - strong [ref=e647]: "You will be able to decide:"
+                          - text: Which inactive learners are realistically recoverable and what type of intervention could bring them back.
+                        - listitem [ref=e648]:
+                          - strong [ref=e649]: "You will be able to decide:"
+                          - text: What evidence and capabilities LearnSphere must strengthen before expanding into certifications or institutional partnerships.
+                        - listitem [ref=e650]:
+                          - strong [ref=e651]: "Key hypotheses being tested:"
+                          - list [ref=e652]:
+                            - listitem [ref=e653]: Learners who perceive course content as relevant to their goals are more likely to sustain usage and complete courses.
+                            - listitem [ref=e654]: Clear progress visibility and timely feedback reduce uncertainty and support continued learning.
+                            - listitem [ref=e655]: Adaptive learning tools improve engagement only when learners understand and trust the recommendations.
+                            - listitem [ref=e656]: Gamification and social learning influence completion differently across learner types and learning goals.
+                            - listitem [ref=e657]: Former learners are more likely to have stopped because of content, time, journey, or value barriers than because of a single isolated feature problem.
+                            - listitem [ref=e658]: Parents, teachers, and administrators evaluate LearnSphere using different success criteria from learners themselves.
+                            - listitem [ref=e659]: Potential users require clearer proof of learning outcomes, credibility, relevance, or ease of use before trying the platform.
+                        - listitem [ref=e660]:
+                          - strong [ref=e661]: "KPIs to report:"
+                          - text: Active-learning frequency, course-start-to-completion behavior, reported completion barriers, learner experience satisfaction, content relevance, ease of navigation, perceived learning progress, feedback usefulness, adaptive-tool usefulness and trust, social-learning value, gamification contribution, likelihood to continue, likelihood to return, likelihood to recommend, primary churn reasons, alternative-platform usage, and prioritized improvement utilities where MaxDiff is included.
+                        - listitem [ref=e662]:
+                          - strong [ref=e663]: "Reporting requirement:"
+                          - text: The final analysis should use role and lifecycle cuts—current, former, potential, parent or guardian, teacher, and administrator—and should identify which findings are common across groups versus specific to a particular stakeholder or learning stage.
+            - paragraph [ref=e667]: I've put together a Strategic Research Framework for LearnSphere — take a look above.
+          - generic [ref=e674]:
+            - paragraph [ref=e678]: Yes, generate the research brief
+            - generic [ref=e682]: U
+          - generic [ref=e687]:
+            - generic [ref=e689]:
+              - button "Routing being planned before the survey is built" [ref=e690] [cursor=pointer]:
+                - generic [ref=e694]: Routing being planned before the survey is built
+              - generic [ref=e697]:
+                - generic [ref=e698]:
+                  - img "done" [ref=e701]
+                  - generic [ref=e703]:
+                    - generic [ref=e705]: The research plan is being put together.
+                    - paragraph [ref=e710]: The target audience spec is being built — Hercules is defining who the research is for and what criteria will be used to reach the right respondents.
+                - generic [ref=e711]:
+                  - img "done" [ref=e714]
+                  - generic [ref=e716]:
+                    - generic [ref=e718]: Goals, audience, methodology — all in one place.
+                    - paragraph [ref=e723]: The brief has been partially built — but Hercules has flagged areas where more secondary context is needed, and is now searching for it before locking in the methodology.
+                - generic [ref=e724]:
+                  - img "done" [ref=e727]
+                  - generic [ref=e729]:
+                    - generic [ref=e731]: Goals to brief — the full construction.
+                    - paragraph [ref=e736]: Hercules is mapping the survey flow — laying out the sections, the order they'll appear, and the logic that will guide respondents through the study.
+                - generic [ref=e737]:
+                  - img "done" [ref=e740]
+                  - generic [ref=e742]:
+                    - generic [ref=e744]: The brief is being built before the survey is.
+                    - paragraph [ref=e749]: Hercules is defining the routing — mapping the conditional paths through the survey and establishing the logic that determines which questions each respondent group sees.
+            - generic [ref=e750]:
+              - paragraph [ref=e753]: Yes — I’ve converted the approved LearnSphere framework into a complete research brief. The study is designed to identify why learners disengage or fail to complete courses, while separating the needs of current learners, inactive learners, potential users, parents, teachers, and administrators. It combines learner-experience measurement, usage and attitude analysis, churn diagnosis, and feature-prioritization logic without introducing unsupported stimulus testing. Please review the brief below and let me know if you would like to adjust the audience, sample size, or methodology before the survey is generated.
+              - generic [ref=e755] [cursor=pointer]:
+                - generic [ref=e756]:
+                  - paragraph [ref=e758]: Version 1
+                  - generic [ref=e759]:
+                    - button "Share brief" [ref=e760]:
+                      - img "share" [ref=e761]
+                    - button "Download brief" [ref=e762]:
+                      - img "download" [ref=e763]
+                    - button "Copy brief" [ref=e764]:
+                      - img "copy" [ref=e765]
+                - generic [ref=e768]:
+                  - 'heading "Research Brief: LearnSphere Learner Engagement and Completion Study" [level=1] [ref=e769]'
+                  - heading "star icon Background & Context" [level=3] [ref=e770]:
+                    - generic [ref=e771]:
+                      - img "star icon" [ref=e772]
+                      - strong [ref=e774]: Background & Context
+                  - paragraph [ref=e775]: LearnSphere needs to understand why learners do not sustain engagement or complete courses, and which parts of the learning experience most influence continued progress. The research is triggered by l...
+                - img "toggle" [ref=e778]
+              - paragraph [ref=e781]: Please review the methodology and audience structure before moving to survey generation. You can still change the sample size, city mix, demographic splits, stakeholder quotas, or feature-prioritization module at this stage.
+          - generic [ref=e788]:
+            - paragraph [ref=e792]: Yes, create the survey.
+            - generic [ref=e796]: U
+          - generic [ref=e801]:
+            - generic [ref=e803]:
+              - button "Branches being mapped to question IDs" [ref=e804] [cursor=pointer]:
+                - generic [ref=e808]: Branches being mapped to question IDs
+              - generic [ref=e811]:
+                - generic [ref=e812]:
+                  - img "done" [ref=e815]
+                  - generic [ref=e817]:
+                    - generic [ref=e819]: Goals, audience, methodology — all in one place.
+                    - paragraph [ref=e824]: "The survey flow is being mapped — Hercules is establishing the structure of the study: which sections will appear, in what order, and how the logical sequence of the instrument will serve the research objectives."
+                - generic [ref=e825]:
+                  - img "done" [ref=e828]
+                  - generic [ref=e830]:
+                    - generic [ref=e832]: Everything the study will be held to — being defined right now.
+                    - paragraph [ref=e837]: Hercules is defining the routing architecture — mapping the branching paths, skip rules, and display conditions that will govern how different respondents move through the survey.
+                - generic [ref=e838]:
+                  - img "done" [ref=e841]
+                  - generic [ref=e843]:
+                    - generic [ref=e845]: Questions and routing — being built from the brief now.
+                    - paragraph [ref=e850]: Hercules is building the survey — writing questions from the brief, ordering them according to the flow, and calibrating them to the target respondent.
+                - generic [ref=e851]:
+                  - img "done" [ref=e854]
+                  - generic [ref=e856]:
+                    - generic [ref=e858]: Turning the brief into a live survey.
+                    - paragraph [ref=e863]: Hercules is wiring the routing logic to the live survey — translating abstract branching rules into concrete conditional logic tied to real question IDs.
+            - generic [ref=e864]:
+              - generic [ref=e866]:
+                - heading "Survey ready" [level=3] [ref=e867]
+                - paragraph [ref=e868]:
+                  - text: Your survey draft,
+                  - strong [ref=e869]: “Why Are Learners Leaving LearnSphere?”
+                  - text: ", is ready with"
+                  - strong [ref=e870]: 25 respondent-facing questions
+                  - text: . It follows the approved linear structure and is designed to distinguish the experiences of current, inactive, potential, parent, teacher, and administrator audiences where relevant.
+                - heading "Research strategy" [level=3] [ref=e871]
+                - paragraph [ref=e872]:
+                  - text: This is a
+                  - strong [ref=e873]: mixed-methodology, multi-objective study
+                  - text: combining usage and attitude research, learner experience measurement, churn/exit diagnosis, competitive evaluation, and feature prioritization. The findings will help LearnSphere determine which learner-experience, content, motivation, feedback, technology, and journey issues to address first to increase sustained engagement, course completion, return usage, and recommendations—and identify which inactive learners may be recoverable.
+                - heading "Survey structure" [level=3] [ref=e874]
+                - paragraph [ref=e875]:
+                  - text: "Respondents move through six ordered sections:"
+                  - strong [ref=e876]: Hook, Warm-Up & Screening; Usage & Behavior; Attitude & Motivation; CX/Satisfaction; Competitive; and Future Intent/Close
+                  - text: . The flow starts with recent behavior and last-active-stage reconstruction, then explores friction and motivations before measuring satisfaction, competitive perceptions, win-back opportunities, and priorities for improvement. It closes with future intent and an open-ended improvement question.
+                - heading "Routing & logic" [level=3] [ref=e877]
+                - paragraph [ref=e878]:
+                  - text: Smart branching and screening logic has been built in, with
+                  - strong [ref=e879]: 6 routing rules
+                  - text: covering branching, skip logic, and screening gates.
+                  - strong [ref=e880]: 2 dynamic carry-forward filters
+                  - text: also tailor follow-up questions based on respondents’ earlier answers.
+                - heading "Invitation to review" [level=3] [ref=e881]
+                - paragraph [ref=e882]: Please review the draft and let me know if you’d like to adjust the audience definitions, wording, response options, routing, or emphasis on any research goal before fielding.
+              - generic [ref=e884]:
+                - generic [ref=e886] [cursor=pointer]:
+                  - generic [ref=e887]:
+                    - paragraph [ref=e888]: Your Research Study is in progress
+                    - button "pause" [ref=e889]:
+                      - img "pause" [ref=e890]
+                  - generic [ref=e891]:
+                    - text: You will be notified when all responses are collected
+                    - generic [ref=e892]:
+                      - generic [ref=e893]: "Completion: 0%"
+                      - generic [ref=e894]: "Responses Collected: 0 / 100"
+                    - generic [ref=e897]:
+                      - paragraph [ref=e898]: "Estimated Timeline Completion: 1 day left"
+                      - button "View Responses" [ref=e899]:
+                        - img [ref=e900]
+                        - generic [ref=e902]: View Responses
+                - generic [ref=e903]:
+                  - generic [ref=e904] [cursor=pointer]:
+                    - text: View Audience
+                    - img [ref=e907]
+                  - generic [ref=e909] [cursor=pointer]:
+                    - text: View Responses
+                    - img [ref=e912]
+                  - generic [ref=e914] [cursor=pointer]:
+                    - text: View Survey
+                    - img [ref=e917]
+              - generic [ref=e921]: AI Content Review Complete
+          - generic [ref=e923]:
+            - generic [ref=e924]: Share this Survey with friends
+            - generic [ref=e925]: Invite participants to answer this survey and collect their feedback in real-time.
+            - generic [ref=e926]:
+              - generic [ref=e927] [cursor=pointer]:
+                - generic [ref=e928]: https://superj.app/survey/6a7edd0215203e92a622fda8
+                - img "copy" [ref=e930]
+              - generic [ref=e932] [cursor=pointer]:
+                - img [ref=e933]
+                - text: Share
+        - generic [ref=e940]:
+          - generic [ref=e943]:
+            - generic [ref=e945]: All India General PopulationAudience set has been applied to this campaign
+            - img "close" [ref=e946] [cursor=pointer]
+          - generic [ref=e949]:
+            - textbox "Ask Hercules a question" [disabled] [ref=e951]:
+              - /placeholder: Ask Hercules...
+            - generic [ref=e952]:
+              - button "upload button" [disabled] [ref=e954] [cursor=pointer]:
+                - img [ref=e956]
+              - generic [ref=e961]:
+                - button "submit button":
+                  - generic:
+                    - img
+  - contentinfo "Site index" [ref=e962]:
+    - navigation [ref=e963]:
+      - link "Home" [ref=e964] [cursor=pointer]:
+        - /url: /
+      - link "Hercules AI" [ref=e965] [cursor=pointer]:
+        - /url: /ai
+      - link "Pricing" [ref=e966] [cursor=pointer]:
+        - /url: /pricing
+      - link "About" [ref=e967] [cursor=pointer]:
+        - /url: /about
+      - link "Research Case Studies" [ref=e968] [cursor=pointer]:
+        - /url: /research
+      - link "Blog" [ref=e969] [cursor=pointer]:
+        - /url: /blog
+      - link "Alternatives" [ref=e970] [cursor=pointer]:
+        - /url: /alternatives
+      - link "Market Research India" [ref=e971] [cursor=pointer]:
+        - /url: /solutions/india
+      - link "Help" [ref=e972] [cursor=pointer]:
+        - /url: /help
+      - link "About Hercules" [ref=e973] [cursor=pointer]:
+        - /url: /help/abouthercules
+      - link "About Superj" [ref=e974] [cursor=pointer]:
+        - /url: /help/aboutsuperj
+      - link "Account Management" [ref=e975] [cursor=pointer]:
+        - /url: /help/accountsmanagement
+      - link "Credit Pricing" [ref=e976] [cursor=pointer]:
+        - /url: /help/creditspricing
+      - link "FAQ" [ref=e977] [cursor=pointer]:
+        - /url: /help/faq
+      - link "Privacy Policy" [ref=e978] [cursor=pointer]:
+        - /url: /privacy
+      - link "Terms of Service" [ref=e979] [cursor=pointer]:
+        - /url: /terms
+      - link "Amul Case Study" [ref=e980] [cursor=pointer]:
+        - /url: /research/amul
+      - link "ICICI Prudential Case Study" [ref=e981] [cursor=pointer]:
+        - /url: /research/icici
+      - link "SBI Case Study" [ref=e982] [cursor=pointer]:
+        - /url: /research/sbi
+      - link "Greenply Case Study" [ref=e983] [cursor=pointer]:
+        - /url: /research/greenply
+      - link "Kotak Case Study" [ref=e984] [cursor=pointer]:
+        - /url: /research/kotak
+      - link "Imperial Blue Case Study" [ref=e985] [cursor=pointer]:
+        - /url: /research/imperial-blue
+      - link "SurveyMonkey Alternative" [ref=e986] [cursor=pointer]:
+        - /url: /alternatives/surveymonkey
+      - link "Kantar Alternative" [ref=e987] [cursor=pointer]:
+        - /url: /alternatives/kantar
+      - link "Nielsen Alternative" [ref=e988] [cursor=pointer]:
+        - /url: /alternatives/nielsen
+      - link "Typeform Alternative" [ref=e989] [cursor=pointer]:
+        - /url: /alternatives/typeform
+      - link "Google Forms Alternative" [ref=e990] [cursor=pointer]:
+        - /url: /alternatives/google-forms
+      - link "Qualtrics Alternative" [ref=e991] [cursor=pointer]:
+        - /url: /alternatives/qualtrics
+      - link "Medallia Alternative" [ref=e992] [cursor=pointer]:
+        - /url: /alternatives/medallia
+      - link "Zoho Survey Alternative" [ref=e993] [cursor=pointer]:
+        - /url: /alternatives/zoho-survey
+      - link "Microsoft Forms Alternative" [ref=e994] [cursor=pointer]:
+        - /url: /alternatives/microsoft-forms
+      - link "Pollfish Alternative" [ref=e995] [cursor=pointer]:
+        - /url: /alternatives/pollfish
+      - link "Market Research Mumbai" [ref=e996] [cursor=pointer]:
+        - /url: /solutions/mumbai
+      - link "Market Research Delhi" [ref=e997] [cursor=pointer]:
+        - /url: /solutions/delhi
+      - link "Market Research Hyderabad" [ref=e998] [cursor=pointer]:
+        - /url: /solutions/hyderabad
+      - link "Market Research Pune" [ref=e999] [cursor=pointer]:
+        - /url: /solutions/pune
+      - link "Market Research Chennai" [ref=e1000] [cursor=pointer]:
+        - /url: /solutions/chennai
+      - link "Market Research Bangalore" [ref=e1001] [cursor=pointer]:
+        - /url: /solutions/bangalore
+      - link "Market Research Kolkata" [ref=e1002] [cursor=pointer]:
+        - /url: /solutions/kolkata
+      - link "FMCG Market Research India" [ref=e1003] [cursor=pointer]:
+        - /url: /solutions/fmcg
+      - link "BFSI Consumer Research" [ref=e1004] [cursor=pointer]:
+        - /url: /solutions/bfsi
+      - link "Market Research for Startups" [ref=e1005] [cursor=pointer]:
+        - /url: /solutions/startups
+      - link "Pharma Market Research India" [ref=e1006] [cursor=pointer]:
+        - /url: /solutions/pharma
+      - link "E-commerce Consumer Research" [ref=e1007] [cursor=pointer]:
+        - /url: /solutions/ecommerce
+      - link "Poseidon AI Research" [ref=e1008] [cursor=pointer]:
+        - /url: /poseidon
+      - link "Product Concept Testing India" [ref=e1009] [cursor=pointer]:
+        - /url: /use-cases/product-testing
+      - link "Brand Tracking Surveys India" [ref=e1010] [cursor=pointer]:
+        - /url: /use-cases/brand-tracking
+      - link "Customer Satisfaction Surveys India" [ref=e1011] [cursor=pointer]:
+        - /url: /use-cases/customer-satisfaction
+      - link "Ad Testing India" [ref=e1012] [cursor=pointer]:
+        - /url: /use-cases/ad-testing
+      - link "Employee Satisfaction Surveys India" [ref=e1013] [cursor=pointer]:
+        - /url: /use-cases/employee-surveys
+      - link "Political Polling India" [ref=e1014] [cursor=pointer]:
+        - /url: /use-cases/political-polling
+      - link "Academic Research Surveys India" [ref=e1015] [cursor=pointer]:
+        - /url: /use-cases/academic-research
+      - link "How to Improve Data Collection with Online Surveys" [ref=e1016] [cursor=pointer]:
+        - /url: /blog/how-to-improve-your-data-collection-strategy-with-online-surveys
+      - link "Data-Backed Decision Making for Business Growth Guide" [ref=e1017] [cursor=pointer]:
+        - /url: /blog/how-to-use-data-backed-decision-making-for-business-growth
+      - link "Top 10 Survey Tools for Market Research in 2026" [ref=e1018] [cursor=pointer]:
+        - /url: /blog/top-10-survey-tools-for-market-research-in-2026
+      - link "Complete Guide to Effective Customer Feedback Surveys" [ref=e1019] [cursor=pointer]:
+        - /url: /blog/a-complete-guide-to-conducting-effective-customer-feedback-surveys
+      - 'link "AI in Employee Surveys: Better HR Insights in 2026" [ref=e1020] [cursor=pointer]':
+        - /url: /blog/leveraging-ai-in-employee-surveys-for-better-hr-insights
+      - link "Best AI-Powered Survey Generators for 2026 [Full List]" [ref=e1021] [cursor=pointer]:
+        - /url: /blog/list-of-the-best-ai-powered-survey-generators-for-2026
+      - 'link "Survey Analytics: Tips for Better Data Interpretation" [ref=e1022] [cursor=pointer]':
+        - /url: /blog/understanding-survey-analytics-tips-for-better-data-interpretation
+      - 'link "Future of Market Research: Key Trends to Watch in 2026" [ref=e1023] [cursor=pointer]':
+        - /url: /blog/the-future-of-market-research-trends-to-watch-in-2026
+      - 'link "Designing High-Impact Customer Surveys: Step-by-Step" [ref=e1024] [cursor=pointer]':
+        - /url: /blog/step-by-step-guide-to-designing-high-impact-customer-surveys
+      - link "How to Use Data to Drive Strategic Business Decisions" [ref=e1025] [cursor=pointer]:
+        - /url: /blog/how-to-use-data-to-drive-strategic-business-decisions
+      - 'link "Hercules: The Ultimate Research Assistant for Data-Driven Teams" [ref=e1026] [cursor=pointer]':
+        - /url: /blog/hercules-the-ultimate-research-assistant-for-data-driven-teams
+      - 'link "Compare Top Survey Platforms: Features, Pricing, and Usability" [ref=e1027] [cursor=pointer]':
+        - /url: /blog/compare-top-survey-platforms-features-pricing-and-usability
+      - link "Best Practices for Choosing a Market Research Tool" [ref=e1028] [cursor=pointer]:
+        - /url: /blog/best-practices-for-choosing-a-market-research-tool
+      - link "Why Your Business Needs an AI-Driven Survey Builder" [ref=e1029] [cursor=pointer]:
+        - /url: /blog/why-your-business-needs-an-ai-driven-survey-builder
+      - link "Top Features to Look for in a Customer Feedback Platform" [ref=e1030] [cursor=pointer]:
+        - /url: /blog/top-features-to-look-for-in-a-customer-feedback-platform
+      - link "Maximize Your Survey Outcomes with Hercules Works Solutions" [ref=e1031] [cursor=pointer]:
+        - /url: /blog/maximize-your-survey-outcomes-with-hercules-works-solutions
+      - link "How Hercules Enhances Data Accuracy and Insights" [ref=e1032] [cursor=pointer]:
+        - /url: /blog/how-hercules-enhances-data-accuracy-and-insights
+      - link "Transform Your Business with the Leading Data Analytics Platform" [ref=e1033] [cursor=pointer]:
+        - /url: /blog/transform-your-business-with-the-leading-data-analytics-platform
+      - 'link "Hercules vs. Competitors: Which Survey Tool Is Best for Your Business?" [ref=e1034] [cursor=pointer]':
+        - /url: /blog/hercules-vs-competitors-which-survey-tool-is-best-for-your-business
+      - link "Unlock Actionable Insights with Hercules Advanced Survey Analytics" [ref=e1035] [cursor=pointer]:
+        - /url: /blog/unlock-actionable-insights-with-hercules-advanced-survey-analytics
+  - alert [ref=e1036]
+```
+
+# Test source
+
+```ts
+  304 |     }
+  305 | 
+  306 |         console.log('Waiting 2 seconds before opening in new tab...');
+  307 |         await page.waitForTimeout(2000);
+  308 | 
+  309 |         console.log('Opening live survey in a fresh Super J context for the consumer...');
+  310 |     const superjContext = await browser.newContext();
+  311 |     const livePage = await superjContext.newPage();
+  312 |     livePage.setDefaultTimeout(300000); // 5 minutes global timeout for this page
+  313 |     await livePage.goto(liveSurveyUrl);
+  314 |     
+  315 |     console.log('Forcing Super J Login, Onboarding, and Survey interactions...');
+  316 |     
+  317 |     try {
+  318 |         console.log('[Test] Attempting Login for fresh consumer...');
+  319 |         const LoginPage = require('../pages/LoginPage');
+  320 |         const DataGeneratorUtil = require('../utils/DataGeneratorUtil');
+  321 |         
+  322 |         const loginPage = new LoginPage(livePage);
+  323 |         const randomPhone = process.env.TEST_PHONE || DataGeneratorUtil.generateRandomPhoneNumber();
+  324 |         console.log(`[Test] Using phone number: ${randomPhone}`);
+  325 |         await loginPage.login(randomPhone, '777777');
+  326 |         
+  327 |         // Wait for redirect after login
+  328 |         console.log('[Test] Waiting 15 seconds for post-OTP redirect...');
+  329 |         await livePage.waitForTimeout(15000);
+  330 |     } catch (e) {
+  331 |         console.log('[Test] Login failed or skipped:', e.message);
+  332 |     }
+  333 | 
+  334 |     try {
+  335 |         console.log('[Test] Attempting Onboarding...');
+  336 |         const OnboardingUtil = require('../utils/OnboardingUtil');
+  337 |         const onboardingUtil = new OnboardingUtil(livePage);
+  338 |         await onboardingUtil.completeOnboarding('1997', targetCity, 'Male');
+  339 |         
+  340 |         console.log('[Test] Waiting 5 seconds for post-onboarding redirect...');
+  341 |         await livePage.waitForTimeout(5000);
+  342 |         
+  343 |         console.log(`[Test] Force-redirecting back to survey URL to bypass redirect bug: ${liveSurveyUrl}`);
+  344 |         await livePage.goto(liveSurveyUrl);
+  345 |         await livePage.waitForTimeout(5000);
+  346 |     } catch (e) {
+  347 |         console.log('[Test] Onboarding failed or skipped:', e.message);
+  348 |     }
+  349 | 
+  350 |     try {
+  351 |         console.log('[Test] Attempting to click Start Survey...');
+  352 |         const LandingPage = require('../pages/LandingPage');
+  353 |         const landingPage = new LandingPage(livePage);
+  354 |         await landingPage.clickStartSurvey(2);
+  355 |     } catch (e) {
+  356 |         console.log('[Test] Click Start Survey failed:', e.message);
+  357 |     }
+  358 |     
+  359 |     console.log('Answering survey using SurveyEngine...');
+  360 |     const SurveyEngine = require('../utils/SurveyEngine');
+  361 |     const surveyEngine = new SurveyEngine(livePage, { surveyLogics });
+  362 |     const result = await surveyEngine.run();
+  363 |     console.log(`Survey Engine finished with result: ${JSON.stringify(result)}`);
+  364 | 
+  365 |     console.log('[Test] Waiting 10 seconds for the survey completion network request to save to backend before closing browser...');
+  366 |     await livePage.waitForTimeout(10000);
+  367 | 
+  368 |     console.log('[Test] Closing consumer context to free memory before verifying B2B dashboard...');
+  369 |     await superjContext.close().catch(() => {});
+  370 | 
+  371 |     await test.step('Verify Response Count in B2B Dashboard', async () => {
+  372 |         console.log('\n--- VERIFYING RESPONSE COUNT IN B2B HERCULES ---');
+  373 |         await page.bringToFront();
+  374 |         
+  375 |         // Wait 10 seconds first for the backend DB to sync
+  376 |         console.log('Waiting 10 seconds for backend database to update...');
+  377 |         await page.waitForTimeout(10000);
+  378 |         
+  379 |         console.log('Reloading Hercules B2B page to fetch updated response count...');
+  380 |         await page.reload();
+  381 |         await page.waitForLoadState('networkidle');
+  382 |         await page.waitForTimeout(5000); // Wait for data to load
+  383 |         
+  384 |         const responsesLabel = page.locator("//span[contains(text(), 'Responses Collected:')] | //p[contains(text(), 'Responses Collected:')] | //div[contains(text(), 'Responses Collected:')]").first();
+  385 |         await responsesLabel.scrollIntoViewIfNeeded().catch(() => {});
+  386 |         
+  387 |         if (await responsesLabel.isVisible().catch(()=>false)) {
+  388 |             const labelText = await responsesLabel.innerText().catch(() => "");
+  389 |             
+  390 |             const countLocator = page.locator("//span[contains(text(), 'Responses Collected:')]/following-sibling::*").first()
+  391 |                 .or(page.locator("//span[contains(text(), 'Responses Collected:')]/.."))
+  392 |                 .first();
+  393 |             const countText = await countLocator.innerText().catch(() => "");
+  394 |             
+  395 |             console.log(`Responses Collected Label: "${labelText}", Count: "${countText}"`);
+  396 |             
+  397 |             // Extract the first number from the countText (excluding title prefix)
+  398 |             const firstNumMatch = countText.replace(/Responses Collected:/i, '').match(/\d+/);
+  399 |             const firstNum = firstNumMatch ? parseInt(firstNumMatch[0], 10) : 0;
+  400 |             
+  401 |             if (firstNum > 0) {
+  402 |                 console.log(`SUCCESS: Verified that the response count has successfully reflected on Hercules B2B! (Count: ${firstNum})`);
+  403 |             } else {
+> 404 |                 throw new Error(`FAILURE: Response count is 0! The survey response was not recorded by the backend. Found text: ${countText}`);
+      |                       ^ Error: FAILURE: Response count is 0! The survey response was not recorded by the backend. Found text: Responses Collected: 0 / 100
+  405 |             }
+  406 |         } else {
+  407 |             throw new Error('FAILURE: "Responses Collected:" label not found on the active page.');
+  408 |         }
+  409 |         
+  410 |         // Capture screenshot of Hercules B2B after reload
+  411 |         await page.screenshot({ path: 'scratch/b2b_after_responses.png', fullPage: true });
+  412 |     });
+  413 | });
+  414 | 
+```

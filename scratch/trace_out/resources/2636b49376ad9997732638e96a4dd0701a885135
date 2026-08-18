@@ -1,0 +1,784 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: DeploySurvey_Free100Users.spec.js >> Deploy survey to 100 Users for Free
+- Location: tests/DeploySurvey_Free100Users.spec.js:152:1
+
+# Error details
+
+```
+Error: FAILURE: Response count is 0! The survey response was not recorded by the backend. Found text: Responses Collected: 0 / 100
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e4]:
+    - generic [ref=e8]:
+      - generic [ref=e9]:
+        - img "Warning" [ref=e10]
+        - generic [ref=e11]: "Approaching Monthly Limit:"
+        - text: You've used 100 of 100 free responses this month.
+        - button "Upgrade Plan" [ref=e12] [cursor=pointer]
+        - text: to access 20 million verified users.
+      - button "Dismiss" [ref=e13] [cursor=pointer]:
+        - img "close" [ref=e14]
+    - main [ref=e16]:
+      - generic [ref=e18]:
+        - generic [ref=e19]:
+          - img "hercules-logo" [ref=e23] [cursor=pointer]
+          - generic [ref=e26]:
+            - button "Open sidebar" [ref=e27] [cursor=pointer]:
+              - img [ref=e28]
+            - generic: Open sidebar
+          - generic [ref=e31]:
+            - generic [ref=e32]:
+              - generic: New campaign
+              - button "New Campaign" [ref=e33] [cursor=pointer]:
+                - img [ref=e35]
+                - generic: New Campaign
+            - generic [ref=e38]:
+              - generic [ref=e39]:
+                - link "All campaigns All Campaigns" [ref=e40] [cursor=pointer]:
+                  - /url: /ai/chat/campaign-history
+                  - button [ref=e41]:
+                    - img [ref=e42]
+                  - generic: All campaigns
+                  - generic: All Campaigns
+                - link "Templates Research Templates" [ref=e49] [cursor=pointer]:
+                  - /url: /ai/chat/survey-presets?activeTab=templates
+                  - button [ref=e50]:
+                    - img [ref=e51]
+                  - generic: Templates
+                  - generic: Research Templates
+              - generic [ref=e55] [cursor=pointer]:
+                - button [ref=e56]:
+                  - img [ref=e57]
+                - generic: Recent campaigns
+                - generic:
+                  - text: Recents
+                  - img "arrow" [ref=e66]
+        - generic [ref=e70]:
+          - button "Share" [ref=e71] [cursor=pointer]
+          - button "U" [ref=e78] [cursor=pointer]:
+            - generic [ref=e80]: U
+      - generic [ref=e84]:
+        - generic [ref=e88]:
+          - generic [ref=e95]:
+            - paragraph [ref=e99]: Create a short survey about remote work preferences to identify pain points among new parents.
+            - generic [ref=e103]: U
+          - generic [ref=e108]:
+            - generic [ref=e110]:
+              - button "Reading what's been shared in full before proceeding" [ref=e111] [cursor=pointer]:
+                - generic [ref=e115]: Reading what's been shared in full before proceeding
+              - generic [ref=e119]:
+                - img "done" [ref=e122]
+                - generic [ref=e124]:
+                  - generic [ref=e126]: Building the why before the what.
+                  - paragraph [ref=e131]: All inputs are being read and categorised — Hercules is building a clear picture of your goals, constraints, and category context before the framework is constructed.
+            - paragraph [ref=e135]: Remote work preferences among new parents is a clear topic. I have a few targeted questions so the research focuses on the right pain points and decisions.
+          - generic [ref=e141]:
+            - generic [ref=e142]:
+              - heading "1. What is the main purpose of this survey? For example, improving workplace policy, designing employee benefits, planning office attendance, or understanding general work preferences." [level=2] [ref=e143]
+              - paragraph [ref=e144]: Design better support for working parents
+            - generic [ref=e145]:
+              - heading "2. Who should answer the survey? Select all that apply." [level=2] [ref=e146]
+              - paragraph [ref=e147]: New parents currently working remotely, New parents working in a hybrid model, New parents working mainly from an office, Expecting parents or parents planning leave
+            - generic [ref=e148]:
+              - heading "3. How should we define “new parents” for this study?" [level=2] [ref=e149]
+              - paragraph [ref=e150]: Expecting parents and parents of young children
+            - generic [ref=e151]:
+              - heading "4. Which pain points should the survey explore? Select all that apply." [level=2] [ref=e152]
+              - paragraph [ref=e153]: Childcare and interruptions, Work-life boundaries and working hours, Productivity and concentration, Manager or team expectations, Career growth and visibility, Technology, workspace, or connectivity
+            - generic [ref=e154]:
+              - heading "5. What is the single most important decision the findings should support?" [level=2] [ref=e155]
+              - paragraph [ref=e156]: Prioritize employer support or policy changes
+            - generic [ref=e157]:
+              - heading "6. What is your preferred timeline for this short survey?" [level=2] [ref=e158]
+              - paragraph [ref=e159]: Within 1-2 weeks
+          - generic [ref=e164]:
+            - generic [ref=e166]:
+              - button "Hypotheses and constructs — being formalised" [ref=e167] [cursor=pointer]:
+                - generic [ref=e171]: Hypotheses and constructs — being formalised
+              - generic [ref=e174]:
+                - generic [ref=e175]:
+                  - img "done" [ref=e178]
+                  - generic [ref=e180]:
+                    - generic [ref=e182]: The logic of the research — being defined now.
+                    - paragraph [ref=e187]: Hercules is taking in the full picture — everything you've shared is being read and organised into a coherent starting point for the research framework.
+                - generic [ref=e188]:
+                  - img "done" [ref=e191]
+                  - generic [ref=e193]:
+                    - generic [ref=e195]: What does this research actually need to prove?
+                    - paragraph [ref=e200]: "The framework generation step is active — Hercules is building the structural logic of your research: which constructs map to which goals, which hypotheses follow from them, and how the study should be sequenced."
+                - generic [ref=e201]:
+                  - img "done" [ref=e204]
+                  - generic [ref=e206]:
+                    - generic [ref=e208]: Strategic Research Framework
+                    - generic [ref=e213]:
+                      - heading "Core Objective & Business Context" [level=3] [ref=e214]
+                      - paragraph [ref=e215]: This study will identify the most important workplace pain points experienced by expecting parents and parents of young children across remote, hybrid, and office-based work arrangements. The goal is to translate those pain points into clear priorities for employer support, workplace policies, manager practices, and benefits.
+                      - paragraph [ref=e216]: The timing is important because employers are balancing return-to-office expectations with employee demands for flexibility, while parents are managing childcare, interruptions, work-hour boundaries, performance visibility, and career progression. The research must distinguish between problems caused by the work location itself and problems caused by inflexible norms, poor manager support, or insufficient benefits.
+                      - paragraph [ref=e217]: Knowing the answers will help employers decide which interventions to prioritise first, such as flexible hours, predictable meeting norms, childcare support, manager training, phased return-to-work policies, equipment support, or career-protection measures.
+                      - heading "Secondary Research Snapshot" [level=3] [ref=e218]
+                      - list [ref=e219]:
+                        - listitem [ref=e220]:
+                          - paragraph [ref=e221]:
+                            - strong [ref=e222]: Hybrid work is currently preferred by many Indian employees, but actual working patterns lag behind preference.
+                            - text: ACCA’s India Talent Trends 2026 reports that 79% of respondents prefer hybrid work, while 53% are already working in a hybrid model. This supports comparing preferred and current arrangements rather than measuring preference alone. (
+                            - link "dev.accaglobal.com" [ref=e223] [cursor=pointer]:
+                              - /url: https://www.dev.accaglobal.com/content/dam/ACCA_Global/professional-insights/GTT-2026/gtt-india-2026-final.pdf
+                            - text: )
+                        - listitem [ref=e224]:
+                          - paragraph [ref=e225]:
+                            - strong [ref=e226]: Flexibility is linked to more than location.
+                            - text: ACCA’s India Talent Trends 2025 found that work-life balance, commuting time and cost, and schedule flexibility were key perceived benefits of working from home. The survey should therefore measure control over working hours and predictability, not just remote versus office status. (
+                            - link "accaglobal.com" [ref=e227] [cursor=pointer]:
+                              - /url: http://www.accaglobal.com/content/dam/ACCA_Global/professional-insights/Global-talent-trends-2025/PI-GTT-2025-INDIA%20v4.pdf
+                            - text: )
+                        - listitem [ref=e228]:
+                          - paragraph [ref=e229]:
+                            - strong [ref=e230]: Office attendance does not resolve the broader employee experience.
+                            - text: JLL’s 2025 India workplace research highlights that employees increasingly expect employers to address well-being, purpose, and personal circumstances alongside physical workplace quality. This supports testing policy and manager behaviours as separate support levers. (
+                            - link "jll.com" [ref=e231] [cursor=pointer]:
+                              - /url: https://www.jll.com/en-in/insights/beyond-mandates-the-future-of-work-in-india
+                            - text: ","
+                            - link "jll.com" [ref=e232] [cursor=pointer]:
+                              - /url: https://www.jll.com/en-sa/insights/workforce-preference-barometer
+                            - text: )
+                        - listitem [ref=e233]:
+                          - paragraph [ref=e234]:
+                            - strong [ref=e235]: Care work is a significant structural issue in India.
+                            - text: UNDP reports that unpaid care and domestic work in India represent an estimated 15%–17% of GDP, while women continue to carry a disproportionate share of unpaid care work. The questionnaire should allow analysis by parent gender without assuming that all parents experience care responsibilities in the same way. (
+                            - link "undp.org" [ref=e236] [cursor=pointer]:
+                              - /url: https://www.undp.org/sites/g/files/zskgke326/files/2024-12/undp_brochure_care_project.pdf
+                            - text: ","
+                            - link "undp.org" [ref=e237] [cursor=pointer]:
+                              - /url: https://www.undp.org/india/blog/who-cares-making-care-everyones-work
+                            - text: )
+                        - listitem [ref=e238]:
+                          - paragraph [ref=e239]:
+                            - strong [ref=e240]: The key research gap is parent-specific evidence.
+                            - text: Existing workplace studies generally report overall employee preferences. This study should identify which workplace barriers are uniquely severe for expecting parents and parents of young children, and which employer actions are perceived as practical and credible by this audience.
+                      - heading "Research Type & Methodology" [level=3] [ref=e241]
+                      - list [ref=e242]:
+                        - listitem [ref=e243]:
+                          - paragraph [ref=e244]:
+                            - strong [ref=e245]: "Study type:"
+                            - text: Employee / Internal Research combined with Usage & Attitude and policy-prioritisation research.
+                        - listitem [ref=e246]:
+                          - paragraph [ref=e247]:
+                            - strong [ref=e248]: "Stimulus count:"
+                            - text: Zero discrete stimuli. The study is not evaluating products, advertisements, concepts, packages, or variants. Cell-based designs such as monadic, A/B, paired comparison, and sequential monadic testing do not apply.
+                        - listitem [ref=e249]:
+                          - paragraph [ref=e250]:
+                            - strong [ref=e251]: "Research design:"
+                            - text: Linear structured questionnaire using a modular funnel. The survey will move from current work arrangement and recent experiences to pain points, support needs, policy priorities, and recommended actions.
+                        - listitem [ref=e252]:
+                          - paragraph [ref=e253]:
+                            - strong [ref=e254]: "Why this approach:"
+                            - text: The business decision is about prioritising employer support, not selecting a winning creative or product option. A descriptive design will capture the lived experience of parents across remote, hybrid, and office-based settings while enabling meaningful subgroup comparisons by parent status, work model, and caregiving situation.
+                        - listitem [ref=e255]:
+                          - paragraph [ref=e256]:
+                            - strong [ref=e257]: "Alternatives considered:"
+                          - list [ref=e258]:
+                            - listitem [ref=e259]:
+                              - strong [ref=e260]: "Qualitative interviews:"
+                              - text: Useful for deeper personal stories, but less suitable as the first step when the organisation needs a prioritised view across several work arrangements.
+                            - listitem [ref=e261]:
+                              - strong [ref=e262]: "MaxDiff prioritisation:"
+                              - text: Could rank a predefined list of policies, but would be premature before understanding the full range of pain points and whether the policy list reflects respondents’ real needs.
+                            - listitem [ref=e263]:
+                              - strong [ref=e264]: "Conjoint or choice-based modelling:"
+                              - text: Not chosen because the immediate decision is to diagnose problems and prioritise support areas, not model trade-offs between fully specified policy packages.
+                        - listitem [ref=e265]:
+                          - paragraph [ref=e266]:
+                            - strong [ref=e267]: "User control:"
+                            - text: If you prefer a different methodology, such as adding qualitative interviews or a follow-up policy prioritisation exercise, it can be changed before the research brief is generated.
+                        - listitem [ref=e268]:
+                          - paragraph [ref=e269]:
+                            - strong [ref=e270]: "Survey design logic:"
+                            - text: Current behaviour will come before attitudes and policy preferences. The questionnaire will separate current work arrangement from preferred arrangement, ask about concrete recent situations before general satisfaction, and distinguish personal pain points from employer or manager-level causes. Parent groups will be compared without forcing a single definition of the “typical” new parent.
+                        - listitem [ref=e271]:
+                          - paragraph [ref=e272]:
+                            - strong [ref=e273]: "Quality controls:"
+                            - text: Include platform-compliant attention checks, speeder detection, straight-line response checks, duplicate or inconsistent answer screening, and open-ended gibberish review. Use short screens, fully labelled response scales, and minimal grids for SuperJ mobile and web respondents.
+                      - heading "Target Audience Profile" [level=3] [ref=e274]
+                      - list [ref=e275]:
+                        - listitem [ref=e276]:
+                          - paragraph [ref=e277]:
+                            - strong [ref=e278]: "Who we are asking:"
+                            - text: Indian adults who are expecting a child, planning parental leave, or parenting a young child while currently working remotely, in a hybrid model, or mainly from an office.
+                        - listitem [ref=e279]:
+                          - paragraph [ref=e280]:
+                            - strong [ref=e281]: "Why they matter:"
+                            - text: These respondents are directly experiencing the interaction between caregiving demands and workplace expectations. Their answers can reveal whether flexibility is genuinely usable, whether managers respond constructively to interruptions, and whether workplace policies protect productivity, well-being, and career progression.
+                        - listitem [ref=e282]:
+                          - paragraph [ref=e283]:
+                            - strong [ref=e284]: "Must-have screening criteria:"
+                          - list [ref=e285]:
+                            - listitem [ref=e286]: Currently employed or actively working in a paid role.
+                            - listitem [ref=e287]: Expecting a child, planning parental leave, or caring for at least one young child.
+                            - listitem [ref=e288]: Currently working remotely, in a hybrid model, or mainly from an office.
+                            - listitem [ref=e289]: Able to describe their recent work and caregiving experience.
+                            - listitem [ref=e290]: Capture whether the respondent is the primary caregiver, shares caregiving, or has another regular caregiving arrangement.
+                        - listitem [ref=e291]:
+                          - paragraph [ref=e292]:
+                            - strong [ref=e293]: "Important subgroup cuts:"
+                            - text: Work arrangement, expecting parent versus parent of a young child, parent gender, primary versus shared caregiving responsibility, access to paid or family childcare, work seniority, and whether the employer currently offers formal support.
+                        - listitem [ref=e294]:
+                          - paragraph [ref=e295]:
+                            - strong [ref=e296]: "Fielding context:"
+                            - text: Respondents will be reached through verified Indian audiences on the SuperJ mobile application and web. Age, gender, city, and NCCS targeting should be enforced by the audience system before survey entry rather than recollected in the questionnaire.
+                      - heading "Key Information Areas & Data Architecture" [level=3] [ref=e297]
+                      - list [ref=e298]:
+                        - listitem [ref=e299]:
+                          - paragraph [ref=e300]:
+                            - strong [ref=e301]: "Current work arrangement and flexibility:"
+                            - text: Capture actual work model, expected office attendance, control over start and finish times, and ability to adjust schedules. → Reveals whether the problem is location, schedule control, or both. → Drives recommendations on hybrid policy and flexible-hours design.
+                        - listitem [ref=e302]:
+                          - paragraph [ref=e303]:
+                            - strong [ref=e304]: "Caregiving context:"
+                            - text: Capture child age or pregnancy stage, caregiving role, childcare availability, and frequency of unexpected care interruptions. → Reveals which parent groups face the greatest operational pressure. → Drives targeted rather than one-size-fits-all support.
+                        - listitem [ref=e305]:
+                          - paragraph [ref=e306]:
+                            - strong [ref=e307]: "Work-life boundaries:"
+                            - text: Measure after-hours work, meeting spillover, inability to disconnect, schedule unpredictability, and pressure to remain continuously available. → Identifies boundary failures that may exist even in remote work. → Drives meeting, communication, and working-hours norms.
+                        - listitem [ref=e308]:
+                          - paragraph [ref=e309]:
+                            - strong [ref=e310]: "Productivity and concentration:"
+                            - text: Capture interruptions, suitable workspaces, concentration difficulty, technology limitations, and ability to complete focused work. → Separates environmental barriers from policy or management barriers. → Drives equipment, workspace, focus-time, and workload interventions.
+                        - listitem [ref=e311]:
+                          - paragraph [ref=e312]:
+                            - strong [ref=e313]: "Manager and team expectations:"
+                            - text: Measure comfort requesting flexibility, perceived response to interruptions, meeting culture, workload allocation, and psychological safety. → Shows whether formal policies are supported by day-to-day behaviour. → Drives manager training and accountability measures.
+                        - listitem [ref=e314]:
+                          - paragraph [ref=e315]:
+                            - strong [ref=e316]: "Career growth and visibility:"
+                            - text: Capture concerns about promotion, performance evaluation, access to important projects, networking, and visibility while working flexibly or taking leave. → Identifies longer-term career risks beyond immediate workload pain. → Drives return-to-work, performance-review, sponsorship, and progression policies.
+                        - listitem [ref=e317]:
+                          - paragraph [ref=e318]:
+                            - strong [ref=e319]: "Employer support priorities:"
+                            - text: Present a carefully balanced list of potential support actions after the pain-point diagnosis. → Reveals which interventions are both important and credible to parents. → Drives a prioritised employer action roadmap rather than a broad list of benefits.
+                      - heading "Survey Flow & Question Design Approach" [level=3] [ref=e320]
+                      - list [ref=e321]:
+                        - listitem [ref=e322]:
+                          - paragraph [ref=e323]:
+                            - strong [ref=e324]: "Phase 1 — Warm-up and eligibility:"
+                            - text: Establish employment status, parent or expecting-parent status, current work model, and recent work recency. Use behavioural screening rather than asking only whether respondents “feel” like working parents.
+                        - listitem [ref=e325]:
+                          - paragraph [ref=e326]:
+                            - strong [ref=e327]: "Phase 2 — Current working and caregiving context:"
+                            - text: Capture work location, schedule control, childcare arrangements, caregiving role, leave status or plans, and typical points of overlap between work and care. This creates the context needed to interpret later pain-point ratings.
+                        - listitem [ref=e328]:
+                          - paragraph [ref=e329]:
+                            - strong [ref=e330]: "Phase 3 — Pain-point diagnosis:"
+                            - text: Measure the frequency and severity of childcare interruptions, work-hour boundary issues, concentration problems, manager expectations, technology or workspace barriers, and career visibility concerns. Use fully labelled 5-point scales and concrete time or occurrence anchors where possible.
+                        - listitem [ref=e331]:
+                          - paragraph [ref=e332]:
+                            - strong [ref=e333]: "Phase 4 — Support and policy evaluation:"
+                            - text: Explore which forms of employer support respondents currently receive, which are actually usable, and where the largest gap exists between support offered and support needed. Keep formal policy availability separate from awareness, access, and perceived usefulness.
+                        - listitem [ref=e334]:
+                          - paragraph [ref=e335]:
+                            - strong [ref=e336]: "Phase 5 — Prioritisation and decision close:"
+                            - text: Ask respondents to identify the most important employer action, the most urgent problem to solve, and the support that would have the greatest practical impact. Include a concise open-ended question for an example of a policy or manager behaviour that would make work easier.
+                        - listitem [ref=e337]:
+                          - paragraph [ref=e338]:
+                            - strong [ref=e339]: "Phase 6 — Optional classification module:"
+                            - text: Use existing audience targeting for age, gender, city, and NCCS. Only collect additional classification variables needed for analysis, such as seniority, employment type, caregiving arrangement, and access to childcare.
+                        - listitem [ref=e340]:
+                          - paragraph [ref=e341]:
+                            - strong [ref=e342]: "Estimated length:"
+                            - text: Approximately 15–25 questions and 8–12 minutes, with routing used to avoid asking expecting parents questions that apply only to parents already caring for a child.
+                      - heading "Expected Insights & Business Decisions Enabled" [level=3] [ref=e343]
+                      - list [ref=e344]:
+                        - listitem [ref=e345]:
+                          - paragraph [ref=e346]:
+                            - strong [ref=e347]: "You will be able to:"
+                            - text: Identify the most frequent and severe pain points for expecting parents and parents of young children across remote, hybrid, and office-based work.
+                        - listitem [ref=e348]:
+                          - paragraph [ref=e349]:
+                            - strong [ref=e350]: "You will be able to:"
+                            - text: Separate problems caused by work location from problems caused by unpredictable schedules, team norms, manager behaviour, insufficient childcare support, or career anxiety.
+                        - listitem [ref=e351]:
+                          - paragraph [ref=e352]:
+                            - strong [ref=e353]: "You will be able to:"
+                            - text: Compare the gap between current work arrangements and preferred arrangements, including whether parents want fully remote work, structured hybrid work, greater schedule control, or better support within office-based work.
+                        - listitem [ref=e354]:
+                          - paragraph [ref=e355]:
+                            - strong [ref=e356]: "You will be able to:"
+                            - text: Identify which support needs differ between expecting parents, parents of infants, and parents of older young children.
+                        - listitem [ref=e357]:
+                          - paragraph [ref=e358]:
+                            - strong [ref=e359]: "You will be able to decide:"
+                            - text: Which employer policy changes should receive first priority, such as flexible start and finish times, predictable meeting windows, childcare assistance, phased return-to-work, additional leave, manager training, or equipment support.
+                        - listitem [ref=e360]:
+                          - paragraph [ref=e361]:
+                            - strong [ref=e362]: "You will be able to decide:"
+                            - text: Whether the primary intervention should be a formal policy change, stronger implementation of existing benefits, manager accountability, or improved communication and access.
+                        - listitem [ref=e363]:
+                          - paragraph [ref=e364]:
+                            - strong [ref=e365]: "You will be able to decide:"
+                            - text: Which workplace practices may be unintentionally damaging career visibility, promotion confidence, or access to important work for parents using flexible arrangements.
+                        - listitem [ref=e366]:
+                          - paragraph [ref=e367]:
+                            - strong [ref=e368]: "Key hypotheses being tested:"
+                          - list [ref=e369]:
+                            - listitem [ref=e370]: Parents experience work-hour unpredictability and boundary erosion as major problems even when they work remotely.
+                            - listitem [ref=e371]: Hybrid work is valuable only when office attendance is predictable and compatible with caregiving arrangements.
+                            - listitem [ref=e372]: Manager response and team norms may matter more than the formal availability of flexibility.
+                            - listitem [ref=e373]: Childcare interruptions create productivity pressure, but career visibility concerns may be the more serious long-term risk.
+                            - listitem [ref=e374]: Expecting parents and parents already caring for young children require different forms of employer support.
+                            - listitem [ref=e375]: Parents with limited access to paid or family childcare experience greater workplace friction.
+                        - listitem [ref=e376]:
+                          - paragraph [ref=e377]:
+                            - strong [ref=e378]: "KPIs to report:"
+                          - list [ref=e379]:
+                            - listitem [ref=e380]: Percentage experiencing each pain point frequently.
+                            - listitem [ref=e381]: Average severity score by pain-point area.
+                            - listitem [ref=e382]: Current-versus-preferred work arrangement gap.
+                            - listitem [ref=e383]: Percentage reporting low control over working hours.
+                            - listitem [ref=e384]: Percentage uncomfortable requesting flexibility.
+                            - listitem [ref=e385]: Percentage reporting career visibility or progression concerns.
+                            - listitem [ref=e386]: Awareness, access, usefulness, and unmet need for existing employer support.
+                            - listitem [ref=e387]: Priority share for each proposed policy or support action.
+                            - listitem [ref=e388]: Top-ranked urgent problem to solve.
+                            - listitem [ref=e389]: Qualitative themes from the open-ended parent experience responses.
+            - paragraph [ref=e393]: I've put together a Strategic Research Framework for this study — take a look above.
+          - generic [ref=e400]:
+            - paragraph [ref=e404]: Yes, generate the research brief
+            - generic [ref=e408]: U
+          - generic [ref=e413]:
+            - generic [ref=e415]:
+              - button "Who goes where in the survey — being mapped" [ref=e416] [cursor=pointer]:
+                - generic [ref=e420]: Who goes where in the survey — being mapped
+              - generic [ref=e423]:
+                - generic [ref=e424]:
+                  - img "done" [ref=e427]
+                  - generic [ref=e429]:
+                    - generic [ref=e431]: The brief is the foundation — it's being built carefully.
+                    - paragraph [ref=e436]: The audience definition is being built — Hercules is specifying who the research is for, what demographic or behavioural criteria define the right respondent, and what will screen out the wrong ones.
+                - generic [ref=e437]:
+                  - img "done" [ref=e440]
+                  - generic [ref=e442]:
+                    - generic [ref=e444]: The research plan is being put together.
+                    - paragraph [ref=e449]: More secondary research is underway — Hercules has flagged areas where the brief needs more grounding and is searching for data to fill them.
+                - generic [ref=e450]:
+                  - img "done" [ref=e453]
+                  - generic [ref=e455]:
+                    - generic [ref=e457]: Every component of the research plan — being defined now.
+                    - paragraph [ref=e462]: The survey architecture is being established — Hercules is defining the sections, the sequence, and the structural logic that will hold the study together.
+                - generic [ref=e463]:
+                  - img "done" [ref=e466]
+                  - generic [ref=e468]:
+                    - generic [ref=e470]: Building the brief in full before a single question is written.
+                    - paragraph [ref=e475]: Hercules is building the routing layer — mapping the conditional paths through the instrument and establishing the rules that determine who sees which questions.
+            - generic [ref=e476]:
+              - paragraph [ref=e479]: "This is a strong and timely research direction: the study will identify the workplace barriers affecting expecting parents and parents of young children across remote, hybrid, and office-based work. The brief focuses on separating location-related problems from issues caused by schedule unpredictability, manager behaviour, childcare gaps, and career visibility concerns. I have retained the approved employee-research methodology and added current Indian workplace context, including the continued preference for hybrid work and the importance of flexibility and well-being. Please review the detailed brief below and share any changes before the survey is generated."
+              - generic [ref=e481] [cursor=pointer]:
+                - generic [ref=e482]:
+                  - paragraph [ref=e484]: Version 1
+                  - generic [ref=e485]:
+                    - button "Share brief" [ref=e486]:
+                      - img "share" [ref=e487]
+                    - button "Download brief" [ref=e488]:
+                      - img "download" [ref=e489]
+                    - button "Copy brief" [ref=e490]:
+                      - img "copy" [ref=e491]
+                - generic [ref=e494]:
+                  - 'heading "Research Brief: Workplace Flexibility and Pain Points Among New Parents" [level=1] [ref=e495]'
+                  - separator [ref=e496]
+                  - heading "star icon Background & Context" [level=3] [ref=e497]:
+                    - generic [ref=e498]:
+                      - img "star icon" [ref=e499]
+                      - strong [ref=e501]: Background & Context
+                  - paragraph [ref=e502]: Employers in India are balancing return-to-office expectations with employee demands for flexibility, predictable schedules, and better support for personal circumstances. Current evidence s...
+                - img "toggle" [ref=e505]
+              - paragraph [ref=e508]: Please review the methodology and target audience before moving forward. You can request changes to the sample size, city allocation, demographic mix, or research approach before the survey is generated.
+          - generic [ref=e515]:
+            - paragraph [ref=e519]: Yes, create the survey.
+            - generic [ref=e523]: U
+          - generic [ref=e528]:
+            - generic [ref=e530]:
+              - button "The branching logic — being wired to the live survey" [ref=e531] [cursor=pointer]:
+                - generic [ref=e535]: The branching logic — being wired to the live survey
+              - generic [ref=e538]:
+                - generic [ref=e539]:
+                  - img "done" [ref=e542]
+                  - generic [ref=e544]:
+                    - generic [ref=e546]: Everything the study will be held to — being defined right now.
+                    - paragraph [ref=e551]: Hercules is building the survey flow — mapping the structure of the instrument, section by section, before a single question is written.
+                - generic [ref=e552]:
+                  - img "done" [ref=e555]
+                  - generic [ref=e557]:
+                    - generic [ref=e559]: The brief is being built before the survey is.
+                    - paragraph [ref=e564]: Hercules is defining the routing — mapping the conditional paths through the survey and establishing the logic that determines which questions each respondent group sees.
+                - generic [ref=e565]:
+                  - img "done" [ref=e568]
+                  - generic [ref=e570]:
+                    - generic [ref=e572]: Questions, flow, routing — the survey is being built.
+                    - paragraph [ref=e577]: The survey is being built — Hercules is generating questions from the research brief, sequencing them correctly, and calibrating them to the target audience.
+                - generic [ref=e578]:
+                  - img "done" [ref=e581]
+                  - generic [ref=e583]:
+                    - generic [ref=e585]: The survey is being designed — properly.
+                    - paragraph [ref=e590]: The routing compilation step is running — Hercules is wiring the abstract routing rules to the real question IDs so that every conditional path through the survey is correctly implemented.
+            - generic [ref=e591]:
+              - generic [ref=e593]:
+                - heading "Survey ready" [level=3] [ref=e594]
+                - paragraph [ref=e595]:
+                  - strong [ref=e596]: “Are Workplaces Ready for New Parents?”
+                  - text: is ready as a 20-question survey draft. It is designed for expecting parents and parents of young children across remote, hybrid, and office-based workplaces.
+                - heading "Research strategy" [level=3] [ref=e597]
+                - paragraph [ref=e598]:
+                  - text: This is an
+                  - strong [ref=e599]: Employee Engagement and Organizational Health
+                  - text: study examining how workplace policies, manager practices, team norms, workload, and benefits affect the employee experience for new and expecting parents. The findings will help determine which flexible-work policies, management practices, and family-support benefits employers should prioritize to reduce workplace friction and improve retention, wellbeing, and career visibility.
+                - heading "Survey structure" [level=3] [ref=e600]
+                - paragraph [ref=e601]:
+                  - text: "Respondents will move through seven structured sections:"
+                  - strong [ref=e602]: Overall Engagement
+                  - text: ","
+                  - strong [ref=e603]: Role & Growth
+                  - text: ","
+                  - strong [ref=e604]: Manager Relationship
+                  - text: ","
+                  - strong [ref=e605]: Team & Collaboration
+                  - text: ","
+                  - strong [ref=e606]: Culture & Values
+                  - text: ","
+                  - strong [ref=e607]: Wellbeing & Workload
+                  - text: ", and"
+                  - strong [ref=e608]: Recognition & Fairness
+                  - text: . The survey uses the combined
+                  - strong [ref=e609]: PARENT_STATUS
+                  - text: screener to identify expecting parents, current parents, people who are not currently working, and respondents who do not fit either parent group while maintaining the exact 20-question budget.
+                - heading "Routing & logic" [level=3] [ref=e610]
+                - paragraph [ref=e611]:
+                  - text: Smart branching and screening logic have been built in. Respondents are routed based on their answers using
+                  - strong [ref=e612]: 3 branching rules and screening gates
+                  - text: ", helping ensure that relevant questions are shown to eligible participants without adding unnecessary respondent-facing questions."
+                - heading "Review and next steps" [level=3] [ref=e613]
+                - paragraph [ref=e614]: Please review the wording, section flow, eligibility paths, and answer options. I’d be happy to incorporate any changes, such as refining the parent life-stage definitions, adjusting workplace examples, or emphasizing specific policy and manager-practice outcomes before launch.
+              - generic [ref=e616]:
+                - generic [ref=e618] [cursor=pointer]:
+                  - generic [ref=e619]:
+                    - paragraph [ref=e620]: Your Research Study is in progress
+                    - button "pause" [ref=e621]:
+                      - img "pause" [ref=e622]
+                  - generic [ref=e623]:
+                    - text: You will be notified when all responses are collected
+                    - generic [ref=e624]:
+                      - generic [ref=e625]: "Completion: 0%"
+                      - generic [ref=e626]: "Responses Collected: 0 / 100"
+                    - generic [ref=e629]:
+                      - paragraph [ref=e630]: "Estimated Timeline Completion: 1 day left"
+                      - button "View Responses" [ref=e631]:
+                        - img [ref=e632]
+                        - generic [ref=e634]: View Responses
+                - generic [ref=e635]:
+                  - generic [ref=e636] [cursor=pointer]:
+                    - text: View Audience
+                    - img [ref=e639]
+                  - generic [ref=e641] [cursor=pointer]:
+                    - text: View Responses
+                    - img [ref=e644]
+                  - generic [ref=e646] [cursor=pointer]:
+                    - text: View Survey
+                    - img [ref=e649]
+              - generic [ref=e653]: AI Content Review Complete
+          - generic [ref=e655]:
+            - generic [ref=e656]: Share this Survey with friends
+            - generic [ref=e657]: Invite participants to answer this survey and collect their feedback in real-time.
+            - generic [ref=e658]:
+              - generic [ref=e659] [cursor=pointer]:
+                - generic [ref=e660]: https://superj.app/survey/6a7ecf7415203e92a622fd3a
+                - img "copy" [ref=e662]
+              - generic [ref=e664] [cursor=pointer]:
+                - img [ref=e665]
+                - text: Share
+        - generic [ref=e672]:
+          - generic [ref=e675]:
+            - generic [ref=e677]: All India General PopulationAudience set has been applied to this campaign
+            - img "close" [ref=e678] [cursor=pointer]
+          - generic [ref=e681]:
+            - textbox "Ask Hercules a question" [disabled] [ref=e683]:
+              - /placeholder: Ask Hercules...
+            - generic [ref=e684]:
+              - button "upload button" [disabled] [ref=e686] [cursor=pointer]:
+                - img [ref=e688]
+              - generic [ref=e693]:
+                - button "submit button":
+                  - generic:
+                    - img
+  - contentinfo "Site index" [ref=e694]:
+    - navigation [ref=e695]:
+      - link "Home" [ref=e696] [cursor=pointer]:
+        - /url: /
+      - link "Hercules AI" [ref=e697] [cursor=pointer]:
+        - /url: /ai
+      - link "Pricing" [ref=e698] [cursor=pointer]:
+        - /url: /pricing
+      - link "About" [ref=e699] [cursor=pointer]:
+        - /url: /about
+      - link "Research Case Studies" [ref=e700] [cursor=pointer]:
+        - /url: /research
+      - link "Blog" [ref=e701] [cursor=pointer]:
+        - /url: /blog
+      - link "Alternatives" [ref=e702] [cursor=pointer]:
+        - /url: /alternatives
+      - link "Market Research India" [ref=e703] [cursor=pointer]:
+        - /url: /solutions/india
+      - link "Help" [ref=e704] [cursor=pointer]:
+        - /url: /help
+      - link "About Hercules" [ref=e705] [cursor=pointer]:
+        - /url: /help/abouthercules
+      - link "About Superj" [ref=e706] [cursor=pointer]:
+        - /url: /help/aboutsuperj
+      - link "Account Management" [ref=e707] [cursor=pointer]:
+        - /url: /help/accountsmanagement
+      - link "Credit Pricing" [ref=e708] [cursor=pointer]:
+        - /url: /help/creditspricing
+      - link "FAQ" [ref=e709] [cursor=pointer]:
+        - /url: /help/faq
+      - link "Privacy Policy" [ref=e710] [cursor=pointer]:
+        - /url: /privacy
+      - link "Terms of Service" [ref=e711] [cursor=pointer]:
+        - /url: /terms
+      - link "Amul Case Study" [ref=e712] [cursor=pointer]:
+        - /url: /research/amul
+      - link "ICICI Prudential Case Study" [ref=e713] [cursor=pointer]:
+        - /url: /research/icici
+      - link "SBI Case Study" [ref=e714] [cursor=pointer]:
+        - /url: /research/sbi
+      - link "Greenply Case Study" [ref=e715] [cursor=pointer]:
+        - /url: /research/greenply
+      - link "Kotak Case Study" [ref=e716] [cursor=pointer]:
+        - /url: /research/kotak
+      - link "Imperial Blue Case Study" [ref=e717] [cursor=pointer]:
+        - /url: /research/imperial-blue
+      - link "SurveyMonkey Alternative" [ref=e718] [cursor=pointer]:
+        - /url: /alternatives/surveymonkey
+      - link "Kantar Alternative" [ref=e719] [cursor=pointer]:
+        - /url: /alternatives/kantar
+      - link "Nielsen Alternative" [ref=e720] [cursor=pointer]:
+        - /url: /alternatives/nielsen
+      - link "Typeform Alternative" [ref=e721] [cursor=pointer]:
+        - /url: /alternatives/typeform
+      - link "Google Forms Alternative" [ref=e722] [cursor=pointer]:
+        - /url: /alternatives/google-forms
+      - link "Qualtrics Alternative" [ref=e723] [cursor=pointer]:
+        - /url: /alternatives/qualtrics
+      - link "Medallia Alternative" [ref=e724] [cursor=pointer]:
+        - /url: /alternatives/medallia
+      - link "Zoho Survey Alternative" [ref=e725] [cursor=pointer]:
+        - /url: /alternatives/zoho-survey
+      - link "Microsoft Forms Alternative" [ref=e726] [cursor=pointer]:
+        - /url: /alternatives/microsoft-forms
+      - link "Pollfish Alternative" [ref=e727] [cursor=pointer]:
+        - /url: /alternatives/pollfish
+      - link "Market Research Mumbai" [ref=e728] [cursor=pointer]:
+        - /url: /solutions/mumbai
+      - link "Market Research Delhi" [ref=e729] [cursor=pointer]:
+        - /url: /solutions/delhi
+      - link "Market Research Hyderabad" [ref=e730] [cursor=pointer]:
+        - /url: /solutions/hyderabad
+      - link "Market Research Pune" [ref=e731] [cursor=pointer]:
+        - /url: /solutions/pune
+      - link "Market Research Chennai" [ref=e732] [cursor=pointer]:
+        - /url: /solutions/chennai
+      - link "Market Research Bangalore" [ref=e733] [cursor=pointer]:
+        - /url: /solutions/bangalore
+      - link "Market Research Kolkata" [ref=e734] [cursor=pointer]:
+        - /url: /solutions/kolkata
+      - link "FMCG Market Research India" [ref=e735] [cursor=pointer]:
+        - /url: /solutions/fmcg
+      - link "BFSI Consumer Research" [ref=e736] [cursor=pointer]:
+        - /url: /solutions/bfsi
+      - link "Market Research for Startups" [ref=e737] [cursor=pointer]:
+        - /url: /solutions/startups
+      - link "Pharma Market Research India" [ref=e738] [cursor=pointer]:
+        - /url: /solutions/pharma
+      - link "E-commerce Consumer Research" [ref=e739] [cursor=pointer]:
+        - /url: /solutions/ecommerce
+      - link "Poseidon AI Research" [ref=e740] [cursor=pointer]:
+        - /url: /poseidon
+      - link "Product Concept Testing India" [ref=e741] [cursor=pointer]:
+        - /url: /use-cases/product-testing
+      - link "Brand Tracking Surveys India" [ref=e742] [cursor=pointer]:
+        - /url: /use-cases/brand-tracking
+      - link "Customer Satisfaction Surveys India" [ref=e743] [cursor=pointer]:
+        - /url: /use-cases/customer-satisfaction
+      - link "Ad Testing India" [ref=e744] [cursor=pointer]:
+        - /url: /use-cases/ad-testing
+      - link "Employee Satisfaction Surveys India" [ref=e745] [cursor=pointer]:
+        - /url: /use-cases/employee-surveys
+      - link "Political Polling India" [ref=e746] [cursor=pointer]:
+        - /url: /use-cases/political-polling
+      - link "Academic Research Surveys India" [ref=e747] [cursor=pointer]:
+        - /url: /use-cases/academic-research
+      - link "How to Improve Data Collection with Online Surveys" [ref=e748] [cursor=pointer]:
+        - /url: /blog/how-to-improve-your-data-collection-strategy-with-online-surveys
+      - link "Data-Backed Decision Making for Business Growth Guide" [ref=e749] [cursor=pointer]:
+        - /url: /blog/how-to-use-data-backed-decision-making-for-business-growth
+      - link "Top 10 Survey Tools for Market Research in 2026" [ref=e750] [cursor=pointer]:
+        - /url: /blog/top-10-survey-tools-for-market-research-in-2026
+      - link "Complete Guide to Effective Customer Feedback Surveys" [ref=e751] [cursor=pointer]:
+        - /url: /blog/a-complete-guide-to-conducting-effective-customer-feedback-surveys
+      - 'link "AI in Employee Surveys: Better HR Insights in 2026" [ref=e752] [cursor=pointer]':
+        - /url: /blog/leveraging-ai-in-employee-surveys-for-better-hr-insights
+      - link "Best AI-Powered Survey Generators for 2026 [Full List]" [ref=e753] [cursor=pointer]:
+        - /url: /blog/list-of-the-best-ai-powered-survey-generators-for-2026
+      - 'link "Survey Analytics: Tips for Better Data Interpretation" [ref=e754] [cursor=pointer]':
+        - /url: /blog/understanding-survey-analytics-tips-for-better-data-interpretation
+      - 'link "Future of Market Research: Key Trends to Watch in 2026" [ref=e755] [cursor=pointer]':
+        - /url: /blog/the-future-of-market-research-trends-to-watch-in-2026
+      - 'link "Designing High-Impact Customer Surveys: Step-by-Step" [ref=e756] [cursor=pointer]':
+        - /url: /blog/step-by-step-guide-to-designing-high-impact-customer-surveys
+      - link "How to Use Data to Drive Strategic Business Decisions" [ref=e757] [cursor=pointer]:
+        - /url: /blog/how-to-use-data-to-drive-strategic-business-decisions
+      - 'link "Hercules: The Ultimate Research Assistant for Data-Driven Teams" [ref=e758] [cursor=pointer]':
+        - /url: /blog/hercules-the-ultimate-research-assistant-for-data-driven-teams
+      - 'link "Compare Top Survey Platforms: Features, Pricing, and Usability" [ref=e759] [cursor=pointer]':
+        - /url: /blog/compare-top-survey-platforms-features-pricing-and-usability
+      - link "Best Practices for Choosing a Market Research Tool" [ref=e760] [cursor=pointer]:
+        - /url: /blog/best-practices-for-choosing-a-market-research-tool
+      - link "Why Your Business Needs an AI-Driven Survey Builder" [ref=e761] [cursor=pointer]:
+        - /url: /blog/why-your-business-needs-an-ai-driven-survey-builder
+      - link "Top Features to Look for in a Customer Feedback Platform" [ref=e762] [cursor=pointer]:
+        - /url: /blog/top-features-to-look-for-in-a-customer-feedback-platform
+      - link "Maximize Your Survey Outcomes with Hercules Works Solutions" [ref=e763] [cursor=pointer]:
+        - /url: /blog/maximize-your-survey-outcomes-with-hercules-works-solutions
+      - link "How Hercules Enhances Data Accuracy and Insights" [ref=e764] [cursor=pointer]:
+        - /url: /blog/how-hercules-enhances-data-accuracy-and-insights
+      - link "Transform Your Business with the Leading Data Analytics Platform" [ref=e765] [cursor=pointer]:
+        - /url: /blog/transform-your-business-with-the-leading-data-analytics-platform
+      - 'link "Hercules vs. Competitors: Which Survey Tool Is Best for Your Business?" [ref=e766] [cursor=pointer]':
+        - /url: /blog/hercules-vs-competitors-which-survey-tool-is-best-for-your-business
+      - link "Unlock Actionable Insights with Hercules Advanced Survey Analytics" [ref=e767] [cursor=pointer]:
+        - /url: /blog/unlock-actionable-insights-with-hercules-advanced-survey-analytics
+  - alert [ref=e768]
+```
+
+# Test source
+
+```ts
+  304 |     }
+  305 | 
+  306 |         console.log('Waiting 2 seconds before opening in new tab...');
+  307 |         await page.waitForTimeout(2000);
+  308 | 
+  309 |         console.log('Opening live survey in a fresh Super J context for the consumer...');
+  310 |     const superjContext = await browser.newContext();
+  311 |     const livePage = await superjContext.newPage();
+  312 |     livePage.setDefaultTimeout(300000); // 5 minutes global timeout for this page
+  313 |     await livePage.goto(liveSurveyUrl);
+  314 |     
+  315 |     console.log('Forcing Super J Login, Onboarding, and Survey interactions...');
+  316 |     
+  317 |     try {
+  318 |         console.log('[Test] Attempting Login for fresh consumer...');
+  319 |         const LoginPage = require('../pages/LoginPage');
+  320 |         const DataGeneratorUtil = require('../utils/DataGeneratorUtil');
+  321 |         
+  322 |         const loginPage = new LoginPage(livePage);
+  323 |         const randomPhone = process.env.TEST_PHONE || DataGeneratorUtil.generateRandomPhoneNumber();
+  324 |         console.log(`[Test] Using phone number: ${randomPhone}`);
+  325 |         await loginPage.login(randomPhone, '777777');
+  326 |         
+  327 |         // Wait for redirect after login
+  328 |         console.log('[Test] Waiting 15 seconds for post-OTP redirect...');
+  329 |         await livePage.waitForTimeout(15000);
+  330 |     } catch (e) {
+  331 |         console.log('[Test] Login failed or skipped:', e.message);
+  332 |     }
+  333 | 
+  334 |     try {
+  335 |         console.log('[Test] Attempting Onboarding...');
+  336 |         const OnboardingUtil = require('../utils/OnboardingUtil');
+  337 |         const onboardingUtil = new OnboardingUtil(livePage);
+  338 |         await onboardingUtil.completeOnboarding('1997', targetCity, 'Male');
+  339 |         
+  340 |         console.log('[Test] Waiting 5 seconds for post-onboarding redirect...');
+  341 |         await livePage.waitForTimeout(5000);
+  342 |         
+  343 |         console.log(`[Test] Force-redirecting back to survey URL to bypass redirect bug: ${liveSurveyUrl}`);
+  344 |         await livePage.goto(liveSurveyUrl);
+  345 |         await livePage.waitForTimeout(5000);
+  346 |     } catch (e) {
+  347 |         console.log('[Test] Onboarding failed or skipped:', e.message);
+  348 |     }
+  349 | 
+  350 |     try {
+  351 |         console.log('[Test] Attempting to click Start Survey...');
+  352 |         const LandingPage = require('../pages/LandingPage');
+  353 |         const landingPage = new LandingPage(livePage);
+  354 |         await landingPage.clickStartSurvey(2);
+  355 |     } catch (e) {
+  356 |         console.log('[Test] Click Start Survey failed:', e.message);
+  357 |     }
+  358 |     
+  359 |     console.log('Answering survey using SurveyEngine...');
+  360 |     const SurveyEngine = require('../utils/SurveyEngine');
+  361 |     const surveyEngine = new SurveyEngine(livePage, { surveyLogics });
+  362 |     const result = await surveyEngine.run();
+  363 |     console.log(`Survey Engine finished with result: ${JSON.stringify(result)}`);
+  364 | 
+  365 |     console.log('[Test] Waiting 10 seconds for the survey completion network request to save to backend before closing browser...');
+  366 |     await livePage.waitForTimeout(10000);
+  367 | 
+  368 |     console.log('[Test] Closing consumer context to free memory before verifying B2B dashboard...');
+  369 |     await superjContext.close().catch(() => {});
+  370 | 
+  371 |     await test.step('Verify Response Count in B2B Dashboard', async () => {
+  372 |         console.log('\n--- VERIFYING RESPONSE COUNT IN B2B HERCULES ---');
+  373 |         await page.bringToFront();
+  374 |         
+  375 |         // Wait 10 seconds first for the backend DB to sync
+  376 |         console.log('Waiting 10 seconds for backend database to update...');
+  377 |         await page.waitForTimeout(10000);
+  378 |         
+  379 |         console.log('Reloading Hercules B2B page to fetch updated response count...');
+  380 |         await page.reload();
+  381 |         await page.waitForLoadState('networkidle');
+  382 |         await page.waitForTimeout(5000); // Wait for data to load
+  383 |         
+  384 |         const responsesLabel = page.locator("//span[contains(text(), 'Responses Collected:')] | //p[contains(text(), 'Responses Collected:')] | //div[contains(text(), 'Responses Collected:')]").first();
+  385 |         await responsesLabel.scrollIntoViewIfNeeded().catch(() => {});
+  386 |         
+  387 |         if (await responsesLabel.isVisible().catch(()=>false)) {
+  388 |             const labelText = await responsesLabel.innerText().catch(() => "");
+  389 |             
+  390 |             const countLocator = page.locator("//span[contains(text(), 'Responses Collected:')]/following-sibling::*").first()
+  391 |                 .or(page.locator("//span[contains(text(), 'Responses Collected:')]/.."))
+  392 |                 .first();
+  393 |             const countText = await countLocator.innerText().catch(() => "");
+  394 |             
+  395 |             console.log(`Responses Collected Label: "${labelText}", Count: "${countText}"`);
+  396 |             
+  397 |             // Extract the first number from the countText (excluding title prefix)
+  398 |             const firstNumMatch = countText.replace(/Responses Collected:/i, '').match(/\d+/);
+  399 |             const firstNum = firstNumMatch ? parseInt(firstNumMatch[0], 10) : 0;
+  400 |             
+  401 |             if (firstNum > 0) {
+  402 |                 console.log(`SUCCESS: Verified that the response count has successfully reflected on Hercules B2B! (Count: ${firstNum})`);
+  403 |             } else {
+> 404 |                 throw new Error(`FAILURE: Response count is 0! The survey response was not recorded by the backend. Found text: ${countText}`);
+      |                       ^ Error: FAILURE: Response count is 0! The survey response was not recorded by the backend. Found text: Responses Collected: 0 / 100
+  405 |             }
+  406 |         } else {
+  407 |             throw new Error('FAILURE: "Responses Collected:" label not found on the active page.');
+  408 |         }
+  409 |         
+  410 |         // Capture screenshot of Hercules B2B after reload
+  411 |         await page.screenshot({ path: 'scratch/b2b_after_responses.png', fullPage: true });
+  412 |     });
+  413 | });
+  414 | 
+```

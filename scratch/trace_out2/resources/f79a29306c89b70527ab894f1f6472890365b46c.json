@@ -1,0 +1,26 @@
+{
+  "kind": "identitytoolkit#GetAccountInfoResponse",
+  "users": [
+    {
+      "localId": "fKsASzBiggNvtSujyVA6jJn2y1c2",
+      "email": "kayimoh434@bejum.com",
+      "passwordHash": "UkVEQUNURUQ=",
+      "emailVerified": false,
+      "passwordUpdatedAt": 1785566568015,
+      "providerUserInfo": [
+        {
+          "providerId": "password",
+          "federatedId": "kayimoh434@bejum.com",
+          "email": "kayimoh434@bejum.com",
+          "rawId": "kayimoh434@bejum.com"
+        }
+      ],
+      "validSince": "1785566568",
+      "disabled": false,
+      "lastLoginAt": "1786695139501",
+      "createdAt": "1785566567364",
+      "tenantId": "production-rfav6",
+      "lastRefreshAt": "2026-08-14T08:12:19.501Z"
+    }
+  ]
+}

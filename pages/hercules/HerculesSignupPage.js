@@ -1,0 +1,81 @@
+const BasePage = require('../../base/BasePage');
+
+class HerculesSignupPage extends BasePage {
+  constructor(page) {
+    super(page);
+    
+    // Core signup modal locators
+    this.googleSignupBtn = this.page.locator("//button[text()='Continue with Google']");
+    this.appleSignupBtn = this.page.locator("//button[text()='Continue with Apple']");
+    this.emailInput = this.page.locator("input[placeholder='Email'], input#guest-email").first();
+    this.continueBtn = this.page.locator("//button[text()='Continue']");
+    
+    // Header/Close controls
+    this.closeModalBtn = this.page.locator("//button[@aria-label='close']");
+    this.logInBtn = this.page.locator("//button[text()='Log in']");
+    
+    // Legal links
+    this.termsLink = this.page.locator("//a[text()='Terms of Service']");
+    this.privacyLink = this.page.locator("//a[text()='Privacy Policy']");
+    
+    // Post-Signup (Password Creation) locators
+    this.passwordInput = this.page.locator("//input[@placeholder='Password' and @type='password']");
+    this.editEmailBtn = this.page.locator("//button[text()='Edit']");
+    this.createAccountSubmitBtn = this.page.locator("//button[contains(@class, 'text-white')]");
+  }
+
+  /**
+   * Signs up using email
+   * @param {string} email
+   */
+  async signUpWithEmail(email) {
+    console.log(`[HerculesSignupPage] Entering email for signup: ${email}`);
+    await this.fillIfVisible(this.emailInput, email);
+    console.log("[HerculesSignupPage] Clicking Continue...");
+    await this.clickIfVisible(this.continueBtn);
+  }
+
+  /**
+   * Initiates Google SSO
+   */
+  async clickContinueWithGoogle() {
+    console.log("[HerculesSignupPage] Clicking Continue with Google...");
+    await this.clickIfVisible(this.googleSignupBtn);
+  }
+
+  /**
+   * Initiates Apple SSO
+   */
+  async clickContinueWithApple() {
+    console.log("[HerculesSignupPage] Clicking Continue with Apple...");
+    await this.clickIfVisible(this.appleSignupBtn);
+  }
+
+  /**
+   * Closes the signup modal
+   */
+  async closeModal() {
+    console.log("[HerculesSignupPage] Closing the signup modal...");
+    await this.clickIfVisible(this.closeModalBtn);
+  }
+
+  /**
+   * Fills the password and submits the final create account form
+   * @param {string} password
+   */
+  async createPassword(password) {
+    console.log(`[HerculesSignupPage] Waiting for password input field...`);
+    for (let i = 0; i < 10; i++) {
+      if (await this.passwordInput.isVisible().catch(() => false)) break;
+      console.log(`[HerculesSignupPage] Password field not visible yet (attempt ${i + 1}/10). Waiting...`);
+      await this.page.waitForTimeout(2000).catch(() => {});
+    }
+    await this.passwordInput.waitFor({ state: 'visible', timeout: 30000 });
+    console.log(`[HerculesSignupPage] Entering password...`);
+    await this.fillIfVisible(this.passwordInput, password);
+    console.log("[HerculesSignupPage] Clicking submit to finalize account creation...");
+    await this.clickIfVisible(this.createAccountSubmitBtn);
+  }
+}
+
+module.exports = HerculesSignupPage;

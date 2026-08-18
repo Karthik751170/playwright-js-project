@@ -1,0 +1,302 @@
+[
+  {
+    "tag": "img",
+    "text": "",
+    "id": "",
+    "className": "",
+    "placeholder": "",
+    "alt": "validated",
+    "ariaLabel": "",
+    "role": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "id": "",
+    "className": "opacity-80 group-hover:opacity-100",
+    "placeholder": "",
+    "alt": "close",
+    "ariaLabel": "",
+    "role": ""
+  },
+  {
+    "tag": "input",
+    "text": "500",
+    "id": "",
+    "className": "w-[111px] h-[44px] md:h-[32px] rounded-[12px] border border-[#D0D5DD] px-[14px] py-[10px] text-[#0A0A0A] shadow-[0px_1px_2px_0px_#1018280D] text-[16px] leading-[24px] font-[400] outline-none\n                    focus:border-[1px] focus:border-[#acacac] focus:text-[#0a0a0a]",
+    "placeholder": "",
+    "alt": "",
+    "ariaLabel": "",
+    "role": ""
+  },
+  {
+    "tag": "button",
+    "text": "",
+    "id": "",
+    "className": "h-[28px] w-[28px] rounded-[8px] border border-transparent hover:bg-[#f9fafb] flex items-center justify-center",
+    "placeholder": "",
+    "alt": "",
+    "ariaLabel": "Edit location filter",
+    "role": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "id": "",
+    "className": "",
+    "placeholder": "",
+    "alt": "edit-filter",
+    "ariaLabel": "",
+    "role": ""
+  },
+  {
+    "tag": "button",
+    "text": "",
+    "id": "",
+    "className": "min-w-4 min-h-4 bg-white rounded-full p-[4.8px]",
+    "placeholder": "",
+    "alt": "",
+    "ariaLabel": "Remove Mumbai",
+    "role": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "id": "",
+    "className": "",
+    "placeholder": "",
+    "alt": "remove-filter",
+    "ariaLabel": "",
+    "role": ""
+  },
+  {
+    "tag": "button",
+    "text": "",
+    "id": "",
+    "className": "min-w-4 min-h-4 bg-white rounded-full p-[4.8px]",
+    "placeholder": "",
+    "alt": "",
+    "ariaLabel": "Remove Delhi",
+    "role": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "id": "",
+    "className": "",
+    "placeholder": "",
+    "alt": "remove-filter",
+    "ariaLabel": "",
+    "role": ""
+  },
+  {
+    "tag": "button",
+    "text": "",
+    "id": "",
+    "className": "min-w-4 min-h-4 bg-white rounded-full p-[4.8px]",
+    "placeholder": "",
+    "alt": "",
+    "ariaLabel": "Remove Bangalore",
+    "role": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "id": "",
+    "className": "",
+    "placeholder": "",
+    "alt": "remove-filter",
+    "ariaLabel": "",
+    "role": ""
+  },
+  {
+    "tag": "button",
+    "text": "",
+    "id": "",
+    "className": "min-w-4 min-h-4 bg-white rounded-full p-[4.8px]",
+    "placeholder": "",
+    "alt": "",
+    "ariaLabel": "Remove Hyderabad",
+    "role": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "id": "",
+    "className": "",
+    "placeholder": "",
+    "alt": "remove-filter",
+    "ariaLabel": "",
+    "role": ""
+  },
+  {
+    "tag": "button",
+    "text": "",
+    "id": "",
+    "className": "min-w-4 min-h-4 bg-white rounded-full p-[4.8px]",
+    "placeholder": "",
+    "alt": "",
+    "ariaLabel": "Remove Pune",
+    "role": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "id": "",
+    "className": "",
+    "placeholder": "",
+    "alt": "remove-filter",
+    "ariaLabel": "",
+    "role": ""
+  },
+  {
+    "tag": "div",
+    "text": "Urban elite, high income, premium lifestyle.",
+    "id": "",
+    "className": "\n          group relative flex items-center justify-between gap-2 rounded-full border px-[18px] h-[34px] shadow-sm w-full\n          \n          bg-[#F1F1F1] border-[#0C0C0C]\n        ",
+    "placeholder": "",
+    "alt": "",
+    "ariaLabel": "",
+    "role": "button"
+  },
+  {
+    "tag": "div",
+    "text": "Affluent, aspirational, brand-focused.",
+    "id": "",
+    "className": "\n          group relative flex items-center justify-between gap-2 rounded-full border px-[18px] h-[34px] shadow-sm w-full\n          \n          bg-[#F1F1F1] border-[#0C0C0C]\n        ",
+    "placeholder": "",
+    "alt": "",
+    "ariaLabel": "",
+    "role": "button"
+  },
+  {
+    "tag": "div",
+    "text": "Upper-middle, quality-conscious, educated.",
+    "id": "",
+    "className": "\n          group relative flex items-center justify-between gap-2 rounded-full border px-[18px] h-[34px] shadow-sm w-full\n          \n          bg-[#F1F1F1] border-[#0C0C0C]\n        ",
+    "placeholder": "",
+    "alt": "",
+    "ariaLabel": "",
+    "role": "button"
+  },
+  {
+    "tag": "div",
+    "text": "Mid-income, value-driven, upwardly mobile.",
+    "id": "",
+    "className": "\n          group relative flex items-center justify-between gap-2 rounded-full border px-[18px] h-[34px] shadow-sm w-full\n          \n          bg-[#F1F1F1] border-[#0C0C0C]\n        ",
+    "placeholder": "",
+    "alt": "",
+    "ariaLabel": "",
+    "role": "button"
+  },
+  {
+    "tag": "div",
+    "text": "Budget-focused, practical, price-sensitive.",
+    "id": "",
+    "className": "\n          group relative flex items-center justify-between gap-2 rounded-full border px-[18px] h-[34px] shadow-sm w-full\n          \n          bg-white border-[#C0C0C0] hover:bg-[#F1F1F1] cursor-pointer\n        ",
+    "placeholder": "",
+    "alt": "",
+    "ariaLabel": "",
+    "role": "button"
+  },
+  {
+    "tag": "div",
+    "text": "Low-income, essentials-first, value-seeking.",
+    "id": "",
+    "className": "\n          group relative flex items-center justify-between gap-2 rounded-full border px-[18px] h-[34px] shadow-sm w-full\n          \n          bg-white border-[#C0C0C0] hover:bg-[#F1F1F1] cursor-pointer\n        ",
+    "placeholder": "",
+    "alt": "",
+    "ariaLabel": "",
+    "role": "button"
+  },
+  {
+    "tag": "button",
+    "text": "",
+    "id": "",
+    "className": "h-[28px] w-[28px] rounded-[8px] border border-transparent hover:bg-[#f9fafb] flex items-center justify-center",
+    "placeholder": "",
+    "alt": "",
+    "ariaLabel": "Edit attributes filter",
+    "role": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "id": "",
+    "className": "",
+    "placeholder": "",
+    "alt": "edit-filter",
+    "ariaLabel": "",
+    "role": ""
+  },
+  {
+    "tag": "button",
+    "text": "",
+    "id": "",
+    "className": "min-w-4 min-h-4 bg-white rounded-full p-[4.8px]",
+    "placeholder": "",
+    "alt": "",
+    "ariaLabel": "Remove Active Retail Investors",
+    "role": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "id": "",
+    "className": "",
+    "placeholder": "",
+    "alt": "remove-filter",
+    "ariaLabel": "",
+    "role": ""
+  },
+  {
+    "tag": "button",
+    "text": "",
+    "id": "",
+    "className": "min-w-4 min-h-4 bg-white rounded-full p-[4.8px]",
+    "placeholder": "",
+    "alt": "",
+    "ariaLabel": "Remove Digital Investment App Users",
+    "role": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "id": "",
+    "className": "",
+    "placeholder": "",
+    "alt": "remove-filter",
+    "ariaLabel": "",
+    "role": ""
+  },
+  {
+    "tag": "img",
+    "text": "",
+    "id": "",
+    "className": "",
+    "placeholder": "",
+    "alt": "remove-filters-icon",
+    "ariaLabel": "",
+    "role": ""
+  },
+  {
+    "tag": "button",
+    "text": "Cancel",
+    "id": "",
+    "className": "border border-[#D6D6D6] bg-[#F7F7F7] cursor-pointer transition duration-100 hover:bg-[#e8e6dc] active:bg-[#e8e6dc] active:scale-[0.98] hover:border-[hsla(30_3.3%_11.8%_/0)]'\n                    } relative peer rounded-[6px] px-[21px] h-[44px] md:h-[39px] text-[#000000] text-[16px] font-[500] w-full",
+    "placeholder": "",
+    "alt": "",
+    "ariaLabel": "",
+    "role": ""
+  },
+  {
+    "tag": "button",
+    "text": "Confirm",
+    "id": "",
+    "className": "bg-[#0c0c0c] transition-transform will-change-transform ease-&lsqb;cubic-bezier(0.165,0.85,0.45,1)&rsqb; duration-150 hover:scale-y-[1.015] hover:scale-x-[1.005] hover:bg-[radial-gradient(at_bottom,hsla(0_0%_100%_/0.20),hsla(0_0%_100%_/0))] active:bg-[radial-gradient(at_bottom,hsla(0_0%_100%_/0.28),hsla(0_0%_100%_/0))] relative peer rounded-[6px] px-[21px] h-[44px] md:h-[39px] text-white text-[16px] font-[500] w-full opacity-55",
+    "placeholder": "",
+    "alt": "",
+    "ariaLabel": "",
+    "role": ""
+  }
+]

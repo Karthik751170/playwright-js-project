@@ -255,12 +255,26 @@ flowchart TD
 
 ---
 
-### 📊 Interactive Evidence Dashboard
-Every security run produces an interactive visual report at:
-`test-results/security/owasp-enterprise-10-10-report.html`
+## 📊 How to View End-to-End Execution Reports & Artifacts
 
-- **Interactive Metric Cards**: Click on **"Passed Controls (29)"** or **"Hardening Recommendations (1)"** to instantly filter findings.
-- **Deep Proof Cards**: Every test displays **What Was Sent (Payload/URL)**, **Security Rationale**, **Expected vs. Actual Result**, and **Raw HTTP Headers/Evidence**.
+The repository generates rich standalone execution reports, video recordings, and trace artifacts across both survey automation and security testing.
+
+### 1. Survey Creation & Consumer Answering Execution Report
+Located in: [`Survey_100Users_Complete_Report_And_Videos/`](Survey_100Users_Complete_Report_And_Videos/) and root [`Standalone_Execution_Report.html`](Standalone_Execution_Report.html)
+
+* **`Standalone_Execution_Report.html`**:
+  * Double-click to open in any web browser (Chrome, Safari, Edge) or run `open Standalone_Execution_Report.html`.
+  * Displays the execution summary, slide-by-slide question analysis, chosen responses, and pass/fail statuses.
+* **`Consumer_Survey_Answering_Video.webm`**:
+  * Complete full-session screen recording of the Super J respondent answering all survey questions.
+* **`Hercules_B2B_Deployment_Video.webm`**:
+  * Full video recording of Hercules AI questionnaire creation, research brief compilation, and live survey deployment.
+* **`Playwright_Full_Interactive_Report/`**:
+  * Interactive native Playwright test report with timeline, step logs, and network trace viewer.
+
+### 2. Enterprise Security Audit Report (OWASP Top 10 + SQLi)
+Located in: [`test-results/security/owasp-enterprise-10-10-report.html`](test-results/security/owasp-enterprise-10-10-report.html)
+* Run `open test-results/security/owasp-enterprise-10-10-report.html` to view interactive metric cards, filterable results (`Passed (29)`, `Hardening (1)`, `Critical (0)`), and raw HTTP proof evidence.
 
 ---
 

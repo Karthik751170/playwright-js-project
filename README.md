@@ -111,253 +111,28 @@ flowchart TD
 
 ---
 
-## 📁 Repository Structure
+## 🧰 Architecture & Modular Subsystems
 
-```
-.
-├── .github/
-│   └── workflows/
-│       └── playwright.yml              # GitHub Actions CI/CD Pipeline
-├── base/
-│   └── BasePage.js                     # Base Playwright page wrapper with retry helpers
-├── pages/
-│   ├── LandingPage.js                  # Super J Consumer landing page
-│   ├── LoginPage.js                    # Super J OTP login page
-│   ├── SurveyPage.js                   # Super J active survey presentation
-│   ├── RewardPage.js                   # Super J wallet & reward claim
-│   ├── hercules/
-│   │   ├── HerculesHomePage.js         # Hercules B2B landing & sign-in
-│   │   ├── HerculesLoginPage.js        # Hercules B2B auth & token handler
-│   │   ├── HerculesSignupPage.js       # Hercules registration flow
-│   │   ├── HerculesSurveyGenerator.js  # AI questionnaire & prompt generation
-│   │   ├── HerculesLogicsWizardPage.js # 4-step logic wizard builder & parser
-│   │   ├── HerculesEditAudience.js     # Audience & demographic controls
-│   │   ├── HerculesPaymentModal.js     # Stripe / plan deployment modals
-│   │   └── HerculesCampaignManager.js  # Campaign & audience management
-│   └── utils/
-│       └── MailosaurUtility.js         # Disposable email & OTP/Magic-link handler
-├── tests/
-│   ├── DeploySurvey_Free100Users.spec.js # Full E2E Free 100 Deployment & Submission
-│   ├── ValidateHerculesLogics.spec.js    # Logic Rules Branching & Answering Validation
-│   ├── ValidateAllHerculesLogics.spec.js # Multi-rule permutation test suite
-│   ├── DeploySurvey_EditAudience_Validation.spec.js # Custom audience targeting test
-│   ├── DeploySurvey_NoEdit.spec.js       # Baseline deployment without audience edits
-│   ├── SurveyTest.spec.js                # Core Consumer Survey answering test
-│   ├── SuperJ_Answer6Surveys.spec.js     # Batch answering across 6 active surveys
-│   ├── SuperJ_EditProfileValidation.spec.js # Consumer profile field verification
-│   ├── SuperJ_CopyDIDValidation.spec.js  # Decentralized Identity (DID) clipboard test
-│   ├── HerculesCreateAccount.spec.js     # Fresh B2B account registration test
-│   ├── HerculesLoggedInFeaturesTest.spec.js # Saved audiences & campaign context menus
-│   ├── SurveyStarUnstarDelete.spec.js    # Dashboard survey lifecycle management
-│   ├── DuplicateAndSaveDraft.spec.js     # Draft survey duplication test
-│   ├── UpgradeToStarterPlan.spec.js      # Plan upgrade & Stripe modal test
-│   ├── CrawlHerculesB2B.spec.js          # Autonomous B2B portal route crawler
-│   └── utils/
-│       ├── MailosaurSetup.js           # Automated Mailosaur user provisioning
-│       └── SurveyPrompts.js            # Curated industry survey prompts
-└── utils/
-    ├── AnswerEngine.js                 # LLM-powered dynamic question solver
-    ├── ActiveQuestionFinder.js         # Resilient active slide locator & counter
-    ├── LiveAIAssistant.js              # Groq & Gemini LLM API orchestrator
-    ├── AIPromptGenerator.js            # Dynamic survey prompt provider
-    ├── OnboardingUtil.js               # Super J consumer onboarding automation
-    ├── DataGeneratorUtil.js            # Dynamic test data generator (phones, IDs)
-    ├── ElementDetector.js              # Question UI component & input detector
-    ├── NextButtonHandler.js            # Resilient CTA & navigation handler
-    ├── PermissionUtil.js               # Browser permissions & clipboard controller
-    ├── SurveyEngine.js                 # Survey lifecycle runner & coordinator
-    ├── UploadUtil.js                   # Media & file upload helper
-    └── WalletValidator.js              # Super J wallet balance & reward validator
-```
-
----
-
-## ⚙️ Environment Setup
-
-Create a `.env` file in the project root:
-
-```env
-# Primary LLM API Key (Required for AI answering & survey generation)
-GROQ_API_KEY=your_groq_api_key_here
-GROQ_API_KEY_2=your_fallback_groq_key   # Optional fallback key
-
-# Mailosaur Credentials (Required for zero-intervention auth)
-MAILOSAUR_API_KEY=your_mailosaur_api_key
-MAILOSAUR_SERVER_ID=kzdzyaot
-
-# Optional / Fallback notifications
-GEMINI_API_KEY=your_gemini_api_key_here
-GMAIL_USER=your_email@domain.com
-GMAIL_PASS=your_app_password
-```
-
----
-
-## 🛠️ Installation & Quickstart
-
-```bash
-# 1. Clone the repository
-git clone https://github.com/Karthik751170/playwright-js-project.git
-cd playwright-js-project
-
-# 2. Install dependencies
-npm install
-
-# 3. Install Playwright browser binaries & system dependencies
-npx playwright install --with-deps chromium
-```
-
----
-
-## 📊 Test Reporting & Observability
-
-The framework provides comprehensive, multi-layered test reporting configured via [`playwright.config.js`](playwright.config.js):
-
-### 1. Multi-Reporter Setup
-| Reporter | Destination | Description |
-| :--- | :--- | :--- |
-| **Playwright HTML** | `playwright-report/` | Interactive HTML report with step-by-step logs, execution timeline, DOM snapshots, and retry analysis. |
-| **Monocart Reporter** | `test-results/report.html` | Unified standalone single-page execution report featuring pass/fail statistics, suite breakdowns, and failure analysis. |
-| **Allure Reporter** | `allure-results/` / `allure-report/` | Enterprise test reporting with historical trend graphs, defect classification, and behavioral tags. |
-| **Console List** | stdout / terminal | Real-time terminal progress logger showing active test execution and duration. |
-
-### 2. Failure Diagnostics & Debugging Artifacts
-The framework automatically captures diagnostic data during test execution:
-- 📸 **Screenshots (`only-on-failure`)**: Captures full-page and element-level screenshots upon assertion failures.
-- 🎥 **Video Recording (`retain-on-failure`)**: Records high-resolution video of test execution for failing runs.
-- 🔍 **Playwright Trace (`retain-on-failure`)**: Records a step-by-step time-travel trace with network logs, console messages, and DOM snapshots.
-
-### 3. Viewing Reports & Traces
-
-```bash
-# Open interactive Playwright HTML report
-npx playwright show-report
-
-# Open Monocart dashboard report
-open test-results/report.html
-
-# View test trace for debugging (step-by-step DOM snapshots)
-npx playwright show-trace test-results/<test-run-folder>/trace.zip
-
-# Generate and view Allure Report
-npm run allure:generate
-npm run allure:open
-
-# Clean up old report artifacts
-npm run allure:clear
-```
-
-### 4. CI/CD Report Artifacts
-On every GitHub Actions run, the following reports are automatically archived as build artifacts (retained for 14 days):
-- `playwright-html-report` (`playwright-report/`)
-- `test-results` (`test-results/` with Monocart `report.html`, failure videos, screenshots, and traces)
-
----
-
-## 🧰 Utilities & Helper Modules
-
-The framework includes specialized utility classes located under `utils/`, `pages/utils/`, and `tests/utils/`:
+The framework is organized into modular subsystems across `utils/`, `pages/`, and `tests/`:
 
 ### Core Engine & AI Utilities (`utils/`)
-- **`AnswerEngine.js`**:
-  - The brain of autonomous survey solving.
-  - Dynamically inspects DOM elements for question structures: Single-Select, Multi-Select, Ranking Cards, Matrix Sliders, and Open-Ended Textareas.
-  - Generates context-aware prompts and communicates with Groq LLM (`llama-3.3-70b-versatile`) to produce human-like answers.
-  - Supports condition-aware answering (`getAiContext()`) to qualify for surveys and avoid disqualification/termination rules.
-- **`ActiveQuestionFinder.js`**:
-  - Resilient locator utility that identifies the currently active question slide in the DOM.
-  - Computes progress metadata (e.g., current slide number and total slide count `slideNumber/totalSlides`).
-- **`LiveAIAssistant.js`**:
-  - LLM orchestrator handling API communication with Groq and Google Gemini.
-  - Implements retry logic, rate-limit fallback across multiple API keys (`GROQ_API_KEY`, `GROQ_API_KEY_2`), and structured output parsing.
-- **`SurveyEngine.js`**:
-  - High-level coordinator managing survey transitions, loop guards against stuck slides, and end-of-survey completion detection.
-- **`AIPromptGenerator.js`**:
-  - Generates dynamic, realistic market research survey briefs for automated testing on Hercules B2B.
+- **`AnswerEngine.js`**: The central brain that dynamically inspects DOM elements, builds prompts, and executes clicks/inputs via Groq LLM.
+- **`ActiveQuestionFinder.js`**: Identifies active question slides in the DOM, accounts for responsive viewport boundaries, and tracks progress metadata (`slideNumber/totalSlides`).
+- **`LiveAIAssistant.js`**: LLM orchestrator handling API communication with Groq (`Llama 3.3 / GPT-OSS`), rate-limit fallbacks, and structured JSON parsing.
+- **`SurveyEngine.js`**: High-level coordinator managing survey transitions, loop guards, and completion validation.
+- **`AIPromptGenerator.js`**: Generates dynamic, realistic market research survey briefs for automated testing on Hercules B2B.
 
 ### User Flow & Interaction Utilities (`utils/`)
-- **`OnboardingUtil.js`**:
-  - Automates the complete consumer onboarding funnel on Super J: birth year selection, dynamic city search/selection (e.g., Pune, Mumbai, Delhi), gender selection, and terms confirmation.
-- **`DataGeneratorUtil.js`**:
-  - Generates random, realistic test data including valid Indian phone numbers (`+91XXXXXXXXXX`), unique usernames, and email aliases.
-- **`ElementDetector.js`**:
-  - Inspects complex DOM elements and detects interactive components (chips, sliders, rating stars, radio buttons).
-- **`NextButtonHandler.js`**:
-  - Resilient CTA locator supporting multiple button text variations (`Next`, `Continue`, `Submit`, `Finish`) and handles overlay blocking/scrolling.
-- **`PermissionUtil.js`**:
-  - Programmatically grants browser context permissions (such as `clipboard-read`, `clipboard-write`, and geolocation).
-- **`UploadUtil.js`**:
-  - Automates file input and media attachment uploads for question types requiring file submissions.
-- **`WalletValidator.js`**:
-  - Validates Super J reward token distribution, wallet balance updates, and transaction history assertions following survey completion.
+- **`OnboardingUtil.js`**: Automates consumer demographic onboarding on Super J (birth year, dynamic city selection, gender, terms confirmation).
+- **`DataGeneratorUtil.js`**: Generates realistic test data (valid Indian phone numbers, unique usernames, aliases).
+- **`ElementDetector.js`**: Identifies interactive components (chips, sliders, rating stars, radio buttons).
+- **`NextButtonHandler.js`**: Resilient CTA handler supporting all button variations (`Next`, `Continue`, `Submit`, `Finish`).
+- **`WalletValidator.js`**: Validates Super J reward token distribution and wallet balance updates.
+- **`MailosaurUtility.js`**: Manages disposable email inboxes, link extractions, and zero-touch authentication.
 
-### Authentication & Test Data Utilities (`pages/utils/` & `tests/utils/`)
-- **`MailosaurUtility.js` / `MailosaurSetup.js`**:
-  - Provides zero-intervention email testing using Mailosaur.
-  - Dynamically creates disposable email addresses, polls Mailosaur inboxes via API, parses verification links/OTPs, and injects JWT authorization headers directly.
-- **`SurveyPrompts.js`**:
-  - A curated repository of diverse market research prompts across industries (SaaS, FMCG, Gaming, FinTech, E-commerce, Health) used for randomized survey creation.
+### Page Models & Workflows (`pages/`)
+- **`HerculesSurveyGenerator.js`**: Automates AI questionnaire handling, prompt refinement, and Research Brief generation on Hercules B2B.
+- **`HerculesLogicsWizardPage.js`**: Parses and constructs conditional survey branching logic (Skip, Redirect, Filter, Ask Why, Terminate).
+- **`LoginPage.js` & `LandingPage.js`**: Handles Super J consumer authentication via phone and OTP.
+- **`SurveyPage.js` & `RewardPage.js`**: Coordinates active survey presentation, wallet rewards, and completion flows.
 
----
-
-## 🧪 Running Test Suites
-
-### 1. Free 100 Users Deployment & Completion Test (Flagship)
-Deploys a survey to 100 users for free on Hercules B2B, extracts the live Super J survey link, onboards a fresh consumer via Mailosaur, autonomously answers all questions via AI, and verifies the recorded response count on B2B.
-
-```bash
-# Headed mode (browser UI visible)
-npx playwright test tests/DeploySurvey_Free100Users.spec.js --headed
-
-# Headless mode (default with HTML + Monocart report generation)
-npx playwright test tests/DeploySurvey_Free100Users.spec.js
-```
-
-### 2. Survey Conditional Logic & Branching Validation
-Validates all 5 logic rule permutations (Skip, Redirect, Filter, Ask Why, Terminate) using dual-pass AI execution.
-
-```bash
-npx playwright test tests/ValidateHerculesLogics.spec.js --headed
-```
-
-### 3. Consumer App Live Survey Answering
-Tests live survey answering workflows on Super J consumer application.
-
-```bash
-npx playwright test tests/SurveyTest.spec.js --headed
-```
-
-### 4. Audience Targeting & Demographics Test
-Tests B2B audience demographic filters (location, age, gender, education, income).
-
-```bash
-npx playwright test tests/DeploySurvey_EditAudience_Validation.spec.js --headed
-```
-
-### 5. Running All Tests
-```bash
-npx playwright test
-```
-
----
-
-## 🔄 CI/CD Automation (GitHub Actions)
-
-The workflow file [`.github/workflows/playwright.yml`](.github/workflows/playwright.yml) runs in the cloud automatically.
-
-### Configuring Secrets on GitHub:
-Navigate to **Repository Settings ➡️ Secrets and variables ➡️ Actions** and add:
-- `GROQ_API_KEY` (or `GROQ_API_KEY_2`)
-- `MAILOSAUR_API_KEY`
-- `MAILOSAUR_SERVER_ID`
-- `GMAIL_USER` *(optional)*
-- `GMAIL_PASS` *(optional)*
-
-### Running via Manual Dispatch:
-1. Go to the **Actions** tab on GitHub.
-2. Select **Playwright E2E Tests**.
-3. Click **Run workflow** and choose your desired test suite from the dropdown:
-   - `deploy-free-100-users` *(Default)*
-   - `validate-logics`
-   - `survey-test`
-   - `all`

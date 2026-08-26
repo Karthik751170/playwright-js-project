@@ -17,9 +17,6 @@ Designed to autonomously test the complete survey lifecycle across both **Hercul
   - **Visual Image Recognition**: Detects, decodes, and identifies photos of animals, birds, products, and objects from Next.js and Cloud Storage URLs to accurately answer image identification checks.
   - **Audio & Sound-to-Picture Matching**: Autonomously triggers audio playback, extracts acoustic metadata / Whisper transcripts, and selects the matching picture option via Groq AI.
   - **Video Attention-Check Handling**: Detects HTML5 video players, automates playback, extracts multi-animal visual and audio cues from video streams, and solves video sound/visual questions with 100% accuracy.
-- ⚡ **Seamless 100-User Free Deployment Flow**:
-  - Directly targets survey card deployment triggers to launch surveys to 100 users for free.
-  - Automatically bridges the B2B draft survey to the live Super J consumer environment.
 - 📩 **Zero-Intervention Authentication (`MailosaurUtility.js`)**:
   - Programmatically provisions disposable email inboxes on Mailosaur (`@kzdzyaot.mailosaur.net`).
   - Extracts email verification links, parses JWT tokens, and handles authentication without manual interaction.

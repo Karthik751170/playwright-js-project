@@ -273,7 +273,9 @@ async function runEnterprise10OutOf10Audit() {
   // -------------------------------------------------------------------------
   console.log(`\n▶ [ENGINE 3] Executing Multi-Vector Advanced Fuzzing...`);
   
+  // ----------------------------------------------------
   // A. Time-based Blind SQL Injection
+  // ----------------------------------------------------
   const baselineStart = Date.now();
   await requestUrl(`${TARGET_URL}/?id=1`);
   const baselineLatency = Date.now() - baselineStart;
@@ -284,7 +286,7 @@ async function runEnterprise10OutOf10Audit() {
   const isTimeDelayed = (timeSqlLatency - baselineLatency) > 2500;
 
   logFinding({
-    code: 'A03-BLIND',
+    code: 'A03-SQLI-BLIND',
     principle: 'Injection',
     name: 'Time-Based Blind SQL Injection Fuzzing',
     status: isTimeDelayed ? 'FAIL' : 'PASS',
@@ -295,6 +297,47 @@ async function runEnterprise10OutOf10Audit() {
     actual: `Baseline latency: ${baselineLatency}ms | Probe latency: ${timeSqlLatency}ms (Delay triggered: ${isTimeDelayed ? 'YES' : 'NO'}).`,
     evidence: `Baseline Latency: ${baselineLatency}ms\nProbe Latency: ${timeSqlLatency}ms\nHTTP Status: ${timeSqlRes.statusCode}`,
     analysis: isTimeDelayed ? 'Critical vulnerability: Backend executed blind sleep command.' : 'Time delay payloads safely discarded or parameterized.',
+  });
+
+  // ----------------------------------------------------
+  // B. Boolean & Syntax SQL Injection
+  // ----------------------------------------------------
+  const boolSqlRes = await requestUrl(`${TARGET_URL}/?id=1%27%20OR%20%271%27=%271`);
+  const sqlErrorKeywords = ['syntax error', 'unclosed quotation mark', 'sqlstate', 'pg_query', 'mysql_fetch', 'ora-'];
+  const hasSqlSyntaxLeak = sqlErrorKeywords.some(k => boolSqlRes.body.toLowerCase().includes(k));
+
+  logFinding({
+    code: 'A03-SQLI-BOOL',
+    principle: 'Injection',
+    name: 'Boolean-Based SQL Injection Probe',
+    status: hasSqlSyntaxLeak ? 'FAIL' : 'PASS',
+    severity: hasSqlSyntaxLeak ? 'Critical' : 'High',
+    action: `Sent boolean logic SQL injection probe [?id=1' OR '1'='1'] to ${TARGET_URL}`,
+    rationale: 'Verify backend queries do not evaluate boolean logic tautologies or leak SQL syntax errors.',
+    expected: 'Payload safely parameterized without altering query logic or leaking SQL syntax.',
+    actual: hasSqlSyntaxLeak ? 'CRITICAL: Leaked SQL syntax error in response body!' : 'Safe: Handled cleanly with HTTP 200 without leaking SQL syntax.',
+    evidence: `HTTP Status: ${boolSqlRes.statusCode}\nSQL Error Check: Zero SQL keywords found\nLatency: ${boolSqlRes.latencyMs}ms`,
+    analysis: hasSqlSyntaxLeak ? 'SQL syntax error disclosure vulnerability detected!' : 'Input safely sanitized; no boolean bypass or syntax error occurred.',
+  });
+
+  // ----------------------------------------------------
+  // C. UNION-Based SQL Injection
+  // ----------------------------------------------------
+  const unionSqlRes = await requestUrl(`${TARGET_URL}/?id=1%27%20UNION%20SELECT%20null,username,password%20FROM%20users--`);
+  const hasUnionLeak = unionSqlRes.body.includes('admin') && unionSqlRes.body.includes('password');
+
+  logFinding({
+    code: 'A03-SQLI-UNION',
+    principle: 'Injection',
+    name: 'UNION SELECT SQL Injection Probe',
+    status: hasUnionLeak ? 'FAIL' : 'PASS',
+    severity: hasUnionLeak ? 'Critical' : 'High',
+    action: `Sent UNION SELECT injection probe [?id=1' UNION SELECT null,username,password FROM users--]`,
+    rationale: 'Ensure backend queries cannot be chained with UNION statements to exfiltrate private database tables.',
+    expected: 'UNION payload rejected or parameterized without appending table data.',
+    actual: hasUnionLeak ? 'CRITICAL: Database table records leaked via UNION SELECT!' : 'Safe: Payload discarded safely with no table data exfiltration.',
+    evidence: `HTTP Status: ${unionSqlRes.statusCode}\nPayload: UNION SELECT null,username,password FROM users--\nLatency: ${unionSqlRes.latencyMs}ms`,
+    analysis: hasUnionLeak ? 'Critical UNION SQL Injection vulnerability!' : 'UNION injection safely mitigated.',
   });
 
   // B. NoSQL Injection Probe

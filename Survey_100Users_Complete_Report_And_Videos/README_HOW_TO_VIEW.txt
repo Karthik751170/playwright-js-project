@@ -16,12 +16,16 @@ WHAT IS IN THIS FOLDER:
 3. Hercules_B2B_Deployment_Video.webm:
    - Video recording of Hercules AI questionnaire, research brief compilation, and survey deployment.
 
-4. Playwright_Full_Interactive_Report/:
+4. OWASP_Enterprise_Security_Audit_Report.html:
+   - Double-click to open in any web browser.
+   - Interactive security audit report (97% Compliance, Grade A+) with clickable filters, multi-vector SQL injection evidence, and OWASP Top 10 breakdown.
+
+5. Playwright_Full_Interactive_Report/:
    - Full native Playwright HTML interactive report with timeline and trace data.
 
-5. GITHUB_REPOSITORY_LINK.txt & GitHub_Repository.url:
+6. GITHUB_REPOSITORY_LINK.txt & GitHub_Repository.url:
    - Direct link and shortcut to the project repository on GitHub.
 
-6. survey_test_report.zip:
+7. survey_test_report.zip:
    - Complete zipped bundle of all report files and videos for easy 1-click downloading.
 ==================================================================

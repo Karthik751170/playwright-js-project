@@ -37,6 +37,55 @@ Designed to autonomously test the complete survey lifecycle across both **Hercul
 
 ---
 
+## 🔄 Complete End-to-End Workflow: Hercules B2B ➔ Super J Consumer
+
+This framework provides a true **closed-loop, end-to-end automation pipeline** connecting survey creators on **Hercules B2B** with consumers answering on **Super J**:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Creator as 🏢 Hercules B2B (Creator)
+    participant HApp as 🚀 Hercules Platform
+    participant AI as 🧠 Groq AI Engine
+    participant SApp as 📱 Super J App
+    actor Respondent as 👤 Super J (Consumer Respondent)
+
+    Note over Creator,HApp: Phase 1: Survey Creation & Logic Design
+    Creator->>HApp: Provide AI Research Brief / Survey Prompt
+    HApp->>AI: Generate Dynamic Question Schema & Choices
+    AI-->>HApp: Structured Survey Questionnaire
+    Creator->>HApp: Configure Advanced Branching Logics (Skip, Redirect, Terminate)
+    Creator->>HApp: Define Target Audience (Demographics, Geo, Age) & Deploy
+    HApp-->>Creator: Deployed Live Survey Share URL
+
+    Note over Respondent,SApp: Phase 2: Autonomous Survey Answering
+    Respondent->>SApp: Launch Survey via Generated Hercules Share URL
+    SApp->>SApp: Zero-Touch Auth / Onboarding via Mailosaur
+    loop For Every Survey Slide
+        SApp->>AI: Extract DOM Schema & Multimodal Media (Image, Audio, Video)
+        AI-->>SApp: Deterministic Qualifying Answer Selection
+        SApp->>SApp: Execute Click / Input & Handle Next CTA
+    end
+    SApp->>HApp: Submit Completed Response Payload
+    SApp->>Respondent: Credit Reward Tokens to Wallet (WalletValidator)
+```
+
+### 1. Survey Creation on Hercules B2B (`pages/HerculesSurveyGenerator.js`, `pages/HerculesLogicsWizardPage.js`)
+* **AI Questionnaire Generation**: Takes natural language research goals (e.g. *"Brand perception survey for Gen Z energy drinks"*) and prompts Groq AI to structure multi-slide questionnaires.
+* **Conditional Branching Logics**: Autonomously configures and tests complex survey rules:
+  * **Skip Logic**: Jump forward to specific slides based on selected answers.
+  * **Ask Why / Follow-up**: Dynamically reveals conditional textarea prompts when specific ratings/options are selected.
+  * **Redirect & Terminate**: Diverts non-qualifying respondent profiles cleanly.
+* **Audience Targeting & Deployment**: Configures sample sizes (e.g. 100 users), demographic criteria, and publishes the live campaign to generate shareable survey links.
+
+### 2. Autonomous Answering on Super J (`utils/AnswerEngine.js`, `utils/SurveyEngine.js`)
+* **Identity Provisioning**: Generates unique disposable consumer identities via Mailosaur and completes demographic onboarding (Birth year, Gender, City, Terms).
+* **Live Survey Ingestion**: Takes the URL deployed in Hercules and opens the respondent interface in Super J.
+* **Multimodal Answering Engine**: Autonomously inspects each slide, solves attention checks (identifying pictures, transcribing audio clips, and parsing compound video streams), and selects qualifying responses.
+* **Verification & Rewards**: Submits responses, verifies that Hercules receives the response payload, and validates that Super J reward tokens are correctly credited to the respondent's wallet balance.
+
+---
+
 ## 🧠 Multimodal Attention-Check & Media Handling Details
 
 Surveys on Super J deploy **quality-control and attention-check questions** to prevent automated bots and inattentive users from submitting invalid data. The framework uses a specialized multimodal engine built into [`utils/AnswerEngine.js`](utils/AnswerEngine.js) and [`utils/LiveAIAssistant.js`](utils/LiveAIAssistant.js):

@@ -15,10 +15,6 @@ class RewardPage extends BasePage {
     console.log(`[RewardPage] Verifying Reward Screen... Expected Type: ${rewardInfo.type || 'UNKNOWN'}`);
     console.log("==================================");
 
-    // Pause execution here to let the user inspect the screen using Playwright Inspector
-    console.log("[RewardPage] Pausing execution for manual inspection. Click Resume in Playwright Inspector to proceed.");
-    await this.page.pause();
-
     // Allow reward screen transition to complete
     await this.page.waitForTimeout(3000);
     const currentUrl = this.page.url();

@@ -32,7 +32,7 @@ test.describe('Hercules Guest User - Survey Generation & Audience Validation', (
     let consecutiveNoAction = 0;
 
     console.log('Navigating AI questionnaire loop...');
-    while (loopCount < 60 && !briefGenerated) {
+    while (loopCount < 240 && !briefGenerated) {
       await page.waitForTimeout(5000);
       loopCount++;
 

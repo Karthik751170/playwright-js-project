@@ -1,13 +1,24 @@
 services:
+  zap:
+    image: ghcr.io/zaproxy/zaproxy:stable
+    container_name: zap_daemon
+    command: zap.sh -daemon -host 0.0.0.0 -port 8080 -config api.disablekey=true -config api.addrs.addr.name=.* -config api.addrs.addr.regex=true
+    ports:
+      - "8080:8080"
+
   playwright-tests:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: playwright_automation
+    depends_on:
+      - zap
     env_file:
       - .env
     environment:
       - CI=true
+      - ZAP_URL=http://zap:8080
+      - ZAP_PROXY_URL=http://zap:8080
     volumes:
       - ./playwright-report:/app/playwright-report
       - ./test-results:/app/test-results

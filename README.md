@@ -133,3 +133,71 @@ The framework is organized into modular subsystems across `utils/`, `pages/`, an
 - **`LoginPage.js` & `LandingPage.js`**: Handles Super J consumer authentication via phone and OTP.
 - **`SurveyPage.js` & `RewardPage.js`**: Coordinates active survey presentation, wallet rewards, and completion flows.
 
+---
+
+## 🛡️ Enterprise Security Testing & OWASP Top 10 Suite
+
+The framework includes a **10/10 Enterprise-Grade Security Audit & Vulnerability Scanning Suite** designed to continuously validate web applications (default: `https://dev.hercules.works`) against all **OWASP Top 10 (2021/2026)** security principles, modern transport standards, and injection attack vectors.
+
+```mermaid
+flowchart TD
+    A[npm run audit:owasp-full] --> B{Multi-Vector Security Engine}
+    B --> C[TLS 1.2/1.3 & SSL Cert Engine]
+    B --> D[Frontend JS Secret & Key Scraper]
+    B --> E[SQL Injection & Blind Time-Delay Fuzzer]
+    B --> F[NoSQL & CRLF Header Injection]
+    B --> G[OWASP Top 10 A01-A10 + CORS Checks]
+    B --> H[Software Composition Analysis npm audit]
+    
+    C & D & E & F & G & H --> I[Interactive Evidence Dashboard]
+    I --> J[test-results/security/owasp-enterprise-10-10-report.html]
+```
+
+### 🔍 Security Testing Engines
+
+1. **💉 Multi-Vector SQL Injection Engine (`A03-BLIND`, `A03`)**:
+   - **Time-Based Blind SQLi**: Establishes latency baselines and tests for asynchronous database execution of sleep vectors (`SLEEP(3)`, `pg_sleep(3)`).
+   - **Error-Based SQL Injection**: Injects union and boolean syntax payloads (`1' OR '1'='1`, `test'"`) to detect leaked database syntax or backend exception strings.
+   - **Targeted Active Scan**: Powered by OWASP ZAP rules specifically targeting MySQL (`40019`), PostgreSQL (`40022`), SQLite (`40024`), MSSQL (`40027`), and Oracle (`40021`).
+2. **🕵️ Frontend JS Secret & Token Scraper (`SEC-01`)**:
+   - Automatically parses and downloads production Next.js React bundles (`/_next/static/chunks/*.js`).
+   - Scans with regex detectors for accidentally leaked **AWS Access Keys, Stripe Secret Keys, Private API Tokens, and Webhooks**.
+3. **🔐 TLS Certificate & Protocol Engine (`TLS-01`, `TLS-02`)**:
+   - Validates live TLS handshake ciphers (ensuring legacy SSLv3, TLS 1.0, TLS 1.1 are disabled).
+   - Inspects certificate chains, Subject Alternative Names (SAN), CA issuer, and days remaining until expiration.
+4. **⚡ NoSQL & CRLF Header Injection (`A03-NOSQL`, `A03-CRLF`)**:
+   - Tests parameter handling for NoSQL operator injection (`$ne`, `$gt`) and HTTP response header splitting (`%0d%0aSet-Cookie:`).
+5. **🛡️ 360° OWASP Top 10 Controls**:
+   - **A01 Broken Access Control**: Verifies client-side route guards on protected views (`/ai`, `/dashboard`, `/settings`) and ensures internal paths (`/api/user`, `/admin`) return `404`.
+   - **A02 Cryptographic Failures**: Enforces HSTS (`max-age=63072000; includeSubDomains; preload`) and plaintext HTTP port closure.
+   - **A05 Security Misconfiguration**: Verifies CSP, Clickjacking protection (`X-Frame-Options: DENY`), MIME sniffing (`nosniff`), and blocked access to sensitive configuration files (`.env`, `.git`, `wp-config.php`, `config.json`, `server.js`).
+   - **A06 Software Composition Analysis**: Executes automated `npm audit` to detect dependency CVEs.
+   - **A07 Authentication & Cookie Flags**: Enforces `Secure`, `HttpOnly`, and `SameSite` on cookies.
+   - **A09 Error & Exception Masking**: Verifies malformed URI traversal (`%c0%ae`) returns clean error pages without stack trace disclosure.
+   - **A10 SSRF & Open Redirects**: Tests callback and AWS internal metadata IP redirection (`169.254.169.254`).
+   - **CORS Security**: Verifies untrusted origin reflection with credentials is strictly rejected.
+
+---
+
+### 🚀 Security Execution Commands
+
+| Command | Description |
+| :--- | :--- |
+| `npm run audit:owasp-full` | **Executes the 10/10 Enterprise Security Audit** across all 30 controls in ~4s and generates the interactive HTML dashboard. |
+| `npm run test:security:sqli-ssrf` | Runs targeted **SQL Injection & SSRF Penetration Fuzzing** via Playwright + OWASP ZAP. |
+| `npm run test:security:passive` | Runs Playwright browser flows through OWASP ZAP passive proxy inspection. |
+| `npm run test:security:active` | Runs full active vulnerability fuzzing via OWASP ZAP. |
+| `npm run audit:security` | Runs the lightweight baseline security headers & cookie audit. |
+| `npm run zap:start` | Launches the headless OWASP ZAP daemon container via Docker. |
+| `npm run zap:stop` | Gracefully stops the OWASP ZAP container. |
+
+---
+
+### 📊 Interactive Evidence Dashboard
+Every security run produces an interactive visual report at:
+`test-results/security/owasp-enterprise-10-10-report.html`
+
+- **Interactive Metric Cards**: Click on **"Passed Controls (29)"** or **"Hardening Recommendations (1)"** to instantly filter findings.
+- **Deep Proof Cards**: Every test displays **What Was Sent (Payload/URL)**, **Security Rationale**, **Expected vs. Actual Result**, and **Raw HTTP Headers/Evidence**.
+
+

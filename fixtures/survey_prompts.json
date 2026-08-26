@@ -40,10 +40,6 @@
     "description": "We are conducting a survey to gather insights on feature request within the E-commerce sector. Your feedback will help us improve our offerings and better serve your needs."
   },
   {
-    "title": "Actionable E-commerce Post-Purchase Experience Survey",
-    "description": "We are conducting a survey to gather insights on post-purchase experience within the E-commerce sector. Your feedback will help us improve our offerings and better serve your needs."
-  },
-  {
     "title": "Comprehensive Technology Customer Satisfaction Survey",
     "description": "We are conducting a survey to gather insights on customer satisfaction within the Technology sector. Your feedback will help us improve our offerings and better serve your needs."
   },
@@ -146,10 +142,6 @@
   {
     "title": "Quick Real Estate Product Feedback Survey",
     "description": "We are conducting a survey to gather insights on product feedback within the Real Estate sector. Your feedback will help us improve our offerings and better serve your needs."
-  },
-  {
-    "title": "Annual Real Estate Market Research Survey",
-    "description": "We are conducting a survey to gather insights on market research within the Real Estate sector. Your feedback will help us improve our offerings and better serve your needs."
   },
   {
     "title": "Quarterly Real Estate Brand Awareness Survey",
@@ -264,10 +256,6 @@
     "description": "We are conducting a survey to gather insights on product feedback within the Travel sector. Your feedback will help us improve our offerings and better serve your needs."
   },
   {
-    "title": "Quarterly Travel Brand Awareness Survey",
-    "description": "We are conducting a survey to gather insights on brand awareness within the Travel sector. Your feedback will help us improve our offerings and better serve your needs."
-  },
-  {
     "title": "Detailed Travel Pricing Strategy Survey",
     "description": "We are conducting a survey to gather insights on pricing strategy within the Travel sector. Your feedback will help us improve our offerings and better serve your needs."
   },
@@ -288,20 +276,12 @@
     "description": "We are conducting a survey to gather insights on pricing strategy within the Logistics sector. Your feedback will help us improve our offerings and better serve your needs."
   },
   {
-    "title": "Strategic Logistics Feature Request Survey",
-    "description": "We are conducting a survey to gather insights on feature request within the Logistics sector. Your feedback will help us improve our offerings and better serve your needs."
-  },
-  {
     "title": "Insightful Logistics Service Quality Survey",
     "description": "We are conducting a survey to gather insights on service quality within the Logistics sector. Your feedback will help us improve our offerings and better serve your needs."
   },
   {
     "title": "Comprehensive Marketing Customer Satisfaction Survey",
     "description": "We are conducting a survey to gather insights on customer satisfaction within the Marketing sector. Your feedback will help us improve our offerings and better serve your needs."
-  },
-  {
-    "title": "In-depth Marketing Employee Engagement Survey",
-    "description": "We are conducting a survey to gather insights on employee engagement within the Marketing sector. Your feedback will help us improve our offerings and better serve your needs."
   },
   {
     "title": "Quick Marketing Product Feedback Survey",
@@ -398,10 +378,6 @@
   {
     "title": "Detailed Cybersecurity Pricing Strategy Survey",
     "description": "We are conducting a survey to gather insights on pricing strategy within the Cybersecurity sector. Your feedback will help us improve our offerings and better serve your needs."
-  },
-  {
-    "title": "Strategic Cybersecurity Feature Request Survey",
-    "description": "We are conducting a survey to gather insights on feature request within the Cybersecurity sector. Your feedback will help us improve our offerings and better serve your needs."
   },
   {
     "title": "Actionable Cybersecurity Post-Purchase Experience Survey",

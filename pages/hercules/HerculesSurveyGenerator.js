@@ -17,10 +17,14 @@ class HerculesSurveyGenerator extends BasePage {
     this.confirmBtn = page.locator('button').filter({ hasText: /^Confirm$|^Submit$|^Next$|^Continue$|^Finish$/i });
     
     // Headers & Options
-    this.selectAllThatApplyHeader = page.locator("//h2[contains(text(),'Select all that apply.')]");
-    this.multiSelectOptions = page.locator("[class='group relative flex items-center justify-between w-full text-left px-[16px] py-[9px] min-h-[44px] rounded-[12px] transition-colors duration-[120ms] focus:outline-none focus-visible:outline-none hover:bg-[#FAFAFB]']");
-    this.singleOptionList = page.locator("[class='group relative flex items-center justify-between w-full text-left px-[16px] py-[9px] min-h-[44px] rounded-[12px] transition-colors duration-[120ms] focus:outline-none focus-visible:outline-none hover:bg-[#FAFAFB]']"); // Reusing class for single options based on E2E test logic
-    this.textInput = page.locator('input[placeholder="Add your own…"]');
+    this.selectAllThatApplyHeader = page.locator("//h2[contains(text(),'Select all that apply.')]").or(page.locator("h2, h3").filter({ hasText: /select all/i }));
+    // NOTE: do NOT include the inner circle indicator (e.g. "[class*='flex-shrink-0']
+    // [class*='rounded-full']") here — that span lives INSIDE each option, so including it
+    // double-counts every option, inflates the count, and makes indices land on non-clickable
+    // spans (symptom: option text logged as "" or a single stray letter).
+    this.multiSelectOptions = page.locator("[data-qna-option='true']").or(page.locator("[class*='group relative flex items-center justify-between']"));
+    this.singleOptionList = page.locator("[data-qna-option='true']").or(page.locator("[class*='group relative flex items-center justify-between']"));
+    this.textInput = page.locator('input[placeholder="Add your own…"]').or(page.locator('input[placeholder*="Add your" i]'));
     
     // Other Questionnaire Buttons
     this.nextQuestionBtn = page.locator('button[aria-label="Next question"]');
@@ -51,6 +55,17 @@ class HerculesSurveyGenerator extends BasePage {
   async clickNext() {
     console.log('[HerculesSurveyGenerator] Clicking Next button...');
     await this.clickIfVisible(this.nextBtn.first());
+  }
+
+  /**
+   * Resolves the option list using EXACTLY ONE strategy so that count and nth() indices always
+   * line up. The app tags real choices with data-qna-option="true"; prefer that and only fall
+   * back to the class-based row selector when the attribute isn't present.
+   */
+  async resolveOptions() {
+    const tagged = this.page.locator("[data-qna-option='true']");
+    if (await tagged.count() > 0) return tagged;
+    return this.page.locator("[class*='group relative flex items-center justify-between']");
   }
 
   async getActiveQuestionText(defaultText = "Please answer the survey question.") {
@@ -88,37 +103,59 @@ class HerculesSurveyGenerator extends BasePage {
       return false; // Not found
     }
 
-    console.log('[HerculesSurveyGenerator] Found multi-select question! Handling AI selection...');
-    
     // Extract question text dynamically for the current active question
     const questionText = await this.getActiveQuestionText("Select all that apply.");
+    if (this.lastAnsweredQuestion === questionText) {
+      console.log(`[HerculesSurveyGenerator] Question "${questionText.substring(0, 30)}..." was already answered. Skipping repeat.`);
+      return false;
+    }
 
-    // Get total number of options
-    const optionsCount = await this.multiSelectOptions.count();
+    console.log('[HerculesSurveyGenerator] Found multi-select question! Handling AI selection...');
+
+    // Get total number of options (single resolution strategy — see resolveOptions())
+    const optionsLocator = await this.resolveOptions();
+    const optionsCount = await optionsLocator.count();
     if (optionsCount === 0) return false;
 
     // Extract options text
     const options = [];
     for (let i = 0; i < optionsCount; i++) {
-      options.push(await this.multiSelectOptions.nth(i).innerText());
+      options.push((await optionsLocator.nth(i).innerText().catch(() => '')).trim());
     }
 
     const aiContext = contextText || testData.surveyContext.fallbackText;
     const response = await LiveAIAssistant.answerQuestion(aiContext, questionText, 'multi', options);
     
-    let indicesToClick = response.indices || [0];
-    console.log(`[HerculesSurveyGenerator] AI selected indices: ${indicesToClick.join(', ')}`);
+    // De-dupe and keep only valid indices. The AI (or its fallback) sometimes returns a single
+    // index — for a "Select all that apply" question we must select MULTIPLE options, so top up
+    // to at least 2 whenever the question actually offers 2 or more choices.
+    let indicesToClick = [...new Set(Array.isArray(response.indices) ? response.indices : [0])]
+        .filter(i => Number.isInteger(i) && i >= 0 && i < optionsCount);
+    if (indicesToClick.length === 0) indicesToClick = [0];
+    for (let i = 0; indicesToClick.length < 2 && i < optionsCount; i++) {
+      if (!indicesToClick.includes(i)) indicesToClick.push(i);
+    }
+    console.log(`[HerculesSurveyGenerator] AI selected indices: ${indicesToClick.join(', ')} (of ${optionsCount} options)`);
 
     for (const index of indicesToClick) {
       if (index >= 0 && index < optionsCount) {
-        console.log(`[HerculesSurveyGenerator] Clicking option: "${options[index]}"`);
-        await this.multiSelectOptions.nth(index).click();
+        console.log(`[HerculesSurveyGenerator] Clicking option ${index}: "${options[index]}"`);
+        await optionsLocator.nth(index).click().catch(() => {});
         await this.page.waitForTimeout(500); // small delay between clicks
       }
     }
 
     console.log('[HerculesSurveyGenerator] Selection complete. Clicking Confirm button...');
-    await this.confirmBtn.click();
+    const confirmButton = this.page.locator("button:has-text('Confirm'), button:has-text('Next'), button:has-text('Submit'), button:has-text('Continue')").first();
+    if (await confirmButton.isVisible({ timeout: 4000 }).catch(() => false)) {
+      await confirmButton.click({ timeout: 4000 }).catch(async () => {
+        await confirmButton.click({ force: true }).catch(() => {});
+      });
+    } else {
+      console.log("[HerculesSurveyGenerator] Confirm button not visible, continuing...");
+    }
+    this.lastAnsweredQuestion = questionText;
+    await this.page.waitForTimeout(1000);
     return true;
   }
 
@@ -128,19 +165,24 @@ class HerculesSurveyGenerator extends BasePage {
    */
   async handleSingleSelect(contextText = null) {
     console.log('[HerculesSurveyGenerator] Checking for single-select fallback options...');
-    if (await this.singleOptionList.count() > 0 && await this.singleOptionList.first().isVisible()) {
-      console.log("[HerculesSurveyGenerator] Found single-select options! Asking AI for selection...");
-      
-      const count = await this.singleOptionList.count();
+    const optionsLocator = await this.resolveOptions();
+    if (await optionsLocator.count() > 0 && await optionsLocator.first().isVisible().catch(() => false)) {
+      const count = await optionsLocator.count();
       if (count === 0) return false;
 
       // Extract question text dynamically for the current active question
       const questionText = await this.getActiveQuestionText("Select one option.");
+      if (this.lastAnsweredQuestion === questionText) {
+        console.log(`[HerculesSurveyGenerator] Question "${questionText.substring(0, 30)}..." was already answered. Skipping repeat.`);
+        return false;
+      }
+
+      console.log("[HerculesSurveyGenerator] Found single-select options! Asking AI for selection...");
 
       // Extract options text
       const options = [];
       for (let i = 0; i < count; i++) {
-        options.push(await this.singleOptionList.nth(i).innerText());
+        options.push((await optionsLocator.nth(i).innerText().catch(() => '')).trim());
       }
 
       const aiContext = contextText || testData.surveyContext.fallbackText;
@@ -151,16 +193,17 @@ class HerculesSurveyGenerator extends BasePage {
          indexToClick = 0; // safe fallback
       }
 
-      console.log(`[HerculesSurveyGenerator] AI selected index ${indexToClick}: "${options[indexToClick]}"`);
-      await this.singleOptionList.nth(indexToClick).click();
+      console.log(`[HerculesSurveyGenerator] AI selected index ${indexToClick}: "${options[indexToClick]}" (of ${count} options)`);
+      await optionsLocator.nth(indexToClick).click().catch(() => {});
       await this.page.waitForTimeout(500);
       
       // Safely check if confirm button exists before clicking
-      if (await this.confirmBtn.isVisible()) {
+      if (await this.confirmBtn.isVisible().catch(() => false)) {
         console.log("[HerculesSurveyGenerator] Clicking Confirm button for single-select...");
         await this.confirmBtn.click({ timeout: 5000 }).catch(() => console.log("[HerculesSurveyGenerator] Confirm button wasn't clickable."));
       }
       
+      this.lastAnsweredQuestion = questionText;
       // Wait for UI transition in case this was the last question
       await this.page.waitForTimeout(2000);
       return true;
@@ -170,6 +213,12 @@ class HerculesSurveyGenerator extends BasePage {
 
   async handleTextInputFallback(contextText = null) {
     console.log('[HerculesSurveyGenerator] Checking for text input fallback...');
+    // If option choices exist on the card, let single-select or multi-select handle it!
+    if (await (await this.resolveOptions()).count().catch(() => 0) > 0) {
+      console.log('[HerculesSurveyGenerator] Choice options exist on card; skipping text input fallback.');
+      return false;
+    }
+
     // Strictly target questionnaire text inputs and exclude the main #prompt AI chat box!
     const questionnaireInput = this.page.locator('input[placeholder="Add your own…"]')
         .or(this.page.locator('input[placeholder*="Add your own" i]'))
@@ -182,12 +231,22 @@ class HerculesSurveyGenerator extends BasePage {
     if (await questionnaireInput.isVisible().catch(() => false)) {
       // Extract question text dynamically for the current active question
       const questionText = await this.getActiveQuestionText("Please provide additional details for the survey.");
+      if (this.lastAnsweredQuestion === questionText) {
+        console.log(`[HerculesSurveyGenerator] Question "${questionText.substring(0, 30)}..." was already answered. Skipping repeat.`);
+        return false;
+      }
 
       const aiContext = contextText || testData.surveyContext.fallbackText;
       const response = await LiveAIAssistant.answerQuestion(aiContext, questionText, 'text');
       
       const dynamicFallback = `Our survey focuses on ${questionText.substring(0, 40)} to optimize pricing and user engagement effectively.`;
-      const answerToUse = (response && response.answer && !response.answer.includes("streamlining our workflows")) ? response.answer : dynamicFallback;
+      let answerToUse = (response && response.answer && !response.answer.includes("streamlining our workflows")) ? response.answer : dynamicFallback;
+      // Sanitize: clean markdown, take first sentence, cap to 120 chars for questionnaire text input
+      answerToUse = answerToUse.replace(/[*#_`\n\r]/g, ' ').replace(/\s+/g, ' ').trim();
+      if (answerToUse.length > 120) {
+          const firstSentence = answerToUse.split('.')[0];
+          answerToUse = (firstSentence.length > 15 && firstSentence.length <= 120) ? firstSentence : answerToUse.substring(0, 115);
+      }
 
       console.log(`[HerculesSurveyGenerator] Found questionnaire text input. AI generated answer: "${answerToUse}"`);
       await questionnaireInput.fill(answerToUse);
@@ -196,16 +255,14 @@ class HerculesSurveyGenerator extends BasePage {
       await questionnaireInput.press('Enter').catch(() => {});
       await this.page.waitForTimeout(1000);
       
-      // Attempt to click Confirm/Submit button inside the questionnaire card
+      // Attempt to click Confirm/Submit button inside the questionnaire card if present
       const confirmBtn = this.page.locator('button').filter({ hasText: /^Confirm$|^Submit$|^Next$|^Continue$|^Finish$/i }).first();
       if (await confirmBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
           console.log('[HerculesSurveyGenerator] Clicking confirm button for questionnaire text input...');
-          await confirmBtn.click({ force: true });
-      } else {
-          console.log('[HerculesSurveyGenerator] Pressing Enter on questionnaire text input...');
-          await questionnaireInput.press('Enter');
+          await confirmBtn.click({ force: true }).catch(() => {});
       }
       
+      this.lastAnsweredQuestion = questionText;
       await this.page.waitForTimeout(2000);
       return true;
     }
@@ -217,14 +274,24 @@ class HerculesSurveyGenerator extends BasePage {
    */
   async clickGenerateBrief() {
     console.log('[HerculesSurveyGenerator] Checking for generate brief button...');
-    const btn = this.page.locator("//button[text()='Yes, generate the research brief']")
-        .or(this.page.locator("//button[normalize-space()='Yes, generate the research brief']"))
+    const btn = this.page.locator('button')
+        .filter({ hasText: /generate.*brief|build.*brief|yes.*brief|generate.*research|research.*brief/i })
+        .or(this.page.getByRole('button', { name: /generate.*(research\s*)?brief|yes,?\s*generate/i }))
+        .or(this.page.locator("//button[contains(normalize-space(),'generate') and (contains(normalize-space(),'brief') or contains(normalize-space(),'research'))]"))
         .first();
 
     if (await btn.isVisible().catch(() => false)) {
-      console.log('[HerculesSurveyGenerator] Found "Yes, generate the research brief" button! Clicking it...');
+      console.log('[HerculesSurveyGenerator] Found generate research brief button! Clicking it...');
       await btn.scrollIntoViewIfNeeded().catch(() => {});
-      await btn.click({ force: true }).catch(() => {});
+      try {
+        await btn.click({ timeout: 8000 });
+        console.log('[HerculesSurveyGenerator] Clicked generate brief button via standard click.');
+      } catch (e) {
+        console.log(`[HerculesSurveyGenerator] Standard click failed (${e.message}); attempting force and DOM click...`);
+        await btn.click({ force: true, timeout: 5000 }).catch(() => {});
+        await btn.evaluate(el => el.click()).catch(() => {});
+      }
+      await this.page.waitForTimeout(2000);
       return true;
     }
     return false;

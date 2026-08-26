@@ -34,12 +34,15 @@ class ActiveQuestionFinder {
                             const style = window.getComputedStyle(el);
                             const rect = el.getBoundingClientRect();
                             const opacityVal = parseFloat(style.opacity);
+                            const hasValidOpacity = isNaN(opacityVal) || opacityVal >= 0.5;
 
                             return rect.width > 0 &&
                                    rect.height > 0 &&
+                                   rect.right > 0 &&
+                                   rect.left < window.innerWidth &&
                                    style.display !== "none" &&
                                    style.visibility !== "hidden" &&
-                                   (opacityVal >= 0.85 || style.opacity === "1");
+                                   hasValidOpacity;
                         }).catch(() => false);
 
                         if (isStrictlyVisible) {

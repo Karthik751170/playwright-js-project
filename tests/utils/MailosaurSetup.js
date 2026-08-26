@@ -33,7 +33,9 @@ async function setupMailosaurAccount(browser) {
     console.log(`[MailosaurSetup] Final Email to use: ${tempEmail}`);
     
     // 2. Set up Hercules and Sign Up
-    const herculesContext = await browser.newContext();
+    const herculesContext = await browser.newContext({
+        recordVideo: { dir: 'test-results/videos/' }
+    });
     await herculesContext.grantPermissions(['clipboard-read', 'clipboard-write']);
     let page = await herculesContext.newPage();
     const homePage = new HerculesHomePage(page);

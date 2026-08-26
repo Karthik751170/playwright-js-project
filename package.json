@@ -6,11 +6,17 @@
   "scripts": {
     "test": "playwright test",
     "test:survey": "playwright test tests/SurveyTest.spec.js",
+    "test:security": "playwright test --config=playwright.zap.config.js",
+    "test:security:passive": "playwright test tests/security/ZapPassiveScan.spec.js --config=playwright.zap.config.js",
+    "test:security:active": "playwright test tests/security/ZapActiveScan.spec.js --config=playwright.zap.config.js",
+    "zap:start": "docker run -d --name zap -p 8080:8080 ghcr.io/zaproxy/zaproxy:stable zap.sh -daemon -host 0.0.0.0 -port 8080 -config api.disablekey=true -config api.addrs.addr.name=.* -config api.addrs.addr.regex=true",
+    "zap:stop": "docker stop zap 2>/dev/null && docker rm zap 2>/dev/null || true",
     "allure:generate": "allure generate allure-results --clean",
     "allure:open": "allure open allure-report",
     "allure:clear": "rm -rf allure-results allure-report",
     "docker:build": "docker compose build",
-    "docker:test": "docker compose up --build --exit-code-from playwright-tests"
+    "docker:test": "docker compose up --build --exit-code-from playwright-tests",
+    "docker:security": "docker compose up --build --exit-code-from playwright-tests"
   },
   "keywords": [],
   "author": "",
@@ -23,6 +29,7 @@
     "monocart-reporter": "^2.12.5"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.120.0",
     "@google/generative-ai": "^0.24.1",
     "dotenv": "^17.4.2",
     "groq-sdk": "^1.5.0"

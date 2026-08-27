@@ -1,7 +1,7 @@
 const BasePage = require('../../base/BasePage');
 const testData = require('../../config/testData');
 const LiveAIAssistant = require('../../utils/LiveAIAssistant');
-const HerculesWizardUtil = require('../../utils/HerculesWizardUtil');
+const EnterpriseWizardUtil = require('../../utils/EnterpriseWizardUtil');
 
 class HerculesSurveyGenerator extends BasePage {
   constructor(page) {
@@ -317,7 +317,7 @@ class HerculesSurveyGenerator extends BasePage {
    * Detects and clicks '//button[text()=\'Select\']', waits 2 seconds, then clicks '//button[text()=\'Run it this way\']'.
    */
   async handleSelectAndRunItThisWay() {
-    return await HerculesWizardUtil.handleSelectAndRunItThisWay(this.page);
+    return await EnterpriseWizardUtil.handleSelectAndRunItThisWay(this.page);
   }
 
   /**

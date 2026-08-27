@@ -60,8 +60,9 @@ sequenceDiagram
     SApp->>Respondent: Credit Reward Tokens to Wallet (WalletValidator)
 ```
 
-### 1. Survey Creation on Hercules B2B (`pages/hercules/HerculesSurveyGenerator.js`)
+### 1. Survey Creation on Hercules B2B (`pages/hercules/HerculesSurveyGenerator.js`, `utils/EnterpriseWizardUtil.js`)
 * **AI Questionnaire Generation**: Takes natural language research goals and prompts Groq AI (`Llama 3.3 70B`) to structure multi-slide questionnaires.
+* **Enterprise Wizard Flow (`utils/EnterpriseWizardUtil.js`)**: Automatically detects and handles the optional adaptive option flow (`//button[text()='Select']` $\rightarrow$ 2s wait $\rightarrow$ `//button[text()='Run it this way']`) across all survey creation suites.
 * **Conditional Branching Logics**: Tests Skip Logic, conditional follow-ups, and redirection rules.
 * **Audience Targeting & Deployment**: Configures sample sizes, demographic filters, and generates live survey URLs.
 
@@ -201,6 +202,7 @@ The GitHub Actions workflow [`.github/workflows/security-ci.yml`](.github/workfl
     │   ├── ScopeGuard.js               # Target domain authorization enforcement
     │   └── SecurityReporter.js         # Modular HTML/JSON reporting & triage engine
     ├── ZapClient.js                    # OWASP ZAP REST API client
+    ├── EnterpriseWizardUtil.js         # Optional Select -> Run it this way wizard flow handler
     ├── AnswerEngine.js                 # DOM inspection & Groq LLM survey solver
     └── LiveAIAssistant.js              # Groq AI orchestrator (Llama 3.3 70B)
 ```

@@ -1,0 +1,49 @@
+name: 🛡️ Enterprise AppSec & Security Quality Gate
+
+on:
+  push:
+    branches: [ main, feature/** ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 2 * * 1' # Weekly security audit on Mondays at 2:00 AM UTC
+
+jobs:
+  security-audit:
+    name: 🔒 OWASP Top 10 & Multi-Vector Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js v24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci
+
+      - name: 🎭 Install Playwright Browsers
+        run: npx playwright install chromium --with-deps
+
+      - name: 🚀 Run 16-Engine Master Security Audit (DAST + Transport + SQLi)
+        run: node scripts/fullSecuritySuite.js
+        env:
+          TARGET_URL: ${{ secrets.TARGET_URL || 'https://dev.hercules.works' }}
+
+      - name: 🛡️ Run Advanced API Security & Strict Gate Assertions
+        run: npx playwright test tests/security/AdvancedAppSecAudit.spec.js
+        env:
+          TARGET_URL: ${{ secrets.TARGET_URL || 'https://dev.hercules.works' }}
+
+      - name: 📊 Upload Interactive Security HTML Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: owasp-enterprise-security-report
+          path: test-results/security/owasp-enterprise-10-10-report.html
+          retention-days: 30

@@ -278,40 +278,61 @@ Located in: [`test-results/security/owasp-enterprise-10-10-report.html`](test-re
 
 ---
 
-## 🚀 Quick Start & CLI Reference
+## 🧪 Test Suites & Automation Catalog
 
-### 1. Installation
+The framework contains automated test suites covering end-to-end user journeys, conditional branching logic, consumer answering, B2B creator workflows, and application security:
 
-```bash
-# Clone the repository
-git clone https://github.com/Karthik751170/playwright-js-project.git
-cd playwright-js-project
+### 1. 🚀 End-to-End Survey Lifecycle & Deployment
+| Test Script | Description |
+| :--- | :--- |
+| [`tests/DeploySurvey_Free100Users.spec.js`](tests/DeploySurvey_Free100Users.spec.js) | Full E2E test deploying to 100 free users on Hercules B2B, auto-onboarding a consumer on Super J, answering all slides via Groq AI, and verifying response counts on B2B dashboard. |
+| [`tests/DeploySurvey_EditAudience_Validation.spec.js`](tests/DeploySurvey_EditAudience_Validation.spec.js) | Validates survey generation, custom audience demographic editing (age, gender, location, income), and deployment. |
+| [`tests/DeploySurvey_NoEdit.spec.js`](tests/DeploySurvey_NoEdit.spec.js) | Baseline survey deployment flow without modifying default audience targeting. |
+| [`tests/LoggedInSurveyCreation.spec.js`](tests/LoggedInSurveyCreation.spec.js) | Authenticated survey creation flow on Hercules B2B. |
 
-# Install dependencies
-npm install
+### 2. 🔀 Survey Logic, Branching & Decision Trees
+| Test Script | Description |
+| :--- | :--- |
+| [`tests/ValidateHerculesLogics.spec.js`](tests/ValidateHerculesLogics.spec.js) | Dual-pass AI validation testing all conditional logic rule actions (**Skip, Redirect, Filter, Ask Why, Terminate**). |
+| [`tests/ValidateAllHerculesLogics.spec.js`](tests/ValidateAllHerculesLogics.spec.js) | Comprehensive multi-rule permutation suite validating complex decision trees and multi-step jump rules. |
+| [`tests/AskHerculesLogics.spec.js`](tests/AskHerculesLogics.spec.js) | Validates survey creation and logic rules defined through conversational AI prompts. |
+| [`tests/AskHerculesQuestionLogics.spec.js`](tests/AskHerculesQuestionLogics.spec.js) | Tests per-question conditional logic triggers and rule actions. |
 
-# Install Playwright browser binaries
-npx playwright install chromium
-```
+### 3. 📱 Super J (Consumer Respondent App)
+| Test Script | Description |
+| :--- | :--- |
+| [`tests/SurveyTest.spec.js`](tests/SurveyTest.spec.js) | Core consumer survey answering test. |
+| [`tests/SuperJ_Answer6Surveys.spec.js`](tests/SuperJ_Answer6Surveys.spec.js) | Batch execution answering across 6 consecutive active surveys on Super J. |
+| [`tests/RunSuperJLiveSurvey.spec.js`](tests/RunSuperJLiveSurvey.spec.js) | Automated answering of live surveys on Super J with Groq AI. |
+| [`tests/RunSpecificSurvey.spec.js`](tests/RunSpecificSurvey.spec.js) | Targeted test execution on a specific survey ID / URL. |
+| [`tests/TestActiveSurvey.spec.js`](tests/TestActiveSurvey.spec.js) | Validates currently active surveys available in the consumer feed. |
+| [`tests/OnboardingTest.spec.js`](tests/OnboardingTest.spec.js) | Tests the complete demographic onboarding funnel (Birth year, Gender, City, Terms). |
+| [`tests/SuperJ_EditProfileValidation.spec.js`](tests/SuperJ_EditProfileValidation.spec.js) | Validates consumer profile modifications and non-editable/restricted fields (Gender, Birth Year, City). |
+| [`tests/SuperJ_CopyDIDValidation.spec.js`](tests/SuperJ_CopyDIDValidation.spec.js) | Tests Decentralized Identity (DID) clipboard copy functionality and toast notifications. |
 
-### 2. Environment Configuration
+### 4. 🏢 Hercules B2B (Creator Platform)
+| Test Script | Description |
+| :--- | :--- |
+| [`tests/HerculesCreateAccount.spec.js`](tests/HerculesCreateAccount.spec.js) | Fresh user registration and automated email verification via Mailosaur. |
+| [`tests/HerculesAppleLoginTest.spec.js`](tests/HerculesAppleLoginTest.spec.js) | Tests OAuth login via Apple account. |
+| [`tests/HerculesGoogleLoginTest.spec.js`](tests/HerculesGoogleLoginTest.spec.js) | Tests OAuth login via Google account. |
+| [`tests/SaveGoogleSession.spec.js`](tests/SaveGoogleSession.spec.js) | Handles and stores persistent authenticated Google sessions. |
+| [`tests/HerculesLoggedInFeaturesTest.spec.js`](tests/HerculesLoggedInFeaturesTest.spec.js) | Validates authenticated portal features (saved audiences, campaign context menus). |
+| [`tests/Hercules_HIconChatActions.spec.js`](tests/Hercules_HIconChatActions.spec.js) | Validates chat management (renaming, duplicating, and deleting chats via the 'H' icon menu). |
+| [`tests/Hercules_ShareLinkValidation.spec.js`](tests/Hercules_ShareLinkValidation.spec.js) | Tests sharing surveys and research briefs, incognito validation, and PDF export functionality. |
+| [`tests/Hercules_SurveyActions.spec.js`](tests/Hercules_SurveyActions.spec.js) | Tests survey actions (cloning, editing drafts, and survey management). |
+| [`tests/SurveyStarUnstarDelete.spec.js`](tests/SurveyStarUnstarDelete.spec.js) | Tests starring, unstarring, filtering favorites, and deleting surveys from dashboard. |
+| [`tests/DuplicateAndSaveDraft.spec.js`](tests/DuplicateAndSaveDraft.spec.js) | Tests duplicating draft surveys and saving campaigns as drafts. |
+| [`tests/UpgradeToStarterPlan.spec.js`](tests/UpgradeToStarterPlan.spec.js) | Tests plan upgrades (Starter/Pro), billing cycles, and Stripe checkout modal interactions. |
+| [`tests/HerculesGuestAudienceTest.spec.js`](tests/HerculesGuestAudienceTest.spec.js) | Validates guest mode audience customization and restriction modals. |
+| [`tests/PricingPageAnalysis.spec.js`](tests/PricingPageAnalysis.spec.js) | Inspects pricing tiers and feature comparison breakdowns. |
+| [`tests/AiPromptTest.spec.js`](tests/AiPromptTest.spec.js) | Tests AI prompt generation across different market research categories. |
 
-Create a `.env` file in the root directory:
-```env
-GROQ_API_KEY=your_groq_api_key
-ENV=dev
-TARGET_URL=https://dev.hercules.works
-```
+### 5. 🛡️ Enterprise Security & Vulnerability Audits
+| Test Script | Description |
+| :--- | :--- |
+| [`tests/security/PlaywrightSecurityAudit.spec.js`](tests/security/PlaywrightSecurityAudit.spec.js) | Audits security headers (CSP, HSTS, X-Frame-Options), cookie flags (HttpOnly, Secure), and CORS policies. |
+| [`tests/security/ZapPassiveScan.spec.js`](tests/security/ZapPassiveScan.spec.js) | Passive security vulnerability scan integrating OWASP ZAP proxy. |
+| [`tests/security/ZapActiveScan.spec.js`](tests/security/ZapActiveScan.spec.js) | Active security vulnerability assessment against target endpoints. |
+| [`tests/security/ZapSqlInjectionAndSsrf.spec.js`](tests/security/ZapSqlInjectionAndSsrf.spec.js) | Validates SQL injection and Server-Side Request Forgery (SSRF) defense layers. |
 
-### 3. Execution Commands
-
-```bash
-# 🛡️ Run Enterprise Security Audit (OWASP Top 10 + SQLi)
-npm run audit:owasp-full
-
-# 🤖 Run AI-Driven Survey Automation Tests
-npm run test:survey
-
-# 📊 Generate Allure Test Report
-npm run allure:generate && npm run allure:open
-```

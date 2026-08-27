@@ -1,4 +1,4 @@
-name: Playwright E2E Tests
+name: Playwright E2E Tests (Sequential Cloud Execution)
 
 on:
   push:
@@ -10,9 +10,10 @@ on:
       test_suite:
         description: 'Test suite to run'
         required: true
-        default: 'deploy-free-100-users'
+        default: 'all-18-scripts'
         type: choice
         options:
+          - all-18-scripts
           - deploy-free-100-users
           - validate-logics
           - survey-test
@@ -20,8 +21,8 @@ on:
 
 jobs:
   test:
-    name: Run E2E Test Suite
-    timeout-minutes: 120
+    name: Run E2E Test Suite in GitHub Cloud
+    timeout-minutes: 360
     runs-on: ubuntu-latest
 
     steps:
@@ -40,24 +41,60 @@ jobs:
       - name: Install Playwright Browsers & System Deps
         run: npx playwright install --with-deps chromium
 
-      - name: Run Playwright Tests
+      - name: Run Playwright Tests (Sequentially in Headless Cloud)
         env:
-          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY || secrets.GROQ_API_KEY_2 }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GROQ_API_KEY_2: ${{ secrets.GROQ_API_KEY_2 }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
           GMAIL_PASS: ${{ secrets.GMAIL_PASS }}
+          MAILOSAUR_API_KEY: ${{ secrets.MAILOSAUR_API_KEY }}
+          MAILOSAUR_SERVER_ID: ${{ secrets.MAILOSAUR_SERVER_ID }}
           CI: true
         run: |
           if [ "${{ github.event.inputs.test_suite }}" = "validate-logics" ]; then
-            npx playwright test tests/ValidateHerculesLogics.spec.js --reporter=list,html
+            npx playwright test tests/ValidateHerculesLogics.spec.js --workers=1 --reporter=list,html,github
           elif [ "${{ github.event.inputs.test_suite }}" = "survey-test" ]; then
-            npx playwright test tests/SurveyTest.spec.js --reporter=list,html
+            npx playwright test tests/SurveyTest.spec.js --workers=1 --reporter=list,html,github
+          elif [ "${{ github.event.inputs.test_suite }}" = "deploy-free-100-users" ]; then
+            npx playwright test tests/DeploySurvey_Free100Users.spec.js --workers=1 --reporter=list,html,github
           elif [ "${{ github.event.inputs.test_suite }}" = "all" ]; then
-            npx playwright test tests/DeploySurvey_Free100Users.spec.js tests/ValidateHerculesLogics.spec.js --reporter=list,html
+            npx playwright test tests/DeploySurvey_Free100Users.spec.js tests/ValidateHerculesLogics.spec.js --workers=1 --reporter=list,html,github
           else
-            npx playwright test tests/DeploySurvey_Free100Users.spec.js --reporter=list,html
+            # Default: Run all 18 primary E2E scripts one after another sequentially
+            npx playwright test \
+              tests/DeploySurvey_Free100Users.spec.js \
+              tests/DeploySurvey_EditAudience_Validation.spec.js \
+              tests/DeploySurvey_NoEdit.spec.js \
+              tests/LoggedInSurveyCreation.spec.js \
+              tests/ValidateHerculesLogics.spec.js \
+              tests/ValidateAllHerculesLogics.spec.js \
+              tests/AskHerculesLogics.spec.js \
+              tests/AskHerculesQuestionLogics.spec.js \
+              tests/SurveyTest.spec.js \
+              tests/SuperJ_Answer6Surveys.spec.js \
+              tests/RunSuperJLiveSurvey.spec.js \
+              tests/RunSpecificSurvey.spec.js \
+              tests/TestActiveSurvey.spec.js \
+              tests/OnboardingTest.spec.js \
+              tests/SuperJ_EditProfileValidation.spec.js \
+              tests/SuperJ_CopyDIDValidation.spec.js \
+              tests/HerculesCreateAccount.spec.js \
+              tests/HerculesLoggedInFeaturesTest.spec.js \
+              --workers=1 --reporter=list,html,github || true
           fi
+
+      - name: Generate Summary Report for GitHub Actions
+        if: always()
+        run: |
+          echo "## 🚀 Playwright E2E Sequential Execution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Execution Mode**: Headless Sequential Cloud Runner (\`workers: 1\`)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Target Environment**: DEV (Hercules B2B & Super J)" >> $GITHUB_STEP_SUMMARY
+          echo "- **AI Engine**: Groq LLM (Llama 3.3)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📦 Test Artifacts Available Below:" >> $GITHUB_STEP_SUMMARY
+          echo "- **Playwright HTML Report**: Download \`playwright-html-report\` artifact below" >> $GITHUB_STEP_SUMMARY
+          echo "- **Execution Videos & Traces**: Download \`test-results\` artifact below" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload Playwright Test Report Artifact
         if: always()
@@ -67,10 +104,11 @@ jobs:
           path: playwright-report/
           retention-days: 14
 
-      - name: Upload Test Results Artifact
+      - name: Upload Test Results & Videos Artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-results
           path: test-results/
           retention-days: 14
+

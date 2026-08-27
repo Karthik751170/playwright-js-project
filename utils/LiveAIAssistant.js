@@ -114,13 +114,21 @@ Output ONLY valid JSON in this exact format, where index is the integer of the s
 { "index": 0 }
 `;
     } else if (type === 'multi') {
+      const rankCountMatch = question.match(/(?:rank\s*(?:from)?\s*\d+\s*(?:to|-)\s*|1\s*(?:to|-)\s*|top\s+|rank\s*(?:top\s*)?|select\s*(?:up\s*to)?\s*|choose\s*(?:up\s*to)?\s*|rank\s*(?:up\s*to)?\s*)(\d+|one|two|three|four|five|six|seven|eight|nine|ten)/i);
+      const wordMap = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10 };
+      const explicitCount = rankCountMatch ? (parseInt(rankCountMatch[1], 10) || wordMap[rankCountMatch[1].toLowerCase()] || 0) : 0;
+      const targetCount = explicitCount > 0 ? explicitCount : (/rank/i.test(question) ? 3 : 0);
+
       prompt += `
 Available options:
 ${options.map((opt, i) => `${i}. ${opt}`).join('\n')}
 
-Select ALL relevant options that fit the context or match the image/photo.
+${targetCount > 0 ? `CRITICAL RANKING / TOP CHOICE INSTRUCTIONS:
+- The question asks to rank from 1 to ${targetCount} (or select top ${targetCount} items).
+- You MUST provide EXACTLY ${targetCount} distinct option indices in the 'indices' array in order of preference (e.g. [0, 1, 2]).
+- NEVER return only 1 index for a 'Rank 1 to ${targetCount}' question! You must output all ${targetCount} ranked choices.` : 'Select ALL relevant options that fit the context or match the image/photo.'}
 Output ONLY valid JSON in this exact format, where indices is an array of integers matching the options:
-{ "indices": [0, 1] }
+{ "indices": [0, 1, 2] }
 `;
     }
 

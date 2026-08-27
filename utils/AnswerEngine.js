@@ -550,16 +550,12 @@ class AnswerEngine {
                 if (candidates.length > 0) {
                     const { questionText, audioDetails, imageDetails } = await this.extractQuestionInfo(container);
                     const isAudioOrVisual = (audioDetails && audioDetails.length > 0) || (imageDetails && imageDetails.length > 0) || /audio|sound|hear|listen|photo|picture|matching/i.test(questionText);
-                    const isMulti = !isAudioOrVisual && /select all|choose all|multiple|all that apply|select up to|choose up to|select \d+|choose \d+|up to \d+|rank from|rank \d+/i.test(questionText);
+                    const rank3Match = questionText.match(/(?:rank\s*(?:from)?\s*\d+\s*(?:to|-)\s*|1\s*(?:to|-)\s*|top\s+|rank\s*(?:top\s*)?|select\s*(?:up\s*to)?\s*|choose\s*(?:up\s*to)?\s*|rank\s*(?:up\s*to)?\s*)(\d+|one|two|three|four|five|six|seven|eight|nine|ten)/i);
+                    const wordMap = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10 };
+                    const requiredRankCount = rank3Match ? (parseInt(rank3Match[1], 10) || wordMap[rank3Match[1].toLowerCase()] || 0) : (/rank/i.test(questionText) ? 3 : 0);
+                    const isMulti = !isAudioOrVisual && (requiredRankCount > 0 || /select all|choose all|multiple|all that apply/i.test(questionText));
                     const aiContext = this.getAiContext();
                     
-                    let maxSelect = candidates.length;
-                    const countMatch = questionText.match(/(?:up\s*to|select|choose|rank\s*(?:from\s*\d+\s*to)?)\s*(\d+|one|two|three|four|five|six|seven|eight|nine|ten)/i);
-                    if (countMatch) {
-                        const wordMap = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10 };
-                        maxSelect = parseInt(countMatch[1], 10) || wordMap[countMatch[1].toLowerCase()] || candidates.length;
-                    }
-
                     const optionsText = candidates.map(c => c.text);
                     let indicesToClick = [];
 
@@ -585,7 +581,7 @@ class AnswerEngine {
                             const response = await LiveAIAssistant.answerQuestion(aiContext, questionText, type, optionsText, 'consumer', this.surveyLogics);
                             
                             if (isMulti && response && Array.isArray(response.indices)) {
-                                indicesToClick = response.indices.slice(0, maxSelect);
+                                indicesToClick = response.indices;
                             } else if (response && response.index !== undefined) {
                                 indicesToClick = [response.index];
                             }
@@ -595,8 +591,20 @@ class AnswerEngine {
                     }
  
                     if (indicesToClick.length === 0) {
-                        const numToSelect = isMulti ? Math.min(candidates.length, maxSelect, 3) : 1;
+                        const numToSelect = isMulti ? Math.min(candidates.length, requiredRankCount > 0 ? requiredRankCount : 2) : 1;
                         indicesToClick = Array.from({ length: numToSelect }, (_, i) => i);
+                    }
+
+                    if (requiredRankCount > 0 && !isAudioOrVisual) {
+                        const targetClicks = Math.min(candidates.length, requiredRankCount);
+                        for (let i = 0; i < candidates.length && indicesToClick.length < targetClicks; i++) {
+                            if (!indicesToClick.includes(i)) {
+                                indicesToClick.push(i);
+                            }
+                        }
+                        if (indicesToClick.length > targetClicks) {
+                            indicesToClick = indicesToClick.slice(0, targetClicks);
+                        }
                     }
                     
                     for (const idx of indicesToClick) {
@@ -1116,18 +1124,15 @@ class AnswerEngine {
                 if (candidates.length === 0) return false;
 
                 let numToRank = candidates.length;
+                const rankMatch = questionText.match(/(?:rank\s*(?:from)?\s*\d+\s*(?:to|-)\s*|1\s*(?:to|-)\s*|top\s+|rank\s*(?:top\s*)?|select\s*(?:up\s*to)?\s*|choose\s*(?:up\s*to)?\s*|rank\s*(?:up\s*to)?\s*)(\d+|one|two|three|four|five|six|seven|eight|nine|ten)/i);
                 const wordMap = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10 };
-                
-                // Match patterns like "rank from 1 to 3", "rank 1 to 3", "rank 1-3", "top 3", "select up to 3", "rank 3"
-                const rankMatch = questionText.match(/(?:rank\s*(?:from)?\s*\d+\s*(?:to|-)\s*|1\s*(?:to|-)\s*|top\s+|first\s+|select\s*(?:up\s*to)?\s*|choose\s*(?:up\s*to)?\s*|rank\s*(?:up\s*to)?\s*)(\d+|one|two|three|four|five|six|seven|eight|nine|ten)/i);
-                
                 if (rankMatch) {
                     const numWord = rankMatch[1].toLowerCase();
                     numToRank = parseInt(numWord, 10) || wordMap[numWord] || candidates.length;
                 } else if (/rank\s+from\s+most\s+to\s+least|rank\s+all|order\s+all/i.test(questionText)) {
                     numToRank = candidates.length;
                 } else {
-                    numToRank = candidates.length;
+                    numToRank = Math.min(candidates.length, 3);
                 }
                 numToRank = Math.max(1, Math.min(candidates.length, numToRank));
 
@@ -1139,15 +1144,22 @@ class AnswerEngine {
                     const optionsText = candidates.map(c => c.text);
                     const response = await LiveAIAssistant.answerQuestion(aiContext, questionText, 'multi', optionsText, 'consumer', this.surveyLogics);
                     if (response && Array.isArray(response.indices) && response.indices.length > 0) {
-                        selectedIndices = response.indices.slice(0, numToRank);
+                        selectedIndices = response.indices;
                     }
                 } catch (e) {}
 
-                // If AI returned fewer than numToRank indices, fill in remaining unique indices up to numToRank
+                // Ensure exactly numToRank unique indices are selected
                 for (let i = 0; i < candidates.length && selectedIndices.length < numToRank; i++) {
                     if (!selectedIndices.includes(i)) {
                         selectedIndices.push(i);
                     }
+                }
+                if (selectedIndices.length > numToRank) {
+                    selectedIndices = selectedIndices.slice(0, numToRank);
+                }
+
+                if (selectedIndices.length === 0) {
+                    selectedIndices = Array.from({ length: numToRank }, (_, i) => i);
                 }
 
                 console.log(`[AnswerEngine] Ranking ${selectedIndices.length} options: ${selectedIndices.join(', ')}...`);

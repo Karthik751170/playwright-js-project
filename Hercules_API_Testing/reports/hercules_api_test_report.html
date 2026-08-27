@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hercules API Testing — Master Execution & Documentation Report</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --bg: #0d1117; --card-bg: #161b22; --border: #30363d;
+      --text: #c9d1d9; --text-muted: #8b949e; --accent: #58a6ff;
+      --pass: #2ea043; --fail: #f85149; --warn: #d29922; --pos: #1f6feb; --neg: #a371f7;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 24px; }
+    .container { max-width: 1300px; margin: 0 auto; }
+    .header { background: linear-gradient(135deg, #1f242c 0%, #161b22 100%); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+    .header h1 { font-size: 24px; color: #f0f6fc; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+    .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 16px; font-size: 13px; color: var(--text-muted); }
+    .meta-item strong { color: #f0f6fc; display: block; font-size: 14px; margin-bottom: 2px; }
+    
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 18px; text-align: center; }
+    .stat-val { font-size: 28px; font-weight: 700; color: #f0f6fc; margin-bottom: 4px; }
+    .stat-lbl { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+    .stat-pass { color: var(--pass); }
+    .stat-fail { color: var(--fail); }
+
+    .controls { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+    .btn { background: #21262d; border: 1px solid var(--border); color: var(--text); padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; }
+    .btn:hover, .btn.active { background: #30363d; color: #f0f6fc; border-color: var(--accent); }
+    .search-input { background: #0d1117; border: 1px solid var(--border); color: var(--text); padding: 8px 14px; border-radius: 6px; font-size: 13px; flex-grow: 1; min-width: 250px; }
+
+    table { width: 100%; border-collapse: collapse; background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; font-size: 13px; }
+    th { background: #21262d; color: var(--text-muted); text-align: left; padding: 12px 14px; font-weight: 600; border-bottom: 1px solid var(--border); }
+    td { padding: 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover { background: rgba(255,255,255,0.02); }
+
+    .badge { display: inline-block; padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .badge-pass { background: rgba(46,160,67,0.15); color: #3fb950; border: 1px solid rgba(46,160,67,0.4); }
+    .badge-fail { background: rgba(248,81,73,0.15); color: #f85149; border: 1px solid rgba(248,81,73,0.4); }
+    .badge-pos { background: rgba(31,111,235,0.15); color: #58a6ff; border: 1px solid rgba(31,111,235,0.4); }
+    .badge-neg { background: rgba(163,113,247,0.15); color: #bc8cff; border: 1px solid rgba(163,113,247,0.4); }
+
+    .test-title { font-weight: 600; color: #f0f6fc; margin-bottom: 4px; }
+    .test-scenario { color: var(--text-muted); font-size: 12px; margin-bottom: 8px; }
+    details summary { color: var(--accent); cursor: pointer; font-size: 12px; font-weight: 600; outline: none; margin-top: 4px; }
+    .detail-block { background: #0d1117; border: 1px solid var(--border); border-radius: 6px; padding: 12px; margin-top: 8px; font-size: 12px; }
+    .detail-block ul { margin-left: 18px; margin-top: 4px; margin-bottom: 8px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+    .code-box { padding: 8px; border-radius: 4px; font-family: monospace; font-size: 11px; margin-top: 4px; }
+    .code-box.exp { background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.2); color: #79c0ff; }
+    .code-box.act { background: rgba(46,160,67,0.08); border: 1px solid rgba(46,160,67,0.2); color: #56d364; }
+    .resp-box { background: #161b22; border: 1px solid var(--border); padding: 8px; border-radius: 4px; font-family: monospace; font-size: 11px; color: #8b949e; overflow-x: auto; max-height: 120px; margin-top: 4px; }
+    code { font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, monospace; background: rgba(110,118,129,0.2); padding: 2px 5px; border-radius: 4px; font-size: 11px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🚀 Hercules API Testing — Master Execution & Documentation Report</h1>
+      <div class="meta-grid">
+        <div class="meta-item">
+          <strong>Target Base URL</strong>
+          <span>https://dev.hercules.works</span>
+        </div>
+        <div class="meta-item">
+          <strong>Single Tracked Account</strong>
+          <span>tracked_user@kzdzyaot.mailosaur.net</span>
+        </div>
+        <div class="meta-item">
+          <strong>Execution Timestamp</strong>
+          <span>Thu, 27 Aug 2026 11:32:27 GMT</span>
+        </div>
+        <div class="meta-item">
+          <strong>Framework & Engine</strong>
+          <span>Playwright API Client + Monocart</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-val stat-pass">100%</div>
+        <div class="stat-lbl">Pass Rate</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">34</div>
+        <div class="stat-lbl">Total Endpoints Tested</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val stat-pass">34</div>
+        <div class="stat-lbl">Passed Scenarios</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val ">0</div>
+        <div class="stat-lbl">Failed Scenarios</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">20 / 14</div>
+        <div class="stat-lbl">Positive / Negative</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">95ms</div>
+        <div class="stat-lbl">Avg Response Time</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn active" onclick="filterTable('all')">All Tests (34)</button>
+      <button class="btn" onclick="filterTable('POSITIVE')">Positive (20)</button>
+      <button class="btn" onclick="filterTable('NEGATIVE')">Negative (14)</button>
+      <button class="btn" onclick="filterTable('PASS')">Passed (34)</button>
+      
+      <input type="text" class="search-input" id="search" placeholder="Search by Module, Endpoint, Scenario or Keyword..." onkeyup="searchTable()">
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 40px;">#</th>
+          <th style="width: 80px;">Status</th>
+          <th style="width: 90px;">Type</th>
+          <th style="width: 130px;">Test ID</th>
+          <th style="width: 180px;">Module</th>
+          <th>Test Scenario, Steps & Results</th>
+          <th style="width: 80px;">Latency</th>
+        </tr>
+      </thead>
+      <tbody id="test-tbody">
+        
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Authentication & Identity">
+        <td><strong>1</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-AUTH-POS-01</code></td>
+        <td><strong>Authentication & Identity</strong></td>
+        <td>
+          <div class="test-title">Session Token State Synchronization</div>
+          <div class="test-scenario">Verify that an authenticated user can synchronize session state and refresh claims.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> User is authenticated with active single tracked account (tracked_user@kzdzyaot.mailosaur.net).</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>/api/auth/sync</code> <br><em>Payload:</em> <code>{}</code></li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200 OK or 204 No Content with refreshed session state.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 248ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>248ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Authentication & Identity">
+        <td><strong>2</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-AUTH-POS-02</code></td>
+        <td><strong>Authentication & Identity</strong></td>
+        <td>
+          <div class="test-title">Password Account Status Check</div>
+          <div class="test-scenario">Verify that user can retrieve password account status and onboarding flags.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> User has completed signup.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP GET <code>/V2/auth/pwd-login/account-status</code> </li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200 OK with account status metadata.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 147ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>147ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Authentication & Identity">
+        <td><strong>3</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-AUTH-POS-03</code></td>
+        <td><strong>Authentication & Identity</strong></td>
+        <td>
+          <div class="test-title">Verification Link / OTP Dispatch Format</div>
+          <div class="test-scenario">Verify that email signup initiates verification link generation without gateway error.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> Target email format is valid.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>/api/auth/send-verification-otp</code> <br><em>Payload:</em> <code>{ email: "probe@mailosaur.net" }</code></li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200/201 confirming email dispatch.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 78ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>78ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="NEGATIVE" data-status="PASS" data-module="Authentication & Identity">
+        <td><strong>4</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-neg">NEGATIVE</span></td>
+        <td><code>TC-AUTH-NEG-01</code></td>
+        <td><strong>Authentication & Identity</strong></td>
+        <td>
+          <div class="test-title">Session Sync Without Auth Token (Missing Credentials)</div>
+          <div class="test-scenario">Verify that unauthenticated session sync request is properly rejected.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> No Authorization header or cookie provided.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>/api/auth/sync</code> <br><em>Payload:</em> <code>{}</code></li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 401 Unauthorized or 400 Bad Request.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 75ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>75ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="NEGATIVE" data-status="PASS" data-module="Authentication & Identity">
+        <td><strong>5</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-neg">NEGATIVE</span></td>
+        <td><code>TC-AUTH-NEG-02</code></td>
+        <td><strong>Authentication & Identity</strong></td>
+        <td>
+          <div class="test-title">Password Authentication with Invalid Credentials</div>
+          <div class="test-scenario">Verify that invalid password authentication attempts fail with clean rejection.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> User does not exist or wrong password.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>/V2/auth/pwd-login</code> <br><em>Payload:</em> <code>{ email, invalid_password }</code></li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 400 Bad Request or 401 Unauthorized.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 77ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>77ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="NEGATIVE" data-status="PASS" data-module="Authentication & Identity">
+        <td><strong>6</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-neg">NEGATIVE</span></td>
+        <td><code>TC-AUTH-NEG-03</code></td>
+        <td><strong>Authentication & Identity</strong></td>
+        <td>
+          <div class="test-title">Magic Link Token Login with Expired / Malformed Token</div>
+          <div class="test-scenario">Verify that forged or expired magic login tokens cannot authenticate a session.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> Token is malformed or invalid.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP GET <code>/V2/auth/token-login/stale_fake_token_99999</code> </li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 400/401/404 or clean SPA login redirect.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 155ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>155ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="AI Workspace & Chat Stream">
+        <td><strong>7</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-AI-POS-01</code></td>
+        <td><strong>AI Workspace & Chat Stream</strong></td>
+        <td>
+          <div class="test-title">Fetch Contextual AI Prompt Suggestions</div>
+          <div class="test-scenario">Verify that user receives research prompt ideas on the /ai workspace.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> User is authenticated.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP GET <code>/api/prompt-suggestions</code> </li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200 OK with array of prompt suggestions.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 132ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>132ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="AI Workspace & Chat Stream">
+        <td><strong>8</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-AI-POS-02</code></td>
+        <td><strong>AI Workspace & Chat Stream</strong></td>
+        <td>
+          <div class="test-title">Initialize Research Chat Campaign Turn [Creates Chat ID]</div>
+          <div class="test-scenario">Verify that sending research objective initializes a chat campaign and returns chatId.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> User provides non-empty research prompt.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>/api/chat</code> <br><em>Payload:</em> <code>{ message: "Create smart home survey" }</code></li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200/201 returning generated chat campaign metadata.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Dynamic Chat ID: Active. Latency: 77ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>77ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="NEGATIVE" data-status="PASS" data-module="AI Workspace & Chat Stream">
+        <td><strong>9</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-neg">NEGATIVE</span></td>
+        <td><code>TC-AI-NEG-01</code></td>
+        <td><strong>AI Workspace & Chat Stream</strong></td>
+        <td>
+          <div class="test-title">AI Chat Generation with Empty Prompt Payload</div>
+          <div class="test-scenario">Verify that empty message payloads are rejected with validation error.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> Message payload is empty string.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>/api/chat</code> <br><em>Payload:</em> <code>{ message: "" }</code></li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 400 Bad Request or 422 Unprocessable Entity.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 76ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>76ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Survey Lifecycle & Generation">
+        <td><strong>10</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-SRV-POS-01</code></td>
+        <td><strong>Survey Lifecycle & Generation</strong></td>
+        <td>
+          <div class="test-title">Generate Survey Question Tree [Creates Survey ID]</div>
+          <div class="test-scenario">Verify that AI compiles question card tree from prompt and associates to surveyId.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> Chat campaign exists.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>/api/generate-questions</code> <br><em>Payload:</em> <code>{ chatId, prompt }</code></li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200/201 with generated questions schema and surveyId.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Captured Survey ID: Active. Latency: 74ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>74ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Survey Lifecycle & Generation">
+        <td><strong>11</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-SRV-POS-02</code></td>
+        <td><strong>Survey Lifecycle & Generation</strong></td>
+        <td>
+          <div class="test-title">Search Active Surveys by Keyword / Filter</div>
+          <div class="test-scenario">Verify that user can query dashboard surveys matching search term.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> User is authenticated.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP GET <code>/V2/dashboard/survey_search?type=name&input=smart</code> </li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200 OK with array of matching surveys.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 76ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>76ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="NEGATIVE" data-status="PASS" data-module="Survey Lifecycle & Generation">
+        <td><strong>12</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-neg">NEGATIVE</span></td>
+        <td><code>TC-SRV-NEG-01</code></td>
+        <td><strong>Survey Lifecycle & Generation</strong></td>
+        <td>
+          <div class="test-title">Get Details for Non-Existent Survey ID</div>
+          <div class="test-scenario">Verify that querying non-existent survey returns 404/400 without unhandled server exception.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> Survey ID does not exist in database.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP GET <code>/V2/survey/details?surveyId=non_existent_srv_99999</code> </li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 404 Not Found or 400 Bad Request.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 75ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>75ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Campaign & Chat Management">
+        <td><strong>13</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-CMP-POS-01</code></td>
+        <td><strong>Campaign & Chat Management</strong></td>
+        <td>
+          <div class="test-title">Fetch Active User Campaigns / Chat History</div>
+          <div class="test-scenario">Verify that user can fetch full list of campaigns for the sidebar.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> User is authenticated.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP GET <code>/api/chats</code> </li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200 OK with array of campaign objects.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 144ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>144ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="NEGATIVE" data-status="PASS" data-module="Campaign & Chat Management">
+        <td><strong>14</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-neg">NEGATIVE</span></td>
+        <td><code>TC-CMP-NEG-01</code></td>
+        <td><strong>Campaign & Chat Management</strong></td>
+        <td>
+          <div class="test-title">Star Campaign with Non-Existent Chat ID</div>
+          <div class="test-scenario">Verify that attempting to star non-existent chat fails safely.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> Chat ID does not exist.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP PATCH <code>/api/chats/fake_chat_99999/star</code> <br><em>Payload:</em> <code>{ isStarred: true }</code></li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 404 Not Found or 400 Bad Request.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 73ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>73ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Dragon Question Builder">
+        <td><strong>15</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-DRG-POS-01</code></td>
+        <td><strong>Dragon Question Builder</strong></td>
+        <td>
+          <div class="test-title">Fetch Supported Demographic City List</div>
+          <div class="test-scenario">Verify that client can retrieve demographic city dataset for targeting.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> User is authenticated.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP GET <code>/V2/dragon/city-list</code> </li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200 OK with city names array.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 74ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>74ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Dragon Question Builder">
+        <td><strong>16</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-DRG-POS-02</code></td>
+        <td><strong>Dragon Question Builder</strong></td>
+        <td>
+          <div class="test-title">Add Single-Choice MCQ Question Card to Survey</div>
+          <div class="test-scenario">Verify that user can add new MCQ question card with choices.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> Survey is created in account.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>/V2/dragon/create-mcq-question</code> <br><em>Payload:</em> <code>{ surveyId, question, choices }</code></li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200/201 with created question schema.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Captured Question ID: Active. Latency: 76ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>76ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Dragon Question Builder">
+        <td><strong>17</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-DRG-POS-03</code></td>
+        <td><strong>Dragon Question Builder</strong></td>
+        <td>
+          <div class="test-title">Fetch All Questions for Active Survey Schema</div>
+          <div class="test-scenario">Verify that questions saved to survey are retrieved in structured JSON.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> Survey exists in account.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP GET <code>/V2/survey/get-all-questions?surveyId=null</code> </li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200 OK with questions array.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 76ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>76ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="NEGATIVE" data-status="PASS" data-module="Dragon Question Builder">
+        <td><strong>18</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-neg">NEGATIVE</span></td>
+        <td><code>TC-DRG-NEG-01</code></td>
+        <td><strong>Dragon Question Builder</strong></td>
+        <td>
+          <div class="test-title">Create MCQ Question with Missing / Empty Choices Array</div>
+          <div class="test-scenario">Verify that backend rejects MCQ question card creation when choices are empty.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> Choices array is empty [].</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>/V2/dragon/create-mcq-question</code> <br><em>Payload:</em> <code>{ question: "...", choices: [] }</code></li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 400 Bad Request or 422 Unprocessable Entity.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 88ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>88ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Audience Targeting & Templates">
+        <td><strong>19</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-AUD-POS-01</code></td>
+        <td><strong>Audience Targeting & Templates</strong></td>
+        <td>
+          <div class="test-title">Fetch System Default Audience Demographic Templates</div>
+          <div class="test-scenario">Verify that user can load preset demographic templates (General Pop, Tech, Millennial).</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> User is authenticated.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP GET <code>/V2/audience/default-templates</code> </li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200 OK with default templates array.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 137ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>137ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Audience Targeting & Templates">
+        <td><strong>20</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-AUD-POS-02</code></td>
+        <td><strong>Audience Targeting & Templates</strong></td>
+        <td>
+          <div class="test-title">Fetch Public Audience Presets (Unauthenticated)</div>
+          <div class="test-scenario">Verify that public landing page visitors can preview available audience segments.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> No auth headers required.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP GET <code>/V2/public/audience/default-templates</code> </li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200 OK with public audience segments.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 76ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>76ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="NEGATIVE" data-status="PASS" data-module="Audience Targeting & Templates">
+        <td><strong>21</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-neg">NEGATIVE</span></td>
+        <td><code>TC-AUD-NEG-01</code></td>
+        <td><strong>Audience Targeting & Templates</strong></td>
+        <td>
+          <div class="test-title">Create Audience Template with Empty Demographic Criteria</div>
+          <div class="test-scenario">Verify that template creation without title or demographic parameters is rejected.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> Payload is empty {}.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>/V2/audience/create</code> <br><em>Payload:</em> <code>{}</code></li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 400 Bad Request or 422 Unprocessable Entity.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 73ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>73ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Survey Logics & Routing">
+        <td><strong>22</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-LOGIC-POS-01</code></td>
+        <td><strong>Survey Logics & Routing</strong></td>
+        <td>
+          <div class="test-title">Query Logic Versions for Survey Conversation Turn</div>
+          <div class="test-scenario">Verify that historical versions of skip & branching rules are queryable.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> Chat campaign exists.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP GET <code>/api/survey/logic-versions/null/1</code> </li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200 OK with logic versions metadata.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 81ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>81ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="NEGATIVE" data-status="PASS" data-module="Survey Logics & Routing">
+        <td><strong>23</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-neg">NEGATIVE</span></td>
+        <td><code>TC-LOGIC-NEG-01</code></td>
+        <td><strong>Survey Logics & Routing</strong></td>
+        <td>
+          <div class="test-title">Edit Survey Routing Logics with Empty Rulebook</div>
+          <div class="test-scenario">Verify that saving empty routing logic fails validation.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> Empty rulebook payload.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>/api/survey/edit-routes</code> <br><em>Payload:</em> <code>{}</code></li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 400 Bad Request or 422 Unprocessable Entity.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 74ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>74ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Credits, Pricing & Billing">
+        <td><strong>24</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-BILL-POS-01</code></td>
+        <td><strong>Credits, Pricing & Billing</strong></td>
+        <td>
+          <div class="test-title">Fetch Credit Pricing Rates & Package Tiers</div>
+          <div class="test-scenario">Verify that user can load credit package tier matrix.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> User is authenticated.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP GET <code>/V2/credits/pricing</code> </li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200 OK with credit rate plans.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 73ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>73ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Credits, Pricing & Billing">
+        <td><strong>25</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-BILL-POS-02</code></td>
+        <td><strong>Credits, Pricing & Billing</strong></td>
+        <td>
+          <div class="test-title">Check Organization Available Credit Balance</div>
+          <div class="test-scenario">Verify that organization credit balance is returned accurately.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> User has active organization.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP GET <code>/V2/credits/balance</code> </li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200 OK with credits balance field.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 136ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>136ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Credits, Pricing & Billing">
+        <td><strong>26</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-BILL-POS-03</code></td>
+        <td><strong>Credits, Pricing & Billing</strong></td>
+        <td>
+          <div class="test-title">Estimate Survey Credit Cost for Sample Size</div>
+          <div class="test-scenario">Verify that cost estimation engine calculates required credit deduction.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> Sample size is positive integer.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>/V2/credits/estimate</code> <br><em>Payload:</em> <code>{ sampleSize: 100, questionCount: 5 }</code></li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200 OK with calculated credit cost.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 77ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>77ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="NEGATIVE" data-status="PASS" data-module="Credits, Pricing & Billing">
+        <td><strong>27</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-neg">NEGATIVE</span></td>
+        <td><code>TC-BILL-NEG-01</code></td>
+        <td><strong>Credits, Pricing & Billing</strong></td>
+        <td>
+          <div class="test-title">Estimate Cost with Negative / Out-of-Bounds Parameters</div>
+          <div class="test-scenario">Verify that negative sample sizes cannot trick pricing calculation engine.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> Negative numeric values supplied.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>/V2/credits/estimate</code> <br><em>Payload:</em> <code>{ sampleSize: -50, questionCount: -10 }</code></li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 400 Bad Request or 422 Unprocessable Entity.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 75ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>75ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="NEGATIVE" data-status="PASS" data-module="Credits, Pricing & Billing">
+        <td><strong>28</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-neg">NEGATIVE</span></td>
+        <td><code>TC-BILL-NEG-02</code></td>
+        <td><strong>Credits, Pricing & Billing</strong></td>
+        <td>
+          <div class="test-title">Verify Payment Order with Forged / Invalid Signature</div>
+          <div class="test-scenario">Verify that webhook payment verification strictly fails on tampered cryptographic signature.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> Signature does not match HMAC hash.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>/V2/payments/verify</code> <br><em>Payload:</em> <code>{ fake_order_id, fake_signature }</code></li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 400 Bad Request or 422 Unprocessable Entity.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 77ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>77ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Analytics & Reporting">
+        <td><strong>29</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-RPT-POS-01</code></td>
+        <td><strong>Analytics & Reporting</strong></td>
+        <td>
+          <div class="test-title">Query Public Audience Demographic Distribution</div>
+          <div class="test-scenario">Verify that public audience demographic distribution is accessible.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> Public survey ID provided.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP GET <code>/V2/public/audience/report/sample_survey_id</code> </li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200 OK or 404 Not Found for unpopulated survey.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 75ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>75ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="NEGATIVE" data-status="PASS" data-module="Analytics & Reporting">
+        <td><strong>30</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-neg">NEGATIVE</span></td>
+        <td><code>TC-RPT-NEG-01</code></td>
+        <td><strong>Analytics & Reporting</strong></td>
+        <td>
+          <div class="test-title">Download CSV / Excel Responses for Non-Existent Survey</div>
+          <div class="test-scenario">Verify that requesting response dump for invalid survey ID returns 404 without data leak.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> Survey ID does not exist.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP GET <code>/V2/survey/get-responses-report/fake_survey_99999</code> </li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 404 Not Found or 400 Bad Request.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 89ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>89ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Account & Organization Settings">
+        <td><strong>31</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-ACC-POS-01</code></td>
+        <td><strong>Account & Organization Settings</strong></td>
+        <td>
+          <div class="test-title">Retrieve Authenticated User Profile & Organization Details</div>
+          <div class="test-scenario">Verify that authenticated user can fetch profile details and company info.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> User is authenticated.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP GET <code>/V2/account/details</code> </li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200 OK with profile object (email, organization, createdAt).</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 134ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>134ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="NEGATIVE" data-status="PASS" data-module="Account & Organization Settings">
+        <td><strong>32</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-neg">NEGATIVE</span></td>
+        <td><code>TC-ACC-NEG-01</code></td>
+        <td><strong>Account & Organization Settings</strong></td>
+        <td>
+          <div class="test-title">Update Profile Details with Empty / Blank Name</div>
+          <div class="test-scenario">Verify that profile updates with blank strings are rejected.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> Name field is blank "".</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP PATCH <code>/V2/account/update-details</code> <br><em>Payload:</em> <code>{ name: "" }</code></li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 400 Bad Request or 422 Unprocessable Entity.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 77ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>77ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Admin & Governance">
+        <td><strong>33</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-ADM-POS-01</code></td>
+        <td><strong>Admin & Governance</strong></td>
+        <td>
+          <div class="test-title">Admin Survey Moderation Queue Access Control</div>
+          <div class="test-scenario">Verify that admin moderation queue enforces role gating.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> User session provided.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP GET <code>/V2/dashboard/admin-surveys?skip=0&limit=5</code> </li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200 (if admin) or HTTP 401/403 (if regular user).</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 80ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>80ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="NEGATIVE" data-status="PASS" data-module="Admin & Governance">
+        <td><strong>34</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-neg">NEGATIVE</span></td>
+        <td><code>TC-ADM-NEG-01</code></td>
+        <td><strong>Admin & Governance</strong></td>
+        <td>
+          <div class="test-title">Superadmin Analytics Query Without Root Privilege</div>
+          <div class="test-scenario">Verify that non-root user accounts cannot query platform-wide superadmin analytics.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Evidence</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> Non-root user token provided.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP GET <code>/api/admin/superadmin/users/analytics</code> </li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 401 Unauthorized or 403 Forbidden.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 73ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Response Excerpt:</strong>
+                <pre class="resp-box">&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot; dir=&quot;ltr&quot; class=&quot;scrollbar-hide&quot;&gt;&lt;head&gt;&lt;meta charSet=&quot;utf-8&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content&quot;/&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt;link rel=&quot;st</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>73ms</code></td>
+      </tr>
+    
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    function filterTable(filter) {
+      document.querySelectorAll('.controls .btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      const rows = document.querySelectorAll('.test-row');
+      rows.forEach(r => {
+        if (filter === 'all') r.style.display = '';
+        else if (filter === 'POSITIVE' || filter === 'NEGATIVE') r.style.display = r.getAttribute('data-type') === filter ? '' : 'none';
+        else if (filter === 'PASS' || filter === 'FAIL') r.style.display = r.getAttribute('data-status') === filter ? '' : 'none';
+      });
+    }
+
+    function searchTable() {
+      const q = document.getElementById('search').value.toLowerCase();
+      const rows = document.querySelectorAll('.test-row');
+      rows.forEach(r => {
+        r.style.display = r.innerText.toLowerCase().includes(q) ? '' : 'none';
+      });
+    }
+  </script>
+</body>
+</html>

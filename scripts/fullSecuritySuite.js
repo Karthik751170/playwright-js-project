@@ -5,6 +5,8 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 const herculesConfig = require('../config/hercules.config');
+const ScopeGuard = require('../utils/security/ScopeGuard');
+const SecurityReporter = require('../utils/security/SecurityReporter');
 
 const TARGET_URL = process.env.TARGET_URL || herculesConfig.baseUrl || 'https://dev.hercules.works';
 
@@ -18,7 +20,7 @@ async function requestUrl(urlStr, options = {}) {
 
   return new Promise((resolve) => {
     const reqHeaders = {
-      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) HerculesEnterpriseSecurity/3.0',
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) HerculesAppSecDAST/4.0',
       ...(options.headers || {}),
     };
 
@@ -126,7 +128,7 @@ async function inspectTlsCertificate(hostname) {
 }
 
 /**
- * Secret & Token Scraper in Frontend JavaScript Bundles
+ * Secret & Token Scraper in Frontend JavaScript Bundles (100% of discovered bundles)
  */
 async function scanJsBundlesForLeakedSecrets(baseUrl, htmlBody) {
   const scriptSrcs = [];
@@ -145,15 +147,19 @@ async function scanJsBundlesForLeakedSecrets(baseUrl, htmlBody) {
   const secretPatterns = [
     { name: 'AWS Access Key ID', regex: /AKIA[0-9A-Z]{16}/g },
     { name: 'Stripe Secret/Live Key', regex: /sk_live_[0-9a-zA-Z]{24}/g },
+    { name: 'GCP API Key', regex: /AIza[0-9A-Za-z-_]{35}/g },
+    { name: 'GitHub Personal Token', regex: /gh[pousr]_[0-9a-zA-Z]{36}/g },
+    { name: 'Firebase Server Key', regex: /AAAA[a-zA-Z0-9_-]{7}:[a-zA-Z0-9_-]{140}/g },
     { name: 'Generic Secret Token Key', regex: /(?:api_key|apikey|secret_key|private_key)\s*[:=]\s*['"][a-zA-Z0-9_\-]{20,}['"]/gi },
     { name: 'Private RSA/EC Key', regex: /-----BEGIN (?:RSA )?PRIVATE KEY-----/g },
     { name: 'Slack Webhook URL', regex: /https:\/\/hooks\.slack\.com\/services\/T[0-9a-zA-Z_]+\/B[0-9a-zA-Z_]+\/[0-9a-zA-Z_]+/g },
   ];
 
   const leaksFound = [];
-  const sampleScanned = scriptSrcs.slice(0, 8); // Scan top 8 primary JS bundles
+  // Scan 100% of discovered Next.js JS bundles for complete coverage
+  const allBundles = Array.from(new Set(scriptSrcs));
 
-  for (const bundleUrl of sampleScanned) {
+  for (const bundleUrl of allBundles) {
     try {
       const res = await requestUrl(bundleUrl);
       if (res.statusCode === 200) {
@@ -174,25 +180,23 @@ async function scanJsBundlesForLeakedSecrets(baseUrl, htmlBody) {
   }
 
   return {
-    scannedCount: sampleScanned.length,
+    scannedCount: allBundles.length,
     leaksFound,
   };
 }
 
 async function runEnterprise10OutOf10Audit() {
+  // Step 0: Validate target scope & authorization
+  ScopeGuard.validateScope(TARGET_URL);
+
   console.log(`\n======================================================================`);
-  console.log(`🚀  ENTERPRISE 10/10 OWASP & INFRASTRUCTURE SECURITY AUDIT`);
+  console.log(`🛡️  AUTOMATED DAST & SECURITY REGRESSION AUDIT`);
   console.log(`🎯  Target: ${TARGET_URL}`);
   console.log(`🕒  Audit Execution Time: ${new Date().toISOString()}`);
   console.log(`======================================================================\n`);
 
-  const auditRecords = [];
-
-  function logFinding(record) {
-    auditRecords.push(record);
-    const icon = record.status === 'PASS' ? '✅' : record.status === 'WARN' ? '⚠️ ' : '❌';
-    console.log(`  ${icon} [${record.status}] ${record.code} - ${record.name}`);
-  }
+  const reporter = new SecurityReporter(TARGET_URL);
+  const logFinding = (record) => reporter.logFinding(record);
 
   const parsedTarget = new URL(TARGET_URL);
 
@@ -528,14 +532,20 @@ async function runEnterprise10OutOf10Audit() {
     analysis: traceDisabled ? 'TRACE method is disabled.' : 'Server returned 500 on TRACE instead of 405. Recommended to explicitly disable TRACE in cloud load balancer/ingress config.',
   });
 
-  // Sensitive Files
+  // Sensitive Files & Configuration Leakage (Expanded Fuzzing)
   const sensitiveFiles = [
-    { file: '/.env', desc: 'Environment Config / Secrets' },
-    { file: '/.git/HEAD', desc: 'Git Source Code Metadata' },
-    { file: '/wp-config.php', desc: 'Legacy / CMS DB Credentials' },
+    { file: '/.env', desc: 'Environment Config' },
+    { file: '/.env.local', desc: 'Local Environment Config' },
+    { file: '/.env.production', desc: 'Production Environment Secrets' },
+    { file: '/.git/HEAD', desc: 'Git Branch Metadata' },
+    { file: '/.git/config', desc: 'Git Remote & Repo Config' },
+    { file: '/wp-config.php', desc: 'Legacy CMS DB Credentials' },
     { file: '/config.json', desc: 'Application Configuration' },
     { file: '/server.js', desc: 'Backend Source File' },
+    { file: '/docker-compose.yml', desc: 'Container Orchestration Secrets' },
     { file: '/.dockerignore', desc: 'Container Build File' },
+    { file: '/phpinfo.php', desc: 'PHP Diagnostic Dump' },
+    { file: '/.aws/credentials', desc: 'Cloud Provider Credentials' },
   ];
 
   for (const s of sensitiveFiles) {
@@ -950,291 +960,21 @@ async function runEnterprise10OutOf10Audit() {
     evidence: `Script Reflected: ${svgLeaked ? 'YES' : 'NO'}\nHTTP Status: ${svgRes.statusCode}\nLatency: ${svgRes.latencyMs}ms`,
     analysis: svgLeaked ? 'Critical XSS vulnerability in media handling!' : 'Media and SVG injection vectors safely neutralized.',
   });
-  const passCount = auditRecords.filter((r) => r.status === 'PASS').length;
-  const warnCount = auditRecords.filter((r) => r.status === 'WARN').length;
-  const failCount = auditRecords.filter((r) => r.status === 'FAIL').length;
-  const totalCount = auditRecords.length;
-  const complianceScore = Math.round((passCount / totalCount) * 100);
 
-  const reportHtml = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>10/10 Enterprise Security Audit Report - ${TARGET_URL}</title>
-  <style>
-    :root {
-      --bg: #060913;
-      --card: #0f172a;
-      --card-inner: #1e293b;
-      --border: #334155;
-      --text: #f8fafc;
-      --muted: #94a3b8;
-      --accent: #38bdf8;
-      --pass: #10b981;
-      --warn: #f59e0b;
-      --fail: #ef4444;
-    }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 24px; }
-    .container { max-width: 1300px; margin: 0 auto; }
-    .header { background: linear-gradient(135deg, #1e293b 0%, #0c1427 100%); border: 1px solid var(--border); border-radius: 16px; padding: 32px; margin-bottom: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
-    h1 { color: var(--accent); margin: 0 0 8px 0; font-size: 28px; display: flex; align-items: center; gap: 12px; }
-    .meta { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
-    
-    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-    .metric-card { 
-      background: var(--card); 
-      border: 2px solid var(--border); 
-      border-radius: 12px; 
-      padding: 20px; 
-      text-align: center; 
-      cursor: pointer; 
-      transition: all 0.2s ease-in-out;
-      user-select: none;
-    }
-    .metric-card:hover { 
-      transform: translateY(-2px); 
-      box-shadow: 0 8px 20px rgba(0,0,0,0.4); 
-      border-color: var(--accent); 
-    }
-    .metric-card.active {
-      border-color: var(--accent);
-      background: #192642;
-      box-shadow: 0 0 15px rgba(56, 189, 248, 0.25);
-    }
-    .score { font-size: 40px; font-weight: 800; color: ${complianceScore >= 85 ? 'var(--pass)' : 'var(--warn)'}; }
-    .stat-num { font-size: 32px; font-weight: 700; }
-    
-    .controls-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin: 28px 0 16px 0;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    .filter-pills { display: flex; gap: 8px; }
-    .pill-btn {
-      background: var(--card);
-      border: 1px solid var(--border);
-      color: var(--muted);
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .pill-btn:hover { color: var(--text); border-color: var(--accent); }
-    .pill-btn.active {
-      background: var(--accent);
-      color: #060913;
-      border-color: var(--accent);
-      font-weight: 700;
-    }
-    .action-btn {
-      background: #1e293b;
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 8px 14px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .action-btn:hover { background: #334155; }
-    
-    .test-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 16px; overflow: hidden; transition: all 0.2s; }
-    .test-header { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: #131d33; }
-    .test-header:hover { background: #192642; }
-    .test-title { font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 12px; }
-    .badge { padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
-    .badge-pass { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
-    .badge-warn { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
-    .badge-fail { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
-    .badge-code { background: #1e293b; color: var(--accent); font-family: monospace; font-size: 12px; padding: 3px 8px; border-radius: 4px; }
-    
-    .test-body { padding: 20px; border-top: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: var(--card); }
-    .section-box { background: var(--card-inner); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
-    .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; letter-spacing: 0.05em; }
-    .section-content { font-size: 13.5px; line-height: 1.5; color: #cbd5e1; }
-    .code-block { background: #070b14; border: 1px solid #1e293b; padding: 10px; border-radius: 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 12px; color: #94a3b8; white-space: pre-wrap; word-break: break-all; margin-top: 4px; }
-    
-    .empty-state { text-align: center; padding: 48px; background: var(--card); border: 1px dashed var(--border); border-radius: 12px; display: none; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>🚀 10/10 Enterprise Security Audit Dashboard</h1>
-      <div class="meta">
-        <strong>Target:</strong> <a href="${TARGET_URL}" style="color: var(--accent);" target="_blank">${TARGET_URL}</a> &nbsp;|&nbsp; 
-        <strong>Audit Standard:</strong> OWASP Top 10 + TLS Ciphers + Secret Scraper + Time-based Blind SQLi &nbsp;|&nbsp; 
-        <strong>Executed At:</strong> ${new Date().toUTCString()}
-      </div>
-
-      <div class="grid">
-        <div id="card-all" class="metric-card active" onclick="applyFilter('ALL')">
-          <div class="score">${complianceScore}%</div>
-          <div style="color: var(--text); font-size: 13px; font-weight: 600; margin-top: 4px;">Compliance Score</div>
-          <div style="color: var(--muted); font-size: 11px; margin-top: 2px;">(Show All ${totalCount} Controls)</div>
-        </div>
-
-        <div id="card-pass" class="metric-card" onclick="applyFilter('PASS')">
-          <div class="stat-num" style="color: var(--pass);">${passCount}</div>
-          <div style="color: var(--text); font-size: 13px; font-weight: 600; margin-top: 4px;">Passed Controls</div>
-          <div style="color: var(--pass); font-size: 11px; margin-top: 2px;">Click to view passed</div>
-        </div>
-
-        <div id="card-warn" class="metric-card" onclick="applyFilter('WARN')">
-          <div class="stat-num" style="color: var(--warn);">${warnCount}</div>
-          <div style="color: var(--text); font-size: 13px; font-weight: 600; margin-top: 4px;">Hardening Recommendations</div>
-          <div style="color: var(--warn); font-size: 11px; margin-top: 2px;">Click to view warnings</div>
-        </div>
-
-        <div id="card-fail" class="metric-card" onclick="applyFilter('FAIL')">
-          <div class="stat-num" style="color: var(--fail);">${failCount}</div>
-          <div style="color: var(--text); font-size: 13px; font-weight: 600; margin-top: 4px;">Critical / High Flaws</div>
-          <div style="color: var(--fail); font-size: 11px; margin-top: 2px;">Click to view failures</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="controls-bar">
-      <div class="filter-pills">
-        <button id="pill-all" class="pill-btn active" onclick="applyFilter('ALL')">All Controls (${totalCount})</button>
-        <button id="pill-pass" class="pill-btn" onclick="applyFilter('PASS')">✅ Passed (${passCount})</button>
-        <button id="pill-warn" class="pill-btn" onclick="applyFilter('WARN')">⚠️ Hardening (${warnCount})</button>
-        <button id="pill-fail" class="pill-btn" onclick="applyFilter('FAIL')">❌ Critical / High (${failCount})</button>
-      </div>
-
-      <div style="display: flex; gap: 8px;">
-        <button class="action-btn" onclick="toggleAllDetails(true)">Expand All Evidence</button>
-        <button class="action-btn" onclick="toggleAllDetails(false)">Collapse All Evidence</button>
-      </div>
-    </div>
-
-    <div id="empty-state" class="empty-state">
-      <h3 style="color: var(--accent); margin-top: 0;">No Findings in This Category</h3>
-      <p style="color: var(--muted); margin-bottom: 0;">There are zero checks with this status filter.</p>
-    </div>
-
-    <div id="tests-container">
-      ${auditRecords.map((r, idx) => `
-        <div class="test-card" data-status="${r.status}">
-          <div class="test-header" onclick="const el = document.getElementById('details-${idx}'); el.style.display = el.style.display === 'none' ? 'grid' : 'none';">
-            <div class="test-title">
-              <span class="badge-code">${r.code}</span>
-              <span>${r.name}</span>
-              <span style="font-size: 12px; color: var(--muted); font-weight: normal;">— ${r.principle}</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 12px;">
-              <span style="font-size: 12px; color: ${r.severity === 'Critical' || r.severity === 'High' ? '#f87171' : '#94a3b8'}; font-weight: 600;">${r.severity}</span>
-              <span class="badge ${r.status === 'PASS' ? 'badge-pass' : (r.status === 'WARN' ? 'badge-warn' : 'badge-fail')}">${r.status}</span>
-            </div>
-          </div>
-
-          <div id="details-${idx}" class="test-body">
-            <div class="section-box">
-              <div class="section-title">🧪 What We Did (Action & Request Sent)</div>
-              <div class="section-content">${r.action}</div>
-            </div>
-
-            <div class="section-box">
-              <div class="section-title">🎯 Why It Was Tested (Security Rationale)</div>
-              <div class="section-content">${r.rationale}</div>
-            </div>
-
-            <div class="section-box">
-              <div class="section-title">📋 Expected Result</div>
-              <div class="section-content">${r.expected}</div>
-            </div>
-
-            <div class="section-box">
-              <div class="section-title">🔍 Actual Result Received</div>
-              <div class="section-content" style="color: ${r.status === 'PASS' ? '#34d399' : (r.status === 'WARN' ? '#fbbf24' : '#f87171')}; font-weight: 600;">${r.actual}</div>
-            </div>
-
-            <div class="section-box" style="grid-column: span 2;">
-              <div class="section-title">📦 Raw Proof / HTTP Headers & Body Evidence</div>
-              <div class="code-block">${r.evidence}</div>
-            </div>
-
-            <div class="section-box" style="grid-column: span 2;">
-              <div class="section-title">💡 Security Verdict & Analysis</div>
-              <div class="section-content">${r.analysis}</div>
-            </div>
-          </div>
-        </div>
-      `).join('')}
-    </div>
-
-  </div>
-
-  <script>
-    let currentFilter = 'ALL';
-
-    function applyFilter(status) {
-      currentFilter = status;
-      const cards = document.querySelectorAll('.test-card');
-      let visibleCount = 0;
-
-      cards.forEach((card) => {
-        const cardStatus = card.getAttribute('data-status');
-        if (status === 'ALL' || cardStatus === status) {
-          card.style.display = 'block';
-          visibleCount++;
-        } else {
-          card.style.display = 'none';
-        }
-      });
-
-      // Toggle Empty State
-      const emptyState = document.getElementById('empty-state');
-      if (visibleCount === 0) {
-        emptyState.style.display = 'block';
-      } else {
-        emptyState.style.display = 'none';
-      }
-
-      // Update Card Active State
-      const statusMap = { 'ALL': 'all', 'PASS': 'pass', 'WARN': 'warn', 'FAIL': 'fail' };
-      document.querySelectorAll('.metric-card').forEach((c) => c.classList.remove('active'));
-      const activeCard = document.getElementById('card-' + statusMap[status]);
-      if (activeCard) activeCard.classList.add('active');
-
-      // Update Pill Active State
-      document.querySelectorAll('.pill-btn').forEach((p) => p.classList.remove('active'));
-      const activePill = document.getElementById('pill-' + statusMap[status]);
-      if (activePill) activePill.classList.add('active');
-    }
-
-    function toggleAllDetails(expand) {
-      document.querySelectorAll('.test-body').forEach((body) => {
-        body.style.display = expand ? 'grid' : 'none';
-      });
-    }
-  </script>
-</body>
-</html>
-  `;
-
-  const reportDir = path.resolve(process.cwd(), 'test-results/security');
-  if (!fs.existsSync(reportDir)) {
-    fs.mkdirSync(reportDir, { recursive: true });
-  }
-
-  const reportPath = path.join(reportDir, 'owasp-enterprise-10-10-report.html');
-  fs.writeFileSync(reportPath, reportHtml, 'utf-8');
+  // -------------------------------------------------------------------------
+  // Generate & Export Standardized Report
+  // -------------------------------------------------------------------------
+  const reportPath = reporter.generateHtmlReport('owasp-enterprise-10-10-report.html');
+  const metrics = reporter.getMetrics();
 
   console.log(`\n======================================================================`);
-  console.log(`🎉 10/10 ENTERPRISE AUDIT COMPLETED`);
-  console.log(`   Compliance Score: ${complianceScore}%`);
-  console.log(`   Passed Controls: ${passCount}/${totalCount}`);
-  console.log(`   Hardening Warnings: ${warnCount}`);
-  console.log(`   Critical Vulnerabilities: ${failCount}`);
-  console.log(`📄 Enterprise Dashboard saved at: ${reportPath}`);
+  console.log(`🎉  SECURITY AUDIT COMPLETED`);
+  console.log(`   Compliance Score: ${metrics.complianceScore}%`);
+  console.log(`   Verified Controls: ${metrics.passCount}/${metrics.totalCount}`);
+  console.log(`   Triaged / Suppressed: ${metrics.suppressedCount}`);
+  console.log(`   Hardening Warnings: ${metrics.warnCount}`);
+  console.log(`   Critical Vulnerabilities: ${metrics.failCount}`);
+  console.log(`📄 Dashboard exported at: ${reportPath}`);
   console.log(`======================================================================\n`);
 }
 

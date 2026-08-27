@@ -1,0 +1,16 @@
+{
+  "version": "1.0",
+  "description": "Security findings triage and accepted risk suppression configuration for CI/CD gates.",
+  "suppressions": [
+    {
+      "code": "A05-TRACE",
+      "target": "https://dev.hercules.works",
+      "reason": "Next.js / GCP edge gateway returns HTTP 500 on TRACE verb instead of 405. Request is rejected and does not reflect headers (no Cross-Site Tracing risk).",
+      "severity": "Low",
+      "status": "ACCEPTED_RISK",
+      "approvedBy": "SecOps-Team",
+      "reviewDate": "2026-08-27",
+      "expiresAt": "2027-08-27"
+    }
+  ]
+}

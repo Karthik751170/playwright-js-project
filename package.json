@@ -12,6 +12,7 @@
     "test:security:sqli-ssrf": "playwright test tests/security/ZapSqlInjectionAndSsrf.spec.js --config=playwright.zap.config.js",
     "audit:security": "node scripts/securityAudit.js",
     "audit:owasp-full": "node scripts/fullSecuritySuite.js",
+    "audit:advanced": "playwright test tests/security/AdvancedAppSecAudit.spec.js",
     "zap:start": "docker run -d --name zap -p 8080:8080 ghcr.io/zaproxy/zaproxy:stable zap.sh -daemon -host 0.0.0.0 -port 8080 -config api.disablekey=true -config api.addrs.addr.name=.* -config api.addrs.addr.regex=true",
     "zap:stop": "docker stop zap 2>/dev/null && docker rm zap 2>/dev/null || true",
     "allure:generate": "allure generate allure-results --clean",

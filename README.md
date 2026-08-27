@@ -119,7 +119,7 @@ The security suite provides **automated Dynamic Application Security Testing (DA
    - **CORS Policy**: Verifies arbitrary origin reflection with credentials is rejected.
 6. **🔑 Advanced API & Stateful Session Security (`BOLA-01`, `RATE-01`, `JWT-01`, `BIZ-01`, `FILE-01`)**:
    - **Broken Object-Level Authorization (BOLA / IDOR)**: Probes cross-tenant survey/profile access with forged tokens to enforce isolation.
-   - **Rate Limiting Resilience**: Tests parallel bursts against auth & OTP endpoints to verify server stability and anti-abuse limits.
+   - **Rate Limiting Resilience**: Tests concurrent bursts against Email Signup/Auth and AI Prompt Generation endpoints to verify server stability and anti-abuse limits.
    - **JWT Cryptography**: Probes algorithm confusion (`"alg": "none"`) and expired session token rejection.
    - **Business Logic Integrity**: Probes mass assignment (`isAdmin=true`, `role=superuser`) and out-of-bounds negative values.
    - **Payload Limits & SVG XSS**: Verifies oversized payload limits (preventing DoS) and script sanitization in media payloads.

@@ -1,5 +1,5 @@
 # 🛡️ Complete Enterprise Security & Test Automation Codebase
-Generated on: 2026-08-27T10:41:22.789Z
+Generated on: 2026-08-27T10:57:08.103Z
 Target Scope: Authorized Hosts (dev.hercules.works, localhost)
 
 ======================================================================
@@ -154,7 +154,7 @@ The security suite provides **automated Dynamic Application Security Testing (DA
    - **CORS Policy**: Verifies arbitrary origin reflection with credentials is rejected.
 6. **🔑 Advanced API & Stateful Session Security (`BOLA-01`, `RATE-01`, `JWT-01`, `BIZ-01`, `FILE-01`)**:
    - **Broken Object-Level Authorization (BOLA / IDOR)**: Probes cross-tenant survey/profile access with forged tokens to enforce isolation.
-   - **Rate Limiting Resilience**: Tests parallel bursts against auth & OTP endpoints to verify server stability and anti-abuse limits.
+   - **Rate Limiting Resilience**: Tests concurrent bursts against Email Signup/Auth and AI Prompt Generation endpoints to verify server stability and anti-abuse limits.
    - **JWT Cryptography**: Probes algorithm confusion (`"alg": "none"`) and expired session token rejection.
    - **Business Logic Integrity**: Probes mass assignment (`isAdmin=true`, `role=superuser`) and out-of-bounds negative values.
    - **Payload Limits & SVG XSS**: Verifies oversized payload limits (preventing DoS) and script sanitization in media payloads.
@@ -490,7 +490,7 @@ class SecurityReporter {
     this.targetUrl = targetUrl;
     this.records = [];
     this.suppressions = this.loadSuppressions();
-    this.outputDir = options.outputDir || path.join(process.cwd(), 'test-results', 'security');
+    this.outputDir = options.outputDir || path.join(process.cwd(), 'reports', 'security');
   }
 
   loadSuppressions() {
@@ -1664,8 +1664,24 @@ async function runEnterprise10OutOf10Audit() {
   // -------------------------------------------------------------------------
   console.log(`\n▶ [ENGINE 13] Rate Limiting & Anti-Brute-Force Controls...`);
   const rateLimitTargets = [
-    { name: 'Auth & OTP Endpoint Burst', path: '/api/auth/send-otp', method: 'POST', body: JSON.stringify({ phone: '+919999999999' }) },
-    { name: 'Survey Submission Rate Guard', path: '/api/surveys/submit', method: 'POST', body: JSON.stringify({ surveyId: 'probe_test', answers: {} }) },
+    { 
+      name: 'Email Signup & Verification Link Rate Guard', 
+      path: '/api/auth/signup', 
+      method: 'POST', 
+      body: JSON.stringify({ email: 'rate_limit_probe@kzdzyaot.mailosaur.net', password: 'TestPassword@2026!' }) 
+    },
+    { 
+      name: 'AI Workspace Prompt & Survey Generation Rate Guard', 
+      path: '/api/ai/generate', 
+      method: 'POST', 
+      body: JSON.stringify({ prompt: 'Create survey burst probe', category: 'market_research' }) 
+    },
+    { 
+      name: 'Consumer Survey Submission Rate Guard', 
+      path: '/api/surveys/submit', 
+      method: 'POST', 
+      body: JSON.stringify({ surveyId: 'probe_test_rate_limit', answers: {} }) 
+    },
   ];
 
   for (const r of rateLimitTargets) {
@@ -1919,11 +1935,11 @@ test.describe('🛡️ Advanced Enterprise AppSec & Strict Security Gates', () =
     }
   });
 
-  test('RATE-01: Strict High-Frequency Burst & Crash Resistance Gate', async ({ request }) => {
+  test('RATE-01: Email Authentication & Signup Rate Limiting Resilience', async ({ request }) => {
     const burstCount = 15;
     const promises = Array.from({ length: burstCount }, () =>
-      request.post(`${TARGET_URL}/api/auth/send-otp`, {
-        data: { phone: '+919999999999' },
+      request.post(`${TARGET_URL}/api/auth/signup`, {
+        data: { email: 'rate_probe@kzdzyaot.mailosaur.net', password: 'TestPassword@2026!' },
         headers: { 'Content-Type': 'application/json' }
       })
     );

@@ -45,11 +45,11 @@ test.describe('🛡️ Advanced Enterprise AppSec & Strict Security Gates', () =
     }
   });
 
-  test('RATE-01: Strict High-Frequency Burst & Crash Resistance Gate', async ({ request }) => {
+  test('RATE-01: Email Authentication & Signup Rate Limiting Resilience', async ({ request }) => {
     const burstCount = 15;
     const promises = Array.from({ length: burstCount }, () =>
-      request.post(`${TARGET_URL}/api/auth/send-otp`, {
-        data: { phone: '+919999999999' },
+      request.post(`${TARGET_URL}/api/auth/signup`, {
+        data: { email: 'rate_probe@kzdzyaot.mailosaur.net', password: 'TestPassword@2026!' },
         headers: { 'Content-Type': 'application/json' }
       })
     );

@@ -784,8 +784,24 @@ async function runEnterprise10OutOf10Audit() {
   // -------------------------------------------------------------------------
   console.log(`\n▶ [ENGINE 13] Rate Limiting & Anti-Brute-Force Controls...`);
   const rateLimitTargets = [
-    { name: 'Auth & OTP Endpoint Burst', path: '/api/auth/send-otp', method: 'POST', body: JSON.stringify({ phone: '+919999999999' }) },
-    { name: 'Survey Submission Rate Guard', path: '/api/surveys/submit', method: 'POST', body: JSON.stringify({ surveyId: 'probe_test', answers: {} }) },
+    { 
+      name: 'Email Signup & Verification Link Rate Guard', 
+      path: '/api/auth/signup', 
+      method: 'POST', 
+      body: JSON.stringify({ email: 'rate_limit_probe@kzdzyaot.mailosaur.net', password: 'TestPassword@2026!' }) 
+    },
+    { 
+      name: 'AI Workspace Prompt & Survey Generation Rate Guard', 
+      path: '/api/ai/generate', 
+      method: 'POST', 
+      body: JSON.stringify({ prompt: 'Create survey burst probe', category: 'market_research' }) 
+    },
+    { 
+      name: 'Consumer Survey Submission Rate Guard', 
+      path: '/api/surveys/submit', 
+      method: 'POST', 
+      body: JSON.stringify({ surveyId: 'probe_test_rate_limit', answers: {} }) 
+    },
   ];
 
   for (const r of rateLimitTargets) {

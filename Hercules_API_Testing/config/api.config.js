@@ -1,19 +1,20 @@
 /**
  * api.config.js
- * Hercules API Testing - Central Configuration & Endpoint Registry
+ * Hercules API Testing - Central Configuration & Dual-Backend Microservice Registry
  */
 
-const herculesConfig = require('../../config/hercules.config');
 const HERCULES_ENDPOINTS = require('../../config/herculesEndpoints');
 
 module.exports = {
   projectName: 'Hercules API Testing',
-  baseUrl: process.env.TARGET_URL || herculesConfig.baseUrl || 'https://dev.hercules.works',
+  webUrl: 'https://dev.hercules.works',
+  aiApiUrl: 'https://devapi-ai.hercules.works',
+  coreApiUrl: 'https://devapi.hercules.works',
   timeout: 30000,
   endpoints: HERCULES_ENDPOINTS,
   defaultHeaders: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
-    'User-Agent': 'Hercules-API-Testing-Runner/1.0',
+    'User-Agent': 'Hercules-API-Testing-Runner/2.0',
   }
 };

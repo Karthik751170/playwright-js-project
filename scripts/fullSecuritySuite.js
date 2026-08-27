@@ -7,6 +7,7 @@ const { execSync } = require('child_process');
 const herculesConfig = require('../config/hercules.config');
 const ScopeGuard = require('../utils/security/ScopeGuard');
 const SecurityReporter = require('../utils/security/SecurityReporter');
+const HERCULES_ENDPOINTS = require('../config/herculesEndpoints');
 
 const TARGET_URL = process.env.TARGET_URL || herculesConfig.baseUrl || 'https://dev.hercules.works';
 
@@ -745,9 +746,9 @@ async function runEnterprise10OutOf10Audit() {
   // -------------------------------------------------------------------------
   console.log(`\n▶ [ENGINE 12] Broken Object-Level Authorization (BOLA / IDOR)...`);
   const bolaEndpoints = [
-    { name: 'Cross-Tenant Survey Access', path: '/api/surveys/srv_victim_tenant_99812', method: 'GET' },
-    { name: 'Cross-Tenant User Profile Access', path: '/api/user/profile/usr_victim_org_881', method: 'GET' },
-    { name: 'Unauthorized Campaign Mutation', path: '/api/campaigns/cmp_victim_org_772', method: 'PATCH', body: JSON.stringify({ status: 'active', budget: 99999 }) },
+    { name: 'Cross-Tenant Survey Access', path: `${HERCULES_ENDPOINTS.SURVEY.GET_SURVEY_DETAILS}?surveyId=srv_victim_tenant_99812`, method: 'GET' },
+    { name: 'Cross-Tenant Audience Report Access', path: HERCULES_ENDPOINTS.ANALYTICS.AUDIENCE_INSIGHTS('srv_victim_tenant_99812'), method: 'GET' },
+    { name: 'Cross-Tenant Campaign Chat Access', path: HERCULES_ENDPOINTS.CAMPAIGNS.GET_CHAT_BY_ID('cmp_victim_org_772'), method: 'GET' },
   ];
 
   for (const b of bolaEndpoints) {
@@ -785,22 +786,22 @@ async function runEnterprise10OutOf10Audit() {
   console.log(`\n▶ [ENGINE 13] Rate Limiting & Anti-Brute-Force Controls...`);
   const rateLimitTargets = [
     { 
-      name: 'Email Signup & Verification Link Rate Guard', 
-      path: '/api/auth/signup', 
+      name: 'Email Signup & Verification OTP Rate Guard', 
+      path: HERCULES_ENDPOINTS.AUTH.SIGNUP_OTP, 
       method: 'POST', 
-      body: JSON.stringify({ email: 'rate_limit_probe@kzdzyaot.mailosaur.net', password: 'TestPassword@2026!' }) 
+      body: JSON.stringify({ email: 'rate_limit_probe@kzdzyaot.mailosaur.net' }) 
     },
     { 
-      name: 'AI Workspace Prompt & Survey Generation Rate Guard', 
-      path: '/api/ai/generate', 
+      name: 'AI Workspace Prompt & Chat Stream Rate Guard', 
+      path: HERCULES_ENDPOINTS.AI_CHAT.CHAT, 
       method: 'POST', 
-      body: JSON.stringify({ prompt: 'Create survey burst probe', category: 'market_research' }) 
+      body: JSON.stringify({ message: 'Create survey burst probe' }) 
     },
     { 
-      name: 'Consumer Survey Submission Rate Guard', 
-      path: '/api/surveys/submit', 
+      name: 'AI Question Generation Rate Guard', 
+      path: HERCULES_ENDPOINTS.SURVEY.GENERATE_QUESTIONS, 
       method: 'POST', 
-      body: JSON.stringify({ surveyId: 'probe_test_rate_limit', answers: {} }) 
+      body: JSON.stringify({ prompt: 'probe_test_rate_limit' }) 
     },
   ];
 
@@ -851,7 +852,7 @@ async function runEnterprise10OutOf10Audit() {
   
   // A. alg: none signature bypass token
   const algNoneToken = `${b64Url({ alg: 'none', typ: 'JWT' })}.${b64Url({ sub: 'admin', role: 'superuser', exp: Math.floor(Date.now() / 1000) + 3600 })}.`;
-  const algNoneRes = await requestUrl(`${TARGET_URL}/api/user`, {
+  const algNoneRes = await requestUrl(`${TARGET_URL}${HERCULES_ENDPOINTS.ACCOUNT.GET_DETAILS}`, {
     headers: { 'Authorization': `Bearer ${algNoneToken}` },
   });
   const algNoneBlocked = algNoneRes.statusCode === 401 || algNoneRes.statusCode === 403 || algNoneRes.statusCode === 404 || (algNoneRes.statusCode === 200 && !algNoneRes.body.includes('superuser'));
@@ -862,7 +863,7 @@ async function runEnterprise10OutOf10Audit() {
     name: 'JWT Algorithm Confusion (alg: none) Bypass Probe',
     status: algNoneBlocked ? 'PASS' : 'FAIL',
     severity: algNoneBlocked ? 'High' : 'Critical',
-    action: `Sent unsigned JWT with header {"alg":"none"} claiming superuser role to: ${TARGET_URL}/api/user`,
+    action: `Sent unsigned JWT with header {"alg":"none"} claiming superuser role to: ${TARGET_URL}${HERCULES_ENDPOINTS.ACCOUNT.GET_DETAILS}`,
     rationale: 'Verify that backend JWT verification strictly enforces HMAC/RSA signature validation and rejects unsigned tokens configured with "alg": "none".',
     expected: 'HTTP 401 (Unauthorized) or 403 (Forbidden). "alg: none" tokens must be rejected.',
     actual: algNoneBlocked ? `Safe: Received HTTP ${algNoneRes.statusCode} ${algNoneRes.statusMessage}. Unsigned token rejected.` : 'CRITICAL: alg: none signature bypass accepted!',
@@ -872,7 +873,7 @@ async function runEnterprise10OutOf10Audit() {
 
   // B. Expired Token Validation
   const expiredToken = `${b64Url({ alg: 'HS256', typ: 'JWT' })}.${b64Url({ sub: 'user_test', exp: Math.floor(Date.now() / 1000) - 7200 })}.tampered_signature_payload`;
-  const expRes = await requestUrl(`${TARGET_URL}/api/dashboard`, {
+  const expRes = await requestUrl(`${TARGET_URL}${HERCULES_ENDPOINTS.AUTH.SYNC}`, {
     headers: { 'Authorization': `Bearer ${expiredToken}` },
   });
   const expBlocked = expRes.statusCode === 401 || expRes.statusCode === 403 || expRes.statusCode === 404 || (expRes.statusCode === 200 && !expRes.body.includes('user_test'));
@@ -883,7 +884,7 @@ async function runEnterprise10OutOf10Audit() {
     name: 'Expired Session Token Rejection & Expiration Enforcement',
     status: expBlocked ? 'PASS' : 'FAIL',
     severity: expBlocked ? 'High' : 'Critical',
-    action: `Sent expired JWT token (exp: -7200s in the past) to: ${TARGET_URL}/api/dashboard`,
+    action: `Sent expired JWT token (exp: -7200s in the past) to: ${TARGET_URL}${HERCULES_ENDPOINTS.AUTH.SYNC}`,
     rationale: 'Verify that expired tokens are strictly rejected and cannot be reused beyond their cryptographic expiration time.',
     expected: 'HTTP 401 Unauthorized or clean rejection.',
     actual: `Received HTTP ${expRes.statusCode} ${expRes.statusMessage}. Expired session rejected properly.`,

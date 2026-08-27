@@ -1,5 +1,6 @@
 const { test, expect } = require('@playwright/test');
 const herculesConfig = require('../../config/hercules.config');
+const HERCULES_ENDPOINTS = require('../../config/herculesEndpoints');
 
 const TARGET_URL = process.env.TARGET_URL || herculesConfig.baseUrl || 'https://dev.hercules.works';
 
@@ -9,9 +10,9 @@ test.describe('🛡️ Advanced Enterprise AppSec & Strict Security Gates', () =
     const forgedToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhdHRhY2tlciIsInRlbmFudElkIjoidW5hdXRob3JpemVkX29yZyJ9.invalid_signature_probe';
     
     const endpoints = [
-      '/api/surveys/srv_victim_tenant_99812',
-      '/api/user/profile/usr_victim_org_881',
-      '/api/campaigns/cmp_victim_org_772'
+      `${HERCULES_ENDPOINTS.SURVEY.GET_SURVEY_DETAILS}?surveyId=srv_victim_tenant_99812`,
+      HERCULES_ENDPOINTS.ANALYTICS.AUDIENCE_INSIGHTS('srv_victim_tenant_99812'),
+      HERCULES_ENDPOINTS.CAMPAIGNS.GET_CHAT_BY_ID('cmp_victim_org_772')
     ];
 
     for (const ep of endpoints) {
@@ -32,14 +33,10 @@ test.describe('🛡️ Advanced Enterprise AppSec & Strict Security Gates', () =
       if (contentType.includes('application/json')) {
         try {
           const json = JSON.parse(text);
-          // JSON must not contain authorized victim data
           expect(json).not.toHaveProperty('victimEmail');
           expect(json).not.toHaveProperty('privateData');
-        } catch (e) {
-          // Valid non-JSON error
-        }
+        } catch (e) {}
       } else {
-        // SPA HTML shell must not leak structured serialized state
         expect(text).not.toMatch(/"(?:victim_org|victim_tenant|private_key)":\s*"/i);
       }
     }
@@ -48,8 +45,8 @@ test.describe('🛡️ Advanced Enterprise AppSec & Strict Security Gates', () =
   test('RATE-01: Email Authentication & Signup Rate Limiting Resilience', async ({ request }) => {
     const burstCount = 15;
     const promises = Array.from({ length: burstCount }, () =>
-      request.post(`${TARGET_URL}/api/auth/signup`, {
-        data: { email: 'rate_probe@kzdzyaot.mailosaur.net', password: 'TestPassword@2026!' },
+      request.post(`${TARGET_URL}${HERCULES_ENDPOINTS.AUTH.SIGNUP_OTP}`, {
+        data: { email: 'rate_probe@kzdzyaot.mailosaur.net' },
         headers: { 'Content-Type': 'application/json' }
       })
     );
@@ -68,7 +65,7 @@ test.describe('🛡️ Advanced Enterprise AppSec & Strict Security Gates', () =
     const b64Url = (obj) => Buffer.from(JSON.stringify(obj)).toString('base64').replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
     const algNoneToken = `${b64Url({ alg: 'none', typ: 'JWT' })}.${b64Url({ sub: 'admin', role: 'superuser', exp: Math.floor(Date.now() / 1000) + 3600 })}.`;
 
-    const response = await request.get(`${TARGET_URL}/api/user`, {
+    const response = await request.get(`${TARGET_URL}${HERCULES_ENDPOINTS.ACCOUNT.GET_DETAILS}`, {
       headers: {
         'Authorization': `Bearer ${algNoneToken}`,
         'Accept': 'application/json'
@@ -96,7 +93,7 @@ test.describe('🛡️ Advanced Enterprise AppSec & Strict Security Gates', () =
     const b64Url = (obj) => Buffer.from(JSON.stringify(obj)).toString('base64').replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
     const expiredToken = `${b64Url({ alg: 'HS256', typ: 'JWT' })}.${b64Url({ sub: 'user_test', exp: Math.floor(Date.now() / 1000) - 7200 })}.stale_sig`;
 
-    const response = await request.get(`${TARGET_URL}/api/dashboard`, {
+    const response = await request.get(`${TARGET_URL}${HERCULES_ENDPOINTS.AUTH.SYNC}`, {
       headers: {
         'Authorization': `Bearer ${expiredToken}`,
         'Accept': 'application/json'
@@ -113,7 +110,7 @@ test.describe('🛡️ Advanced Enterprise AppSec & Strict Security Gates', () =
     expect([200, 400]).toContain(probeResponse.status());
 
     // 2. Perform follow-up read-back check against user state endpoint
-    const readBackResponse = await request.get(`${TARGET_URL}/api/user`, {
+    const readBackResponse = await request.get(`${TARGET_URL}${HERCULES_ENDPOINTS.ACCOUNT.GET_DETAILS}`, {
       headers: { 'Accept': 'application/json' }
     });
     const stateText = await readBackResponse.text();

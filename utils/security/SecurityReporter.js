@@ -11,7 +11,7 @@ class SecurityReporter {
     this.targetUrl = targetUrl;
     this.records = [];
     this.suppressions = this.loadSuppressions();
-    this.outputDir = options.outputDir || path.join(process.cwd(), 'test-results', 'security');
+    this.outputDir = options.outputDir || path.join(process.cwd(), 'reports', 'security');
   }
 
   loadSuppressions() {

@@ -7,6 +7,7 @@ const ZAP_PROXY_URL = process.env.ZAP_PROXY_URL || process.env.ZAP_URL || 'http:
 const authPath = path.resolve(__dirname, '.auth/apple-user.json');
 
 module.exports = defineConfig({
+  globalSetup: require.resolve('./utils/security/globalSetup.js'),
   testDir: './tests/security',
   timeout: 180 * 1000,
   expect: {

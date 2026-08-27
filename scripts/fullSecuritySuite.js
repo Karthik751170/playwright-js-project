@@ -806,11 +806,15 @@ async function runEnterprise10OutOf10Audit() {
     );
     const avgLatency = Math.round(burstResults.reduce((acc, c) => acc + c.latencyMs, 0) / burstCount);
 
+    const has500 = burstResults.some((res) => res.statusCode >= 500);
+    const allBlockedOrHandled = burstResults.every((res) => [200, 400, 401, 403, 404, 429].includes(res.statusCode));
+    const rateStatus = (!has500 && allBlockedOrHandled) ? 'PASS' : 'FAIL';
+
     logFinding({
       code: 'RATE-01',
       principle: 'Rate Limiting & Anti-Automation',
       name: `Abuse Prevention: ${r.name}`,
-      status: 'PASS',
+      status: rateStatus,
       severity: 'High',
       action: `Dispatched burst of ${burstCount} concurrent requests in parallel to: ${rUrl}`,
       rationale: 'Verify that authentication and submission APIs are fortified against high-frequency brute-force, credential stuffing, and bot spam.',

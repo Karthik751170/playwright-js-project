@@ -1,6 +1,7 @@
 const { defineConfig } = require('@playwright/test');
 
 module.exports = defineConfig({
+  globalSetup: require.resolve('./utils/security/globalSetup.js'),
   testDir: './tests',
   timeout: 3600 * 1000,
   expect: {
@@ -14,7 +15,7 @@ module.exports = defineConfig({
     }]
   ],
   use: {
-    headless: true,
+    headless: false,
     viewport: { width: 1280, height: 720 },
     ignoreHTTPSErrors: true,
     storageState: '.auth/apple-user.json',

@@ -179,7 +179,8 @@ async function generateSurvey(page) {
 
     console.log('Waiting for Survey generation to finish and Deploy button to appear (up to 10 minutes)...');
     
-    const editorDeployBtn = page.locator("button:has-text('Deploy')").first();
+    // const editorDeployBtn = page.locator("button:has-text('Deploy')").first();
+    const editorDeployBtn = page.locator("//span[text()='Deploy']").first();
     const reviewComplete = page.locator("text=/AI Content Review Complete|Share this Survey with friends|View Audience/i").first();
     
     const startTime = Date.now();
@@ -259,8 +260,8 @@ test('Deploy survey to 100 Users for Free', async ({ browser }) => {
             await audienceBannerClose.click({ force: true }).catch(() => {});
         }
 
-        console.log('Waiting for Deploy button on survey card...');
-        const cardDeployBtn = page.locator("button:has-text('Deploy')").first();
+        // const cardDeployBtn = page.locator("button:has-text('Deploy')").first();
+        const cardDeployBtn = page.locator("//span[text()='Deploy']").first();
         await cardDeployBtn.waitFor({ state: 'visible', timeout: 60000 });
         console.log('Clicking Deploy button on survey card...');
         await cardDeployBtn.click({ force: true });

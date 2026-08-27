@@ -63,6 +63,7 @@ test('Deploy survey without editing audience', async ({ browser }) => {
             console.log('Clicked Generate Brief!');
             break;
         }
+        if (await surveyGenerator.handleSelectAndRunItThisWay().catch(() => false)) continue;
         if (await surveyGenerator.selectAllThatApplyHeader.count() > 0 && await surveyGenerator.selectAllThatApplyHeader.first().isVisible()) {
             if (await surveyGenerator.handleSelectAllThatApply()) continue;
         }

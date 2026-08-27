@@ -60,6 +60,7 @@ test('Deploy survey, click top-left Hercules modal, duplicate, deploy & Save as 
         if (page.url().includes('editor')) break;
         if (await finalGenerateSurveyBtn.isVisible() && await finalGenerateSurveyBtn.isEnabled()) break;
         if (await surveyGenerator.clickGenerateBrief()) break;
+        if (await surveyGenerator.handleSelectAndRunItThisWay().catch(() => false)) continue;
         if (await surveyGenerator.selectAllThatApplyHeader.count() > 0 && await surveyGenerator.selectAllThatApplyHeader.first().isVisible()) {
             if (await surveyGenerator.handleSelectAllThatApply()) continue;
         }

@@ -52,6 +52,9 @@ test('logedin user survey creation', async ({ browser }) => {
             break;
         }
 
+        // Optional: Check Select -> Run it this way
+        if (await surveyGenerator.handleSelectAndRunItThisWay().catch(() => false)) continue;
+
         // Check multi-select
         if (await surveyGenerator.selectAllThatApplyHeader.count() > 0 && await surveyGenerator.selectAllThatApplyHeader.first().isVisible()) {
             if (await surveyGenerator.handleSelectAllThatApply()) continue;

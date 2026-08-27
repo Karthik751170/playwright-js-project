@@ -73,6 +73,7 @@ test('Create survey, Star, Unstar, Delete from 3-dot menu, and verify deletion i
             console.log('Sidebar toggle button is visible. Proceeding to sidebar steps...');
             break;
         }
+        if (await surveyGenerator.handleSelectAndRunItThisWay().catch(() => false)) continue;
         if (await surveyGenerator.selectAllThatApplyHeader.count() > 0 && await surveyGenerator.selectAllThatApplyHeader.first().isVisible()) {
             if (await surveyGenerator.handleSelectAllThatApply()) continue;
         }

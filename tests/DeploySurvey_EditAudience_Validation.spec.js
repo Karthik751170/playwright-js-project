@@ -35,6 +35,9 @@ test('Deploy survey with Edit Audience validation', async ({ browser }) => {
             break;
         }
 
+        // Optional: Check Select -> Run it this way
+        if (await surveyGenerator.handleSelectAndRunItThisWay().catch(() => false)) continue;
+
         // 2. Check multi-select
         if (await surveyGenerator.selectAllThatApplyHeader.count() > 0 && await surveyGenerator.selectAllThatApplyHeader.first().isVisible()) {
             if (await surveyGenerator.handleSelectAllThatApply()) continue;

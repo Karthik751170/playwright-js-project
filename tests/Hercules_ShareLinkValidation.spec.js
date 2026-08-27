@@ -73,6 +73,7 @@ async function generateSurvey(page) {
             console.log('Clicked Generate Brief!');
             break;
         }
+        if (await surveyGenerator.handleSelectAndRunItThisWay().catch(() => false)) { consecutiveFails = 0; continue; }
         if (await surveyGenerator.selectAllThatApplyHeader.count() > 0 && await surveyGenerator.selectAllThatApplyHeader.first().isVisible()) {
             if (await surveyGenerator.handleSelectAllThatApply()) { consecutiveFails = 0; continue; }
         }

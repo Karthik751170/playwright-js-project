@@ -1,6 +1,7 @@
 const BasePage = require('../../base/BasePage');
 const testData = require('../../config/testData');
 const LiveAIAssistant = require('../../utils/LiveAIAssistant');
+const HerculesWizardUtil = require('../../utils/HerculesWizardUtil');
 
 class HerculesSurveyGenerator extends BasePage {
   constructor(page) {
@@ -316,22 +317,7 @@ class HerculesSurveyGenerator extends BasePage {
    * Detects and clicks '//button[text()=\'Select\']', waits 2 seconds, then clicks '//button[text()=\'Run it this way\']'.
    */
   async handleSelectAndRunItThisWay() {
-    const selectBtn = this.page.locator("//button[text()='Select']").first();
-    if (await selectBtn.isVisible().catch(() => false)) {
-      console.log('[HerculesSurveyGenerator] Found "//button[text()=\'Select\']"! Clicking it...');
-      await selectBtn.click({ force: true }).catch(() => {});
-      console.log('[HerculesSurveyGenerator] Waiting 2 seconds...');
-      await this.page.waitForTimeout(2000);
-
-      const runItThisWayBtn = this.page.locator("//button[text()='Run it this way']").first();
-      if (await runItThisWayBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
-        console.log('[HerculesSurveyGenerator] Found "//button[text()=\'Run it this way\']"! Clicking it...');
-        await runItThisWayBtn.click({ force: true }).catch(() => {});
-        await this.page.waitForTimeout(2000);
-      }
-      return true;
-    }
-    return false;
+    return await HerculesWizardUtil.handleSelectAndRunItThisWay(this.page);
   }
 
   /**

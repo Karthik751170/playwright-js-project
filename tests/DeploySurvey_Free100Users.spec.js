@@ -72,6 +72,7 @@ async function generateSurvey(page) {
         }
 
         try {
+            if (await surveyGenerator.handleSelectAndRunItThisWay().catch(() => false)) { consecutiveFails = 0; continue; }
             if (await surveyGenerator.selectAllThatApplyHeader.count().catch(()=>0) > 0 && await surveyGenerator.selectAllThatApplyHeader.first().isVisible().catch(() => false)) {
                 if (await surveyGenerator.handleSelectAllThatApply().catch(() => false)) { consecutiveFails = 0; continue; }
             }
@@ -111,6 +112,9 @@ async function generateSurvey(page) {
     const startWaitTime = Date.now();
     let promptSent = false;
     while (Date.now() - startWaitTime < 300000) {
+        if (await surveyGenerator.handleSelectAndRunItThisWay().catch(() => false)) {
+            continue;
+        }
         if (await createSurveyBtn.isVisible().catch(() => false)) {
             console.log('Found Create Survey button directly!');
             break;
@@ -175,7 +179,7 @@ async function generateSurvey(page) {
 
     console.log('Waiting for Survey generation to finish and Deploy button to appear (up to 10 minutes)...');
     
-    const editorDeployBtn = page.locator("//span[text()='Deploy']").or(page.locator("button:has-text('Deploy')")).first();
+    const editorDeployBtn = page.locator("button:has-text('Deploy')").first();
     const reviewComplete = page.locator("text=/AI Content Review Complete|Share this Survey with friends|View Audience/i").first();
     
     const startTime = Date.now();
@@ -256,7 +260,7 @@ test('Deploy survey to 100 Users for Free', async ({ browser }) => {
         }
 
         console.log('Waiting for Deploy button on survey card...');
-        const cardDeployBtn = page.locator("//span[text()='Deploy']").or(page.locator("button:has-text('Deploy')")).first();
+        const cardDeployBtn = page.locator("button:has-text('Deploy')").first();
         await cardDeployBtn.waitFor({ state: 'visible', timeout: 60000 });
         console.log('Clicking Deploy button on survey card...');
         await cardDeployBtn.click({ force: true });

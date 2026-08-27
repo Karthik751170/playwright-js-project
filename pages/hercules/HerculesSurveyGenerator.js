@@ -32,6 +32,8 @@ class HerculesSurveyGenerator extends BasePage {
     this.generateBriefBtn = page.locator("button").filter({ hasText: /generate.*brief|build.*brief|yes.*brief|generate the brief|generate research brief|generate the research|generate brief|create.*survey/i });
 
     // Modals & Navigation
+    this.selectBtn = page.locator("//button[text()='Select']");
+    this.runItThisWayBtn = page.locator("//button[text()='Run it this way']");
     this.editAudienceWaitBtn = page.locator('button:has-text("Edit Audience")');
     this.cancelBtn = page.locator('button:has-text("Cancel")');
     this.closeSignInBtn = page.locator("button[aria-label='close']");
@@ -305,6 +307,28 @@ class HerculesSurveyGenerator extends BasePage {
     if (await this.skipBtn.count() > 0 && await this.skipBtn.first().isVisible()) {
       console.log("[HerculesSurveyGenerator] Found Skip button. Clicking it.");
       await this.skipBtn.first().click();
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Detects and clicks '//button[text()=\'Select\']', waits 2 seconds, then clicks '//button[text()=\'Run it this way\']'.
+   */
+  async handleSelectAndRunItThisWay() {
+    const selectBtn = this.page.locator("//button[text()='Select']").first();
+    if (await selectBtn.isVisible().catch(() => false)) {
+      console.log('[HerculesSurveyGenerator] Found "//button[text()=\'Select\']"! Clicking it...');
+      await selectBtn.click({ force: true }).catch(() => {});
+      console.log('[HerculesSurveyGenerator] Waiting 2 seconds...');
+      await this.page.waitForTimeout(2000);
+
+      const runItThisWayBtn = this.page.locator("//button[text()='Run it this way']").first();
+      if (await runItThisWayBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+        console.log('[HerculesSurveyGenerator] Found "//button[text()=\'Run it this way\']"! Clicking it...');
+        await runItThisWayBtn.click({ force: true }).catch(() => {});
+        await this.page.waitForTimeout(2000);
+      }
       return true;
     }
     return false;

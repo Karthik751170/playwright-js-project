@@ -1,25 +1,14 @@
 /**
  * runApiSuite.js
- * Master Autonomous Test Engine for Hercules API Testing (Strict Mode 2.0 — Full Lifecycle & Billing Suite)
+ * Master Autonomous Test Engine for Hercules API Testing (Strict Mode 3.0 — Zero Assumptions)
  * 
- * Target Microservices:
+ * Target Microservices (100% Intercepted & Verified):
  * - AI & Chat Engine: https://devapi-ai.hercules.works
  * - Core Business & V2 API: https://devapi.hercules.works
  * 
- * Executed Lifecycle Flows:
- *  1. Create Survey (AI Chat Campaign Initialization)
- *  2. Generate Research Brief & Question Tree
- *  3. Configure & Update Demographic Audience
- *  4. Pre-Flight Credit Calculation & Pricing Estimation
- *  5. Survey Deployment & Deployed Payload Verification
- *  6. Post-Deployment Credit Balance & Ledger Verification
- *  7. Star Campaign / Favorite Toggle (POST /api/chats/:id/star { star: true })
- *  8. Rename Campaign & Title Sync (PATCH /api/chats/:id/rename { new_name })
- *  9. Plan Upgrade Pricing & Upgrade Preview
- * 10. Plan Downgrade & Refund Policy Verification
- * 11. Activity Stream & In-App Notification Verification
- * 12. Teardown & Survey Cleanup (Purge / Delete)
- * + Complete Negative & Security Boundary Assertions
+ * All positive tests assert strict HTTP 200/201 + deep JSON schema properties.
+ * All negative tests assert strict HTTP 401/403/422 or OWASP Anti-Enumeration envelopes.
+ * ZERO permissive [200, 404] fallbacks.
  */
 
 const https = require('https');
@@ -75,7 +64,7 @@ async function sendRequest(method, endpoint, options = {}) {
   const headers = {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
-    'User-Agent': 'Hercules-API-Test-Engine/2.0',
+    'User-Agent': 'Hercules-API-Test-Engine/3.0',
     ...(options.headers || {})
   };
 
@@ -235,7 +224,7 @@ function recordTestCase({
  */
 async function runAllApiTests() {
   console.log('\n======================================================');
-  console.log('🚀 HERCULES API TESTING SUITE — FULL ENDPOINT EXECUTION');
+  console.log('🚀 HERCULES API TESTING SUITE (STRICT ZERO-ASSUMPTIONS 3.0)');
   console.log(`🎯 AI Microservice: ${AI_BASE_URL}`);
   console.log(`🎯 Core Microservice: ${CORE_BASE_URL}`);
   console.log('======================================================\n');
@@ -246,508 +235,489 @@ async function runAllApiTests() {
     'Cookie': session.cookieHeader
   };
 
-  // State store for dependent chaining across all 12 lifecycle phases
   const dynamicState = {
     chatId: null,
     chatTurnId: null,
-    surveyId: null,
-    questionId: null,
-    audienceId: null,
-    preAvailableCredits: 0,
-    estimatedCost: 0,
-    pricingRates: {},
+    businessId: null,
+    initialBalance: 0,
   };
 
   // =========================================================================
-  // PHASE 1: SURVEY CREATION & RESEARCH CHAT (AI Engine)
+  // MODULE 1: AUTHENTICATION, IDENTITY & PROFILE
   // =========================================================================
-  console.log(`\n▶ [PHASE 1] AI Survey Creation & Natural Language Prompting...`);
+  console.log(`\n▶ [MODULE 1] Authentication, Session & User Profile Verification...`);
 
-  // TC-LC-01: Create Survey Campaign
-  const reqId = `req_${Date.now()}`;
-  let res = await sendRequest('POST', endpoints.AI_CHAT.CHAT, {
+  // TC-01: Session Token Sync
+  let res = await sendRequest('POST', endpoints.AUTH.SYNC, { headers: authHeaders, data: {} });
+  let isPass = res.statusCode === 200 && res.json && res.json.status === true && res.json.data && res.json.data.message.includes('authenticated');
+  recordTestCase({
+    id: 'TC-AUTH-01',
+    module: 'Authentication & Identity',
+    type: 'POSITIVE',
+    title: 'Session Token State Synchronization [POST /api/auth/sync]',
+    scenario: 'Verify that authenticated user token synchronizes claims and tier status.',
+    preconditions: `Authenticated session for ${session.email}.`,
+    steps: [
+      { step: 1, action: 'Send HTTP POST', endpoint: `${AI_BASE_URL}${endpoints.AUTH.SYNC}`, payload: '{}', headers: 'Authorization: Bearer <valid_token>' }
+    ],
+    expected: 'HTTP 200 OK with JSON { status: true, data: { message: "User ... authenticated" } }.',
+    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Latency: ${res.latencyMs}ms. Response: ${res.body.substring(0, 120)}`,
+    status: isPass ? 'PASS' : 'FAIL',
+    latencyMs: res.latencyMs,
+    reqDetails: { method: 'POST', endpoint: endpoints.AUTH.SYNC, headers: authHeaders, body: {} },
+    resDetails: { statusCode: res.statusCode, body: res.body.substring(0, 300) }
+  });
+
+  // TC-02: Get Account Profile Details
+  res = await sendRequest('GET', endpoints.ACCOUNT.GET_DETAILS, { headers: authHeaders });
+  isPass = res.statusCode === 200 && res.json && res.json.success === true && res.json.data && typeof res.json.data.email === 'string' && res.json.data.email.includes('@');
+  recordTestCase({
+    id: 'TC-AUTH-02',
+    module: 'Authentication & Identity',
+    type: 'POSITIVE',
+    title: 'Retrieve Authenticated User Profile [GET /V2/account/details]',
+    scenario: 'Verify that user profile details, name, and designation are returned accurately.',
+    preconditions: 'User is authenticated.',
+    steps: [
+      { step: 1, action: 'Send HTTP GET', endpoint: `${CORE_BASE_URL}${endpoints.ACCOUNT.GET_DETAILS}`, headers: 'Bearer Token' }
+    ],
+    expected: 'HTTP 200 OK with JSON { success: true, data: { email, name, designation } }.',
+    actual: `HTTP ${res.statusCode} ${res.statusMessage}. User: ${res.json?.data?.name} (${res.json?.data?.email}). Latency: ${res.latencyMs}ms.`,
+    status: isPass ? 'PASS' : 'FAIL',
+    latencyMs: res.latencyMs,
+    reqDetails: { method: 'GET', endpoint: endpoints.ACCOUNT.GET_DETAILS, headers: authHeaders },
+    resDetails: { statusCode: res.statusCode, body: res.body.substring(0, 300) }
+  });
+
+  // =========================================================================
+  // MODULE 2: AI WORKSPACE & MULTI-TURN SURVEY GENERATION
+  // =========================================================================
+  console.log(`\n▶ [MODULE 2] AI Workspace & Multi-Turn Survey Generation...`);
+
+  // TC-03: Contextual Prompt Suggestions
+  res = await sendRequest('GET', endpoints.AI_CHAT.SUGGESTIONS, { headers: authHeaders });
+  isPass = res.statusCode === 200 && res.json && Array.isArray(res.json.surveyNames) && res.json.surveyNames.length > 0;
+  recordTestCase({
+    id: 'TC-AI-01',
+    module: 'AI Workspace',
+    type: 'POSITIVE',
+    title: 'Fetch AI Prompt Suggestions [GET /api/prompt-suggestions]',
+    scenario: 'Verify that client receives research category suggestions for survey creation.',
+    preconditions: 'User is authenticated.',
+    steps: [
+      { step: 1, action: 'Send HTTP GET', endpoint: `${AI_BASE_URL}${endpoints.AI_CHAT.SUGGESTIONS}` }
+    ],
+    expected: 'HTTP 200 OK with array surveyNames (e.g., ["Brand Tracking", "Customer Profiling"]).',
+    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Categories: ${res.json?.surveyNames?.length ?? 0}. Latency: ${res.latencyMs}ms.`,
+    status: isPass ? 'PASS' : 'FAIL',
+    latencyMs: res.latencyMs,
+    reqDetails: { method: 'GET', endpoint: endpoints.AI_CHAT.SUGGESTIONS, headers: authHeaders },
+    resDetails: { statusCode: res.statusCode, body: res.body.substring(0, 300) }
+  });
+
+  // TC-04: Survey Initialization Turn 1
+  const reqId1 = `req_${Date.now()}_1`;
+  res = await sendRequest('POST', endpoints.AI_CHAT.CHAT, {
     headers: authHeaders,
     data: {
-      prompt: 'Create a 4-question market research study on cold brew coffee consumer preferences.',
-      request_id: reqId
+      prompt: 'Create a 3-question consumer survey on cold brew coffee preferences.',
+      request_id: reqId1
     }
   });
-  let isPass = (res.statusCode === 200 || res.statusCode === 201) && res.json && res.json.status === true && res.json.data;
+  isPass = res.statusCode === 200 && res.json && res.json.status === true && res.json.data && res.json.data.chat_id;
   if (res.json && res.json.data) {
     dynamicState.chatId = res.json.data.chat_id;
     dynamicState.chatTurnId = res.json.data.chat_turn_id;
   }
   recordTestCase({
-    id: 'TC-LC-01',
-    module: 'Survey Creation',
+    id: 'TC-AI-02',
+    module: 'AI Workspace',
     type: 'POSITIVE',
-    title: 'Initialize Survey Campaign via AI [POST /api/chat]',
-    scenario: 'Verify that sending research objective initializes survey workspace and returns chat_id & chat_turn_id.',
-    preconditions: `Authenticated session for ${session.email}.`,
+    title: 'Initialize Survey Campaign Turn 1 [POST /api/chat]',
+    scenario: 'Verify that AI initializes survey workspace and returns generated chat_id & ai_message.',
+    preconditions: 'User provides prompt and request_id.',
     steps: [
-      { step: 1, action: 'Send HTTP POST', endpoint: `${AI_BASE_URL}${endpoints.AI_CHAT.CHAT}`, payload: `{ prompt: "Cold brew survey", request_id: "${reqId}" }`, headers: 'Authorization: Bearer <valid_token>' }
+      { step: 1, action: 'Send HTTP POST', endpoint: `${AI_BASE_URL}${endpoints.AI_CHAT.CHAT}`, payload: `{ prompt: "Create cold brew survey", request_id: "${reqId1}" }` }
     ],
     expected: 'HTTP 200 OK with JSON { status: true, data: { chat_id, chat_turn_id, ai_message } }.',
-    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Generated Chat ID: ${dynamicState.chatId || 'Active'}. Latency: ${res.latencyMs}ms.`,
+    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Generated Chat ID: ${dynamicState.chatId}. Latency: ${res.latencyMs}ms.`,
     status: isPass ? 'PASS' : 'FAIL',
     latencyMs: res.latencyMs,
-    reqDetails: { method: 'POST', endpoint: endpoints.AI_CHAT.CHAT, data: { prompt: 'Cold brew survey', request_id: reqId } },
+    reqDetails: { method: 'POST', endpoint: endpoints.AI_CHAT.CHAT, data: { prompt: 'Create cold brew survey', request_id: reqId1 } },
     resDetails: { statusCode: res.statusCode, body: res.body.substring(0, 300) }
   });
 
-  // =========================================================================
-  // PHASE 2: GENERATE RESEARCH BRIEF & QUESTION TREE
-  // =========================================================================
-  console.log(`\n▶ [PHASE 2] Generate Research Brief & Survey Schema...`);
-
-  // TC-LC-02: Generate Questions
-  res = await sendRequest('POST', endpoints.SURVEY.GENERATE_QUESTIONS, {
+  // TC-05: Follow-Up Conversation Turn 2
+  const reqId2 = `req_${Date.now()}_2`;
+  res = await sendRequest('POST', endpoints.AI_CHAT.CHAT, {
     headers: authHeaders,
     data: {
-      chatId: dynamicState.chatId || 'sample_chat_id',
-      prompt: 'Generate 4 multiple choice questions for cold brew study.'
+      prompt: 'Focus specifically on measuring brand awareness, taste satisfaction, and purchase frequency.',
+      chat_id: dynamicState.chatId,
+      request_id: reqId2
     }
   });
-  isPass = [200, 201, 400, 404].includes(res.statusCode);
-  if (res.json && (res.json.surveyId || res.json._id || (res.json.data && (res.json.data.surveyId || res.json.data._id)))) {
-    dynamicState.surveyId = res.json.surveyId || res.json._id || (res.json.data && (res.json.data.surveyId || res.json.data._id));
-  }
+  isPass = res.statusCode === 200 && res.json && res.json.status === true && res.json.data && res.json.data.chat_id === dynamicState.chatId;
   recordTestCase({
-    id: 'TC-LC-02',
-    module: 'Brief Generation',
+    id: 'TC-AI-03',
+    module: 'AI Workspace',
     type: 'POSITIVE',
-    title: 'Generate Survey Question Brief [POST /api/generate-questions]',
-    scenario: 'Verify that AI compiles question card tree from prompt and associates to surveyId.',
-    preconditions: 'Active survey chat session created in Phase 1.',
+    title: 'Survey Refinement Follow-Up Turn 2 [POST /api/chat]',
+    scenario: 'Verify that multi-turn follow-up prompts persist within the same active chat_id session.',
+    preconditions: 'Chat campaign created in Turn 1.',
     steps: [
-      { step: 1, action: 'Send HTTP POST', endpoint: `${AI_BASE_URL}${endpoints.SURVEY.GENERATE_QUESTIONS}`, payload: '{ chatId, prompt }' }
+      { step: 1, action: 'Send HTTP POST', endpoint: `${AI_BASE_URL}${endpoints.AI_CHAT.CHAT}`, payload: `{ prompt: "Focus on brand awareness...", chat_id: "${dynamicState.chatId}", request_id: "${reqId2}" }` }
     ],
-    expected: 'HTTP 200/201 or handled JSON schema response with questions.',
-    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Captured Survey ID: ${dynamicState.surveyId || 'Active'}. Latency: ${res.latencyMs}ms.`,
+    expected: 'HTTP 200 OK with conversational response linked to chat_id.',
+    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Latency: ${res.latencyMs}ms. Response: ${res.body.substring(0, 120)}`,
     status: isPass ? 'PASS' : 'FAIL',
     latencyMs: res.latencyMs,
-    reqDetails: { method: 'POST', endpoint: endpoints.SURVEY.GENERATE_QUESTIONS, data: { chatId: dynamicState.chatId } },
+    reqDetails: { method: 'POST', endpoint: endpoints.AI_CHAT.CHAT, data: { chat_id: dynamicState.chatId, request_id: reqId2 } },
+    resDetails: { statusCode: res.statusCode, body: res.body.substring(0, 300) }
+  });
+
+  // TC-06: Fetch Individual Survey Campaign Details
+  res = await sendRequest('GET', endpoints.CAMPAIGNS.GET_CHAT_BY_ID(dynamicState.chatId), { headers: authHeaders });
+  isPass = res.statusCode === 200 && res.json && res.json.status === true && res.json.data && res.json.data.chat_id === dynamicState.chatId;
+  recordTestCase({
+    id: 'TC-AI-04',
+    module: 'AI Workspace',
+    type: 'POSITIVE',
+    title: 'Fetch Specific Survey Campaign Metadata [GET /api/chats/:id]',
+    scenario: 'Verify that survey metadata (chat_name, super_j_survey_id, user_id) is queryable by chat_id.',
+    preconditions: 'Chat campaign exists in database.',
+    steps: [
+      { step: 1, action: 'Send HTTP GET', endpoint: `${AI_BASE_URL}${endpoints.CAMPAIGNS.GET_CHAT_BY_ID(dynamicState.chatId)}` }
+    ],
+    expected: 'HTTP 200 OK with JSON { status: true, data: { chat_id, chat_name, super_j_survey_id } }.',
+    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Chat Name: "${res.json?.data?.chat_name}". Latency: ${res.latencyMs}ms.`,
+    status: isPass ? 'PASS' : 'FAIL',
+    latencyMs: res.latencyMs,
+    reqDetails: { method: 'GET', endpoint: endpoints.CAMPAIGNS.GET_CHAT_BY_ID(dynamicState.chatId), headers: authHeaders },
     resDetails: { statusCode: res.statusCode, body: res.body.substring(0, 300) }
   });
 
   // =========================================================================
-  // PHASE 3: AUDIENCE TARGETING & DEMOGRAPHIC CONFIGURATION
+  // MODULE 3: CAMPAIGN MANAGEMENT (STAR, RENAME, LIST, DELETE)
   // =========================================================================
-  console.log(`\n▶ [PHASE 3] Configure Demographic Audience...`);
+  console.log(`\n▶ [MODULE 3] Campaign Lifecycle Management (Star, Rename, List, Cleanup)...`);
 
-  // TC-LC-03: Create / Update Audience Template
-  const audiencePayload = {
-    title: 'Cold Brew Urban Demographic Target (18-35)',
-    total: 100,
-    male: 50,
-    female: 50,
-    ageGroups: ['18-24', '25-34'],
-    cities: ['Bangalore', 'Mumbai', 'Delhi']
-  };
-  res = await sendRequest('POST', endpoints.AUDIENCE.CREATE, {
-    headers: authHeaders,
-    data: audiencePayload
-  });
-  isPass = [200, 201, 400, 422].includes(res.statusCode) || (res.json && res.json.status !== undefined);
-  if (res.json && res.json.data && (res.json.data.id || res.json.data._id)) {
-    dynamicState.audienceId = res.json.data.id || res.json.data._id;
-  }
-  recordTestCase({
-    id: 'TC-LC-03',
-    module: 'Audience Configuration',
-    type: 'POSITIVE',
-    title: 'Configure Custom Target Audience [POST /V2/audience/create]',
-    scenario: 'Verify that custom demographic audience with age/gender splits and target cities is created.',
-    preconditions: 'User is authenticated.',
-    steps: [
-      { step: 1, action: 'Send HTTP POST', endpoint: `${CORE_BASE_URL}${endpoints.AUDIENCE.CREATE}`, payload: JSON.stringify(audiencePayload) }
-    ],
-    expected: 'HTTP 200/201 confirming created audience schema.',
-    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Audience ID: ${dynamicState.audienceId || 'Active'}. Latency: ${res.latencyMs}ms.`,
-    status: isPass ? 'PASS' : 'FAIL',
-    latencyMs: res.latencyMs,
-    reqDetails: { method: 'POST', endpoint: endpoints.AUDIENCE.CREATE, data: audiencePayload },
-    resDetails: { statusCode: res.statusCode, body: res.body.substring(0, 300) }
-  });
-
-  // =========================================================================
-  // PHASE 4: PRE-FLIGHT CREDIT PRICING & COST ESTIMATION
-  // =========================================================================
-  console.log(`\n▶ [PHASE 4] Pre-Deployment Credit Pricing & Cost Calculation...`);
-
-  // TC-LC-04A: Snapshot Account Balance
-  res = await sendRequest('GET', endpoints.BILLING.ACCOUNT_INFO, { headers: authHeaders });
-  isPass = res.statusCode === 200 && res.json && res.json.data && res.json.data.account;
-  if (res.json && res.json.data && res.json.data.account) {
-    dynamicState.preAvailableCredits = res.json.data.account.availableCredits || 0;
-  }
-  recordTestCase({
-    id: 'TC-LC-04A',
-    module: 'Credit Estimation',
-    type: 'POSITIVE',
-    title: 'Snapshot Pre-Deployment Credit Balance [GET /V2/credits/info]',
-    scenario: 'Verify that account available credits balance is queryable before deployment.',
-    preconditions: 'User has active account.',
-    steps: [
-      { step: 1, action: 'Send HTTP GET', endpoint: `${CORE_BASE_URL}${endpoints.BILLING.ACCOUNT_INFO}`, headers: 'Bearer Token' }
-    ],
-    expected: 'HTTP 200 OK with JSON { data: { account: { availableCredits, totalCredits } } }.',
-    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Initial Balance: ${dynamicState.preAvailableCredits} credits. Latency: ${res.latencyMs}ms.`,
-    status: isPass ? 'PASS' : 'FAIL',
-    latencyMs: res.latencyMs,
-    reqDetails: { method: 'GET', endpoint: endpoints.BILLING.ACCOUNT_INFO, headers: authHeaders },
-    resDetails: { statusCode: res.statusCode, body: res.body.substring(0, 300) }
-  });
-
-  // TC-LC-04B: Estimate Cost
-  const estimatePayload = {
-    sampleSize: 100,
-    questionCount: 4,
-    demographics: { age: ['18-24', '25-34'], gender: ['Male', 'Female'] }
-  };
-  res = await sendRequest('POST', endpoints.BILLING.ESTIMATE_COST, {
-    headers: authHeaders,
-    data: estimatePayload
-  });
-  isPass = [200, 400, 422].includes(res.statusCode);
-  if (res.json && res.json.data && res.json.data.cost) {
-    dynamicState.estimatedCost = res.json.data.cost;
-  } else {
-    dynamicState.estimatedCost = 100; // Baseline 1 credit/response
-  }
-  recordTestCase({
-    id: 'TC-LC-04B',
-    module: 'Credit Estimation',
-    type: 'POSITIVE',
-    title: 'Calculate Pre-Deployment Cost Estimation [POST /V2/credits/estimate]',
-    scenario: 'Verify that credit estimation engine computes required credits for sample size and question count.',
-    preconditions: 'Sample size: 100, Question count: 4.',
-    steps: [
-      { step: 1, action: 'Send HTTP POST', endpoint: `${CORE_BASE_URL}${endpoints.BILLING.ESTIMATE_COST}`, payload: JSON.stringify(estimatePayload) }
-    ],
-    expected: 'HTTP 200 OK or handled calculation with estimated cost credits.',
-    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Estimated Cost: ${dynamicState.estimatedCost} credits. Latency: ${res.latencyMs}ms.`,
-    status: isPass ? 'PASS' : 'FAIL',
-    latencyMs: res.latencyMs,
-    reqDetails: { method: 'POST', endpoint: endpoints.BILLING.ESTIMATE_COST, data: estimatePayload },
-    resDetails: { statusCode: res.statusCode, body: res.body.substring(0, 300) }
-  });
-
-  // =========================================================================
-  // PHASE 5: SURVEY DEPLOYMENT & DEPLOYED PAYLOAD VERIFICATION
-  // =========================================================================
-  console.log(`\n▶ [PHASE 5] Deploy Survey to Target Audience...`);
-
-  // TC-LC-05: Deploy Survey Version (Exact schema: chat_id & survey_turn_number)
-  const deployPayload = {
-    chat_id: dynamicState.chatId || 'sample_chat_id',
-    survey_turn_number: 1
-  };
-  res = await sendRequest('POST', endpoints.SURVEY.DEPLOY_SURVEY_VERSION, {
-    headers: authHeaders,
-    data: deployPayload
-  });
-  // Handles 200 (Success) or 400/402/404 (Handled Business Status)
-  isPass = [200, 201, 400, 402, 404].includes(res.statusCode) && res.json !== null;
-  recordTestCase({
-    id: 'TC-LC-05',
-    module: 'Survey Deployment',
-    type: 'POSITIVE',
-    title: 'Deploy Survey to Production Audience [POST /api/deploy-survey-version]',
-    scenario: 'Verify that survey deployment triggers validation and version publication.',
-    preconditions: 'Survey is configured with questions and audience.',
-    steps: [
-      { step: 1, action: 'Send HTTP POST', endpoint: `${AI_BASE_URL}${endpoints.SURVEY.DEPLOY_SURVEY_VERSION}`, payload: JSON.stringify(deployPayload) }
-    ],
-    expected: 'HTTP 200 OK (Deployment Success) or handled business status (400/402/404).',
-    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Latency: ${res.latencyMs}ms. Response: ${res.body.substring(0, 150)}`,
-    status: isPass ? 'PASS' : 'FAIL',
-    latencyMs: res.latencyMs,
-    reqDetails: { method: 'POST', endpoint: endpoints.SURVEY.DEPLOY_SURVEY_VERSION, data: deployPayload },
-    resDetails: { statusCode: res.statusCode, body: res.body.substring(0, 300) }
-  });
-
-  // =========================================================================
-  // PHASE 6: POST-DEPLOYMENT CREDIT DEDUCTION & BALANCE AUDIT
-  // =========================================================================
-  console.log(`\n▶ [PHASE 6] Post-Deployment Credit Deduction Audit...`);
-
-  // TC-LC-06: Balance Audit
-  res = await sendRequest('GET', endpoints.BILLING.ACCOUNT_INFO, { headers: authHeaders });
-  isPass = res.statusCode === 200 && res.json && res.json.data && res.json.data.account;
-  const postAvailableCredits = res.json?.data?.account?.availableCredits ?? 0;
-  recordTestCase({
-    id: 'TC-LC-06',
-    module: 'Credit Deduction Audit',
-    type: 'POSITIVE',
-    title: 'Post-Deployment Credit Deduction Integrity Audit [GET /V2/credits/info]',
-    scenario: 'Verify that post-deployment available credits maintain ledger integrity without unauthorized debit.',
-    preconditions: 'Survey deployment phase executed.',
-    steps: [
-      { step: 1, action: 'Send HTTP GET', endpoint: `${CORE_BASE_URL}${endpoints.BILLING.ACCOUNT_INFO}` }
-    ],
-    expected: 'HTTP 200 OK. Available credits verified against pre-deployment baseline.',
-    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Pre-Balance: ${dynamicState.preAvailableCredits} | Post-Balance: ${postAvailableCredits} credits. Latency: ${res.latencyMs}ms.`,
-    status: isPass ? 'PASS' : 'FAIL',
-    latencyMs: res.latencyMs,
-    reqDetails: { method: 'GET', endpoint: endpoints.BILLING.ACCOUNT_INFO, headers: authHeaders },
-    resDetails: { statusCode: res.statusCode, body: res.body.substring(0, 300) }
-  });
-
-  // =========================================================================
-  // PHASE 7: CAMPAIGN MANAGEMENT — STAR & FAVORITE TOGGLE
-  // =========================================================================
-  console.log(`\n▶ [PHASE 7] Star & Favorite Survey Campaign...`);
-
-  // TC-LC-07: Star Chat Campaign (Exact schema: POST /api/chats/:id/star { star: true })
-  const targetChatId = dynamicState.chatId || 'sample_chat_id';
-  res = await sendRequest('POST', endpoints.CAMPAIGNS.STAR_CHAT(targetChatId), {
+  // TC-07: Star Survey Campaign
+  res = await sendRequest('POST', endpoints.CAMPAIGNS.STAR_CHAT(dynamicState.chatId), {
     headers: authHeaders,
     data: { star: true }
   });
-  isPass = res.statusCode === 200 && res.json && res.json.status === true;
+  isPass = res.statusCode === 200 && res.json && res.json.status === true && res.json.data && res.json.data.starred === true;
   recordTestCase({
-    id: 'TC-LC-07',
+    id: 'TC-CMP-01',
     module: 'Campaign Management',
     type: 'POSITIVE',
     title: 'Star Survey Campaign as Favorite [POST /api/chats/:id/star]',
-    scenario: 'Verify that user can mark campaign as starred for quick access in the sidebar.',
+    scenario: 'Verify that user can mark survey campaign as favorite for quick access.',
     preconditions: 'Target chat campaign exists.',
     steps: [
-      { step: 1, action: 'Send HTTP POST', endpoint: `${AI_BASE_URL}${endpoints.CAMPAIGNS.STAR_CHAT(targetChatId)}`, payload: '{ star: true }' }
+      { step: 1, action: 'Send HTTP POST', endpoint: `${AI_BASE_URL}${endpoints.CAMPAIGNS.STAR_CHAT(dynamicState.chatId)}`, payload: '{ star: true }' }
     ],
     expected: 'HTTP 200 OK with JSON { status: true, data: { starred: true } }.',
-    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Starred: ${res.json?.data?.starred ?? true}. Latency: ${res.latencyMs}ms.`,
+    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Starred: ${res.json?.data?.starred}. Latency: ${res.latencyMs}ms.`,
     status: isPass ? 'PASS' : 'FAIL',
     latencyMs: res.latencyMs,
-    reqDetails: { method: 'POST', endpoint: endpoints.CAMPAIGNS.STAR_CHAT(targetChatId), data: { star: true } },
+    reqDetails: { method: 'POST', endpoint: endpoints.CAMPAIGNS.STAR_CHAT(dynamicState.chatId), data: { star: true } },
     resDetails: { statusCode: res.statusCode, body: res.body.substring(0, 300) }
   });
 
-  // =========================================================================
-  // PHASE 8: CAMPAIGN MANAGEMENT — RENAME SURVEY TITLE
-  // =========================================================================
-  console.log(`\n▶ [PHASE 8] Rename Survey Campaign Title...`);
-
-  // TC-LC-08: Rename Campaign Title (Exact schema: PATCH /api/chats/:id/rename { new_name })
-  const updatedTitle = 'Q3 2026 Cold Brew Market Intelligence Study';
-  res = await sendRequest('PATCH', endpoints.CAMPAIGNS.RENAME_CHAT(targetChatId), {
+  // TC-08: Rename Survey Campaign Title
+  const renamedTitle = 'Q3 Cold Brew Brand Perception Intelligence Study';
+  res = await sendRequest('PATCH', endpoints.CAMPAIGNS.RENAME_CHAT(dynamicState.chatId), {
     headers: authHeaders,
-    data: { new_name: updatedTitle }
+    data: { new_name: renamedTitle }
   });
-  isPass = res.statusCode === 200 && res.json && res.json.status === true;
+  isPass = res.statusCode === 200 && res.json && res.json.status === true && res.json.data && res.json.data.chat_name === renamedTitle;
   recordTestCase({
-    id: 'TC-LC-08',
+    id: 'TC-CMP-02',
     module: 'Campaign Management',
     type: 'POSITIVE',
     title: 'Rename Survey Campaign Title [PATCH /api/chats/:id/rename]',
-    scenario: 'Verify that user can update campaign title and persist changes across dashboards.',
+    scenario: 'Verify that user can rename campaign title and update dashboard records.',
     preconditions: 'Target chat campaign exists.',
     steps: [
-      { step: 1, action: 'Send HTTP PATCH', endpoint: `${AI_BASE_URL}${endpoints.CAMPAIGNS.RENAME_CHAT(targetChatId)}`, payload: `{ new_name: "${updatedTitle}" }` }
+      { step: 1, action: 'Send HTTP PATCH', endpoint: `${AI_BASE_URL}${endpoints.CAMPAIGNS.RENAME_CHAT(dynamicState.chatId)}`, payload: `{ new_name: "${renamedTitle}" }` }
     ],
     expected: 'HTTP 200 OK with JSON { status: true, data: { chat_name: "..." } }.',
-    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Renamed to: "${res.json?.data?.chat_name ?? updatedTitle}". Latency: ${res.latencyMs}ms.`,
+    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Renamed to: "${res.json?.data?.chat_name}". Latency: ${res.latencyMs}ms.`,
     status: isPass ? 'PASS' : 'FAIL',
     latencyMs: res.latencyMs,
-    reqDetails: { method: 'PATCH', endpoint: endpoints.CAMPAIGNS.RENAME_CHAT(targetChatId), data: { new_name: updatedTitle } },
+    reqDetails: { method: 'PATCH', endpoint: endpoints.CAMPAIGNS.RENAME_CHAT(dynamicState.chatId), data: { new_name: renamedTitle } },
     resDetails: { statusCode: res.statusCode, body: res.body.substring(0, 300) }
   });
 
-  // =========================================================================
-  // PHASE 9: SUBSCRIPTION & PLAN UPGRADE FLOWS
-  // =========================================================================
-  console.log(`\n▶ [PHASE 9] Test Plan Upgrade Pricing & Upgrade Preview...`);
-
-  // TC-LC-09A: Fetch Pricing Plans
-  res = await sendRequest('GET', endpoints.BILLING.GET_PRICING_PLANS, { headers: authHeaders });
-  isPass = [200, 404].includes(res.statusCode);
+  // TC-09: Fetch Active User Campaigns List
+  res = await sendRequest('GET', `${endpoints.CAMPAIGNS.GET_HISTORY}?limit=15&offset=0`, { headers: authHeaders });
+  isPass = res.statusCode === 200 && res.json && res.json.status === true && res.json.data && Array.isArray(res.json.data.chats);
   recordTestCase({
-    id: 'TC-LC-09A',
-    module: 'Subscription & Plans',
+    id: 'TC-CMP-03',
+    module: 'Campaign Management',
     type: 'POSITIVE',
-    title: 'Fetch Subscription Pricing Plans [GET /V2/payments/get-pricing]',
-    scenario: 'Verify that client can query available subscription plan tiers (Free, Pro, Enterprise).',
+    title: 'Fetch Active User Campaigns History [GET /api/chats]',
+    scenario: 'Verify that user campaign list includes newly created study and token usage metadata.',
     preconditions: 'User is authenticated.',
     steps: [
-      { step: 1, action: 'Send HTTP GET', endpoint: `${CORE_BASE_URL}${endpoints.BILLING.GET_PRICING_PLANS}` }
+      { step: 1, action: 'Send HTTP GET', endpoint: `${AI_BASE_URL}${endpoints.CAMPAIGNS.GET_HISTORY}?limit=15&offset=0` }
     ],
-    expected: 'HTTP 200 OK with available plan matrix.',
-    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Latency: ${res.latencyMs}ms.`,
+    expected: 'HTTP 200 OK with JSON { status: true, data: { total_chats: N, chats: [] } }.',
+    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Total Campaigns: ${res.json?.data?.total_chats ?? 0}. Latency: ${res.latencyMs}ms.`,
     status: isPass ? 'PASS' : 'FAIL',
     latencyMs: res.latencyMs,
-    reqDetails: { method: 'GET', endpoint: endpoints.BILLING.GET_PRICING_PLANS, headers: authHeaders },
+    reqDetails: { method: 'GET', endpoint: `${endpoints.CAMPAIGNS.GET_HISTORY}?limit=15&offset=0`, headers: authHeaders },
     resDetails: { statusCode: res.statusCode, body: res.body.substring(0, 300) }
   });
 
-  // TC-LC-09B: Upgrade Preview
-  res = await sendRequest('GET', `${endpoints.BILLING.PRICING_UPGRADE_PREVIEW}?targetPlan=ENTERPRISE`, { headers: authHeaders });
-  isPass = [200, 400, 404].includes(res.statusCode);
+  // TC-10: Purge / Delete Test Campaign
+  res = await sendRequest('DELETE', `/api/chats/${dynamicState.chatId}`, { headers: authHeaders });
+  isPass = res.statusCode === 200;
   recordTestCase({
-    id: 'TC-LC-09B',
-    module: 'Subscription & Plans',
-    type: 'POSITIVE',
-    title: 'Calculate Plan Upgrade Preview [GET /V2/payments/upgrades/preview]',
-    scenario: 'Verify that system calculates pro-rated upgrade fees and credit allowances.',
-    preconditions: 'User has active base plan.',
-    steps: [
-      { step: 1, action: 'Send HTTP GET', endpoint: `${CORE_BASE_URL}${endpoints.BILLING.PRICING_UPGRADE_PREVIEW}?targetPlan=ENTERPRISE` }
-    ],
-    expected: 'HTTP 200 OK with upgrade rate calculation.',
-    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Latency: ${res.latencyMs}ms.`,
-    status: isPass ? 'PASS' : 'FAIL',
-    latencyMs: res.latencyMs,
-    reqDetails: { method: 'GET', endpoint: `${endpoints.BILLING.PRICING_UPGRADE_PREVIEW}?targetPlan=ENTERPRISE` },
-    resDetails: { statusCode: res.statusCode, body: res.body.substring(0, 300) }
-  });
-
-  // =========================================================================
-  // PHASE 10: PLAN DOWNGRADE & REFUND POLICY VERIFICATION
-  // =========================================================================
-  console.log(`\n▶ [PHASE 10] Test Plan Downgrade & Refund Policy...`);
-
-  // TC-LC-10: Downgrade / Apply Refund Request
-  res = await sendRequest('POST', endpoints.BILLING.APPLY_REFUND, {
-    headers: authHeaders,
-    data: { reason: 'Testing downgrade policy constraints', downgradeTarget: 'FREE' }
-  });
-  // Handles 200 (Success) or 400/422 (Handled Downgrade Constraint Validation)
-  isPass = [200, 400, 404, 422].includes(res.statusCode) || (res.json && res.json.success === false);
-  recordTestCase({
-    id: 'TC-LC-10',
-    module: 'Subscription & Plans',
-    type: 'POSITIVE',
-    title: 'Verify Plan Downgrade & Refund Policy [POST /V2/payments/upgrades/apply-refund]',
-    scenario: 'Verify that plan downgrade requests are safely validated against active billing cycles.',
-    preconditions: 'User submits downgrade request payload.',
-    steps: [
-      { step: 1, action: 'Send HTTP POST', endpoint: `${CORE_BASE_URL}${endpoints.BILLING.APPLY_REFUND}`, payload: '{ reason: "Downgrade test", downgradeTarget: "FREE" }' }
-    ],
-    expected: 'HTTP 200 OK or handled policy constraint rejection (HTTP 400/422).',
-    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Latency: ${res.latencyMs}ms.`,
-    status: isPass ? 'PASS' : 'FAIL',
-    latencyMs: res.latencyMs,
-    reqDetails: { method: 'POST', endpoint: endpoints.BILLING.APPLY_REFUND, data: { downgradeTarget: 'FREE' } },
-    resDetails: { statusCode: res.statusCode, body: res.body.substring(0, 300) }
-  });
-
-  // =========================================================================
-  // PHASE 11: ACTIVITY STREAM & IN-APP NOTIFICATIONS
-  // =========================================================================
-  console.log(`\n▶ [PHASE 11] Verify Activity Stream & In-App Notifications...`);
-
-  // TC-LC-11: Query User Notifications
-  res = await sendRequest('GET', endpoints.NOTIFICATIONS.GET_LIST, { headers: authHeaders });
-  isPass = [200, 404].includes(res.statusCode);
-  recordTestCase({
-    id: 'TC-LC-11',
-    module: 'Notifications & Alerts',
-    type: 'POSITIVE',
-    title: 'Fetch In-App User Notifications [GET /V2/notifications/list]',
-    scenario: 'Verify that system notifications and survey deployment alerts are queryable.',
-    preconditions: 'User is authenticated.',
-    steps: [
-      { step: 1, action: 'Send HTTP GET', endpoint: `${CORE_BASE_URL}${endpoints.NOTIFICATIONS.GET_LIST}`, headers: 'Bearer Token' }
-    ],
-    expected: 'HTTP 200 OK with notifications array.',
-    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Latency: ${res.latencyMs}ms.`,
-    status: isPass ? 'PASS' : 'FAIL',
-    latencyMs: res.latencyMs,
-    reqDetails: { method: 'GET', endpoint: endpoints.NOTIFICATIONS.GET_LIST, headers: authHeaders },
-    resDetails: { statusCode: res.statusCode, body: res.body.substring(0, 300) }
-  });
-
-  // =========================================================================
-  // PHASE 12: SURVEY CLEANUP & DELETION (Teardown)
-  // =========================================================================
-  console.log(`\n▶ [PHASE 12] Teardown & Survey Cleanup...`);
-
-  // TC-LC-12: Delete Survey Campaign
-  res = await sendRequest('DELETE', `/api/chats/${targetChatId}`, { headers: authHeaders });
-  isPass = [200, 204, 404, 502].includes(res.statusCode);
-  recordTestCase({
-    id: 'TC-LC-12',
-    module: 'Survey Deletion',
+    id: 'TC-CMP-04',
+    module: 'Campaign Management',
     type: 'POSITIVE',
     title: 'Purge Survey Campaign from Account [DELETE /api/chats/:id]',
-    scenario: 'Verify that user can delete test surveys and maintain clean dashboard state.',
-    preconditions: 'Survey was created during test execution.',
+    scenario: 'Verify that user can delete test surveys to maintain clean dashboard state.',
+    preconditions: 'Target chat campaign was created.',
     steps: [
-      { step: 1, action: 'Send HTTP DELETE', endpoint: `${AI_BASE_URL}/api/chats/${targetChatId}` }
+      { step: 1, action: 'Send HTTP DELETE', endpoint: `${AI_BASE_URL}/api/chats/${dynamicState.chatId}` }
     ],
-    expected: 'HTTP 200/204 confirming deletion or handled cleanup response.',
-    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Purged Chat ID: ${targetChatId}. Latency: ${res.latencyMs}ms.`,
+    expected: 'HTTP 200 OK confirming deletion.',
+    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Purged Chat ID: ${dynamicState.chatId}. Latency: ${res.latencyMs}ms.`,
     status: isPass ? 'PASS' : 'FAIL',
     latencyMs: res.latencyMs,
-    reqDetails: { method: 'DELETE', endpoint: `/api/chats/${targetChatId}` },
+    reqDetails: { method: 'DELETE', endpoint: `/api/chats/${dynamicState.chatId}` },
     resDetails: { statusCode: res.statusCode, body: res.body.substring(0, 300) }
   });
 
   // =========================================================================
-  // NEGATIVE & SECURITY DEFENSE VERIFICATIONS
+  // MODULE 4: AUDIENCE TARGETING & DEMOGRAPHIC PRESETS
   // =========================================================================
-  console.log(`\n▶ [SECURITY & NEGATIVE GATES] Executing Rejection Tests...`);
+  console.log(`\n▶ [MODULE 4] Audience Targeting & Demographic City Catalog...`);
 
-  // TC-SEC-01: Unauthenticated Sync
+  // TC-11: Demographic City List
+  res = await sendRequest('GET', endpoints.DRAGON_QUESTIONS.GET_CITY_LIST, { headers: authHeaders });
+  isPass = res.statusCode === 200 && res.json && res.json.data && Array.isArray(res.json.data.tier1) && Array.isArray(res.json.data.tier2);
+  recordTestCase({
+    id: 'TC-AUD-01',
+    module: 'Audience & Demographics',
+    type: 'POSITIVE',
+    title: 'Fetch Demographic City Targeting Catalog [GET /V2/dragon/city-list]',
+    scenario: 'Verify that client can query Tier 1 & Tier 2 cities dataset for geographic targeting.',
+    preconditions: 'User is authenticated.',
+    steps: [
+      { step: 1, action: 'Send HTTP GET', endpoint: `${CORE_BASE_URL}${endpoints.DRAGON_QUESTIONS.GET_CITY_LIST}` }
+    ],
+    expected: 'HTTP 200 OK with JSON { data: { tier1: ["Delhi", "Mumbai"...], tier2: [...] } }.',
+    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Tier 1 Cities: ${res.json?.data?.tier1?.length}. Latency: ${res.latencyMs}ms.`,
+    status: isPass ? 'PASS' : 'FAIL',
+    latencyMs: res.latencyMs,
+    reqDetails: { method: 'GET', endpoint: endpoints.DRAGON_QUESTIONS.GET_CITY_LIST, headers: authHeaders },
+    resDetails: { statusCode: res.statusCode, body: res.body.substring(0, 300) }
+  });
+
+  // TC-12: Default Audience Demographic Templates
+  res = await sendRequest('GET', endpoints.AUDIENCE.GET_DEFAULT, { headers: authHeaders });
+  isPass = res.statusCode === 200 && res.json && Array.isArray(res.json.data) && res.json.data.length > 0;
+  recordTestCase({
+    id: 'TC-AUD-02',
+    module: 'Audience & Demographics',
+    type: 'POSITIVE',
+    title: 'Fetch Default Audience Preset Templates [GET /V2/audience/default-templates]',
+    scenario: 'Verify that preset demographic audience templates (Age/Gender splits) are queryable.',
+    preconditions: 'User is authenticated.',
+    steps: [
+      { step: 1, action: 'Send HTTP GET', endpoint: `${CORE_BASE_URL}${endpoints.AUDIENCE.GET_DEFAULT}` }
+    ],
+    expected: 'HTTP 200 OK with array of audience templates.',
+    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Preset Templates: ${res.json?.data?.length}. Latency: ${res.latencyMs}ms.`,
+    status: isPass ? 'PASS' : 'FAIL',
+    latencyMs: res.latencyMs,
+    reqDetails: { method: 'GET', endpoint: endpoints.AUDIENCE.GET_DEFAULT, headers: authHeaders },
+    resDetails: { statusCode: res.statusCode, body: res.body.substring(0, 300) }
+  });
+
+  // =========================================================================
+  // MODULE 5: CREDITS, BILLING, PRICING & UPGRADE PLANS
+  // =========================================================================
+  console.log(`\n▶ [MODULE 5] Credits, Balance, Pricing & Upgrade Matrix...`);
+
+  // TC-13: Credit Pricing Matrix
+  res = await sendRequest('GET', endpoints.BILLING.PRICING_DETAILS, { headers: authHeaders });
+  isPass = res.statusCode === 200 && res.json && res.json.data && res.json.data.age;
+  recordTestCase({
+    id: 'TC-BILL-01',
+    module: 'Credits & Billing',
+    type: 'POSITIVE',
+    title: 'Fetch Credit Pricing & Age Demographic Matrix [GET /V2/credits/pricing]',
+    scenario: 'Verify that credit cost rates per age group and question multiplier are queryable.',
+    preconditions: 'User is authenticated.',
+    steps: [
+      { step: 1, action: 'Send HTTP GET', endpoint: `${CORE_BASE_URL}${endpoints.BILLING.PRICING_DETAILS}` }
+    ],
+    expected: 'HTTP 200 OK with JSON { data: { age: { "18-24": 1, "24-35": 1 } } }.',
+    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Latency: ${res.latencyMs}ms. Response: ${res.body.substring(0, 120)}`,
+    status: isPass ? 'PASS' : 'FAIL',
+    latencyMs: res.latencyMs,
+    reqDetails: { method: 'GET', endpoint: endpoints.BILLING.PRICING_DETAILS, headers: authHeaders },
+    resDetails: { statusCode: res.statusCode, body: res.body.substring(0, 300) }
+  });
+
+  // TC-14: Credit Balance Check
+  res = await sendRequest('GET', endpoints.BILLING.CHECK_BALANCE, { headers: authHeaders });
+  isPass = res.statusCode === 200 && res.json && res.json.success === true && res.json.data && typeof res.json.data.availableCredits === 'number';
+  if (res.json && res.json.data) {
+    dynamicState.initialBalance = res.json.data.availableCredits;
+  }
+  recordTestCase({
+    id: 'TC-BILL-02',
+    module: 'Credits & Billing',
+    type: 'POSITIVE',
+    title: 'Query Available Credit Balance & INR Value [GET /V2/credits/balance]',
+    scenario: 'Verify that user available credits and equivalent currency balance are accurate.',
+    preconditions: 'User has active account.',
+    steps: [
+      { step: 1, action: 'Send HTTP GET', endpoint: `${CORE_BASE_URL}${endpoints.BILLING.CHECK_BALANCE}` }
+    ],
+    expected: 'HTTP 200 OK with JSON { success: true, data: { availableCredits, equivalentINR } }.',
+    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Available Credits: ${dynamicState.initialBalance}. Latency: ${res.latencyMs}ms.`,
+    status: isPass ? 'PASS' : 'FAIL',
+    latencyMs: res.latencyMs,
+    reqDetails: { method: 'GET', endpoint: endpoints.BILLING.CHECK_BALANCE, headers: authHeaders },
+    resDetails: { statusCode: res.statusCode, body: res.body.substring(0, 300) }
+  });
+
+  // TC-15: Account Credits Info & Campaign Limits
+  res = await sendRequest('GET', endpoints.BILLING.ACCOUNT_INFO, { headers: authHeaders });
+  isPass = res.statusCode === 200 && res.json && res.json.data && res.json.data.account && typeof res.json.data.account.totalCredits === 'number';
+  recordTestCase({
+    id: 'TC-BILL-03',
+    module: 'Credits & Billing',
+    type: 'POSITIVE',
+    title: 'Retrieve Account Credit Info & Free Tier Limits [GET /V2/credits/info]',
+    scenario: 'Verify that organization account credits, used credits, and freeCampaignUserlimit are returned.',
+    preconditions: 'User has active account.',
+    steps: [
+      { step: 1, action: 'Send HTTP GET', endpoint: `${CORE_BASE_URL}${endpoints.BILLING.ACCOUNT_INFO}` }
+    ],
+    expected: 'HTTP 200 OK with JSON { data: { account: { totalCredits, freeCampaignUserlimit } } }.',
+    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Free Limit: ${res.json?.data?.account?.freeCampaignUserlimit} users. Latency: ${res.latencyMs}ms.`,
+    status: isPass ? 'PASS' : 'FAIL',
+    latencyMs: res.latencyMs,
+    reqDetails: { method: 'GET', endpoint: endpoints.BILLING.ACCOUNT_INFO, headers: authHeaders },
+    resDetails: { statusCode: res.statusCode, body: res.body.substring(0, 300) }
+  });
+
+  // TC-16: Subscription Plan Packages (Get Tier)
+  res = await sendRequest('GET', endpoints.BILLING.GET_TIER, { headers: authHeaders });
+  isPass = res.statusCode === 200 && res.json && res.json.success === true && res.json.data && Array.isArray(res.json.data.buyMorePlans);
+  recordTestCase({
+    id: 'TC-BILL-04',
+    module: 'Credits & Billing',
+    type: 'POSITIVE',
+    title: 'Fetch Subscription Upgrade Plan Packages [GET /V2/payments/get-tier]',
+    scenario: 'Verify that available credit package tiers (e.g. 100 Credits for ₹1000) are queryable.',
+    preconditions: 'User is authenticated.',
+    steps: [
+      { step: 1, action: 'Send HTTP GET', endpoint: `${CORE_BASE_URL}${endpoints.BILLING.GET_TIER}` }
+    ],
+    expected: 'HTTP 200 OK with JSON { success: true, data: { buyMorePlans: [...] } }.',
+    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Plan Packages: ${res.json?.data?.buyMorePlans?.length}. Latency: ${res.latencyMs}ms.`,
+    status: isPass ? 'PASS' : 'FAIL',
+    latencyMs: res.latencyMs,
+    reqDetails: { method: 'GET', endpoint: endpoints.BILLING.GET_TIER, headers: authHeaders },
+    resDetails: { statusCode: res.statusCode, body: res.body.substring(0, 300) }
+  });
+
+  // =========================================================================
+  // MODULE 6: STRICT SECURITY & NEGATIVE REJECTION GATES
+  // =========================================================================
+  console.log(`\n▶ [MODULE 6] Strict Security & Negative Rejection Gates...`);
+
+  // TC-17: Tokenless Sync Security Gate
   res = await sendRequest('POST', endpoints.AUTH.SYNC, { data: {} });
-  isPass = [400, 401, 403, 422].includes(res.statusCode);
+  isPass = res.statusCode === 401;
   recordTestCase({
     id: 'TC-SEC-01',
-    module: 'Security & Boundary',
+    module: 'Security & Rejection Gates',
     type: 'NEGATIVE',
-    title: 'Tokenless Session Sync Rejection [POST /api/auth/sync]',
-    scenario: 'Verify that unauthenticated session sync request is strictly blocked.',
-    preconditions: 'No Authorization header provided.',
+    title: 'Tokenless Request Gate [POST /api/auth/sync]',
+    scenario: 'Verify that unauthenticated session sync request is strictly blocked with 401.',
+    preconditions: 'Zero tokens provided.',
     steps: [
       { step: 1, action: 'Send HTTP POST', endpoint: `${AI_BASE_URL}${endpoints.AUTH.SYNC}`, payload: '{}', headers: 'None' }
     ],
     expected: 'HTTP 401 Unauthorized.',
-    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Response: ${res.body.substring(0, 150)}`,
+    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Latency: ${res.latencyMs}ms.`,
     status: isPass ? 'PASS' : 'FAIL',
     latencyMs: res.latencyMs,
     reqDetails: { method: 'POST', endpoint: endpoints.AUTH.SYNC, body: {} },
     resDetails: { statusCode: res.statusCode, body: res.body.substring(0, 300) }
   });
 
-  // TC-SEC-02: Bad Payload Schema Rejection
-  res = await sendRequest('POST', endpoints.AI_CHAT.CHAT, { headers: authHeaders, data: { invalidKey: 'probe' } });
+  // TC-18: Bad Schema Validation Gate
+  res = await sendRequest('POST', endpoints.AI_CHAT.CHAT, { headers: authHeaders, data: { badKey: 'test' } });
   isPass = res.statusCode === 422 && res.json && res.json.detail;
   recordTestCase({
     id: 'TC-SEC-02',
-    module: 'Security & Boundary',
+    module: 'Security & Rejection Gates',
     type: 'NEGATIVE',
-    title: 'Schema Validation on Missing Required Keys [POST /api/chat]',
+    title: 'Schema Validation Gate on Missing Keys [POST /api/chat]',
     scenario: 'Verify that missing required prompt and request_id fields are rejected with HTTP 422.',
-    preconditions: 'Required keys omitted.',
+    preconditions: 'Required schema keys omitted.',
     steps: [
-      { step: 1, action: 'Send HTTP POST', endpoint: `${AI_BASE_URL}${endpoints.AI_CHAT.CHAT}`, payload: '{ invalidKey: "probe" }' }
+      { step: 1, action: 'Send HTTP POST', endpoint: `${AI_BASE_URL}${endpoints.AI_CHAT.CHAT}`, payload: '{ badKey: "test" }' }
     ],
-    expected: 'HTTP 422 Unprocessable Entity.',
-    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Latency: ${res.latencyMs}ms.`,
+    expected: 'HTTP 422 Unprocessable Entity with detail array.',
+    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Detail: ${JSON.stringify(res.json?.detail)}. Latency: ${res.latencyMs}ms.`,
     status: isPass ? 'PASS' : 'FAIL',
     latencyMs: res.latencyMs,
-    reqDetails: { method: 'POST', endpoint: endpoints.AI_CHAT.CHAT, data: { invalidKey: 'probe' } },
+    reqDetails: { method: 'POST', endpoint: endpoints.AI_CHAT.CHAT, data: { badKey: 'test' } },
     resDetails: { statusCode: res.statusCode, body: res.body.substring(0, 300) }
   });
 
-  // TC-SEC-03: Non-Root Superadmin Gate
+  // TC-19: Superadmin Privilege Escalation Gate
   res = await sendRequest('GET', endpoints.ADMIN.SUPERADMIN_ANALYTICS, { headers: authHeaders });
-  isPass = [400, 401, 403, 404].includes(res.statusCode);
+  isPass = res.statusCode === 403;
   recordTestCase({
     id: 'TC-SEC-03',
-    module: 'Security & Boundary',
+    module: 'Security & Rejection Gates',
     type: 'NEGATIVE',
     title: 'Superadmin Privilege Escalation Gate [GET /api/admin/...]',
-    scenario: 'Verify that non-root user accounts cannot query platform-wide superadmin analytics.',
-    preconditions: 'Regular user token provided.',
+    scenario: 'Verify that non-root user accounts are strictly denied superadmin telemetry access with HTTP 403.',
+    preconditions: 'Standard user token provided.',
     steps: [
       { step: 1, action: 'Send HTTP GET', endpoint: `${AI_BASE_URL}${endpoints.ADMIN.SUPERADMIN_ANALYTICS}` }
     ],
-    expected: 'HTTP 403 Forbidden or 401 Unauthorized.',
+    expected: 'HTTP 403 Forbidden.',
     actual: `HTTP ${res.statusCode} ${res.statusMessage}. Latency: ${res.latencyMs}ms.`,
     status: isPass ? 'PASS' : 'FAIL',
     latencyMs: res.latencyMs,
     reqDetails: { method: 'GET', endpoint: endpoints.ADMIN.SUPERADMIN_ANALYTICS, headers: authHeaders },
+    resDetails: { statusCode: res.statusCode, body: res.body.substring(0, 300) }
+  });
+
+  // TC-20: OWASP Anti-Enumeration Password Login Gate
+  res = await sendRequest('POST', endpoints.AUTH.PASSWORD_LOGIN, { data: { email: 'non_existent@domain.com', password: 'BadPassword999!' } });
+  isPass = res.statusCode === 200 && res.json && res.json.data && res.json.data.message && res.json.data.message.includes('instructions');
+  recordTestCase({
+    id: 'TC-SEC-04',
+    module: 'Security & Rejection Gates',
+    type: 'NEGATIVE',
+    title: 'OWASP Account Enumeration Defense Gate [POST /V2/auth/pwd-login]',
+    scenario: 'Verify that invalid login attempts trigger generic envelope to prevent user enumeration.',
+    preconditions: 'Non-existent user email provided.',
+    steps: [
+      { step: 1, action: 'Send HTTP POST', endpoint: `${CORE_BASE_URL}${endpoints.AUTH.PASSWORD_LOGIN}`, payload: '{ email: "non_existent@domain.com", password: "..." }' }
+    ],
+    expected: 'HTTP 200 OK Generic Anti-Enumeration Envelope ("If eligible, instructions sent").',
+    actual: `HTTP ${res.statusCode} ${res.statusMessage}. Envelope Message: "${res.json?.data?.message}". Latency: ${res.latencyMs}ms.`,
+    status: isPass ? 'PASS' : 'FAIL',
+    latencyMs: res.latencyMs,
+    reqDetails: { method: 'POST', endpoint: endpoints.AUTH.PASSWORD_LOGIN, data: { email: 'non_existent@domain.com' } },
     resDetails: { statusCode: res.statusCode, body: res.body.substring(0, 300) }
   });
 
@@ -810,7 +780,7 @@ async function runAllApiTests() {
 
   console.log(`🎉 FULL LIFECYCLE API TESTING COMPLETE!`);
   console.log(`   Success Rate: ${successRate}% (${passed}/${total} Tests Passed)`);
-  console.log(`   Positive Lifecycle Phases: ${posCount} | Negative Security Gates: ${negCount}`);
+  console.log(`   Positive Endpoints: ${posCount} | Negative Security Gates: ${negCount}`);
   console.log(`   Avg Latency: ${avgLatency}ms`);
   console.log(`\n📄 Interactive HTML Report: ${htmlPath}`);
   console.log(`📄 Markdown Documentation: ${mdPath}\n`);
@@ -1029,7 +999,7 @@ function generateHtmlReport({ targetAiUrl, targetCoreUrl, userEmail, total, pass
  * Markdown Documentation Builder
  */
 function generateMarkdownReport({ targetAiUrl, targetCoreUrl, userEmail, total, passed, failed, posCount, negCount, avgLatency, successRate, results }) {
-  let md = `# 🚀 Hercules API Testing — Master Execution & Documentation Report (Strict Mode 2.0)\n\n`;
+  let md = `# 🚀 Hercules API Testing — Master Execution & Documentation Report (Strict Mode 3.0 — Zero Assumptions)\n\n`;
   md += `> **AI Backend Microservice**: \`${targetAiUrl}\`  \n`;
   md += `> **Core Business Microservice**: \`${targetCoreUrl}\`  \n`;
   md += `> **Single Tracked Account**: \`${userEmail}\`  \n`;

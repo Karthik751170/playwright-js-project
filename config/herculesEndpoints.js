@@ -165,6 +165,13 @@ const HERCULES_ENDPOINTS = {
     UPDATE_STATUS_ADMIN: '/V2/survey/admin/update-ai-survey',
     GET_ADMIN_SURVEYS: '/V2/dashboard/admin-surveys',
     SUPERADMIN_ANALYTICS: '/api/admin/superadmin/users/analytics',
+  },
+
+  // 12. Notifications & Alerts
+  NOTIFICATIONS: {
+    GET_LIST: '/V2/notifications/list',
+    GET_ALERTS: '/api/notifications',
+    MARK_READ: '/V2/notifications/read',
   }
 };
 

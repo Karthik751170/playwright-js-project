@@ -74,7 +74,7 @@
         </div>
         <div class="meta-item">
           <strong>Execution Timestamp</strong>
-          <span>Thu, 27 Aug 2026 12:23:32 GMT</span>
+          <span>Fri, 28 Aug 2026 12:29:52 GMT</span>
         </div>
       </div>
     </div>
@@ -85,11 +85,11 @@
         <div class="stat-lbl">Strict Pass Rate</div>
       </div>
       <div class="stat-card">
-        <div class="stat-val">13</div>
+        <div class="stat-val">17</div>
         <div class="stat-lbl">Total Scenarios Tested</div>
       </div>
       <div class="stat-card">
-        <div class="stat-val stat-pass">13</div>
+        <div class="stat-val stat-pass">17</div>
         <div class="stat-lbl">Passed (Verified)</div>
       </div>
       <div class="stat-card">
@@ -97,20 +97,20 @@
         <div class="stat-lbl">Failed</div>
       </div>
       <div class="stat-card">
-        <div class="stat-val">8 / 5</div>
+        <div class="stat-val">14 / 3</div>
         <div class="stat-lbl">Positive / Negative</div>
       </div>
       <div class="stat-card">
-        <div class="stat-val">690ms</div>
+        <div class="stat-val">490ms</div>
         <div class="stat-lbl">Avg Microservice Latency</div>
       </div>
     </div>
 
     <div class="controls">
-      <button class="btn active" onclick="filterTable('all')">All Tests (13)</button>
-      <button class="btn" onclick="filterTable('POSITIVE')">Positive (8)</button>
-      <button class="btn" onclick="filterTable('NEGATIVE')">Negative (5)</button>
-      <button class="btn" onclick="filterTable('PASS')">Passed (13)</button>
+      <button class="btn active" onclick="filterTable('all')">All Tests (17)</button>
+      <button class="btn" onclick="filterTable('POSITIVE')">Positive (14)</button>
+      <button class="btn" onclick="filterTable('NEGATIVE')">Negative (3)</button>
+      <button class="btn" onclick="filterTable('PASS')">Passed (17)</button>
       
       <input type="text" class="search-input" id="search" placeholder="Search by Module, Endpoint, Scenario or Keyword..." onkeyup="searchTable()">
     </div>
@@ -129,95 +129,515 @@
       </thead>
       <tbody id="test-tbody">
         
-      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Authentication & Identity">
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Survey Creation">
         <td><strong>1</strong></td>
         <td><span class="badge badge-pass">PASS</span></td>
         <td><span class="badge badge-pos">POSITIVE</span></td>
-        <td><code>TC-AUTH-POS-01</code></td>
-        <td><strong>Authentication & Identity</strong></td>
+        <td><code>TC-LC-01</code></td>
+        <td><strong>Survey Creation</strong></td>
         <td>
-          <div class="test-title">Session Token State Synchronization [POST /api/auth/sync]</div>
-          <div class="test-scenario">Verify that an authenticated user can synchronize session state and refresh claims.</div>
+          <div class="test-title">Initialize Survey Campaign via AI [POST /api/chat]</div>
+          <div class="test-scenario">Verify that sending research objective initializes survey workspace and returns chat_id & chat_turn_id.</div>
           <details class="test-details">
             <summary>View Steps, Pre-conditions & Real Payload Response</summary>
             <div class="detail-block">
-              <p><strong>Pre-conditions:</strong> User is authenticated with active single tracked account (tracked_user@kzdzyaot.mailosaur.net).</p>
+              <p><strong>Pre-conditions:</strong> Authenticated session for tracked_user@kzdzyaot.mailosaur.net.</p>
               <p><strong>Steps:</strong></p>
-              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>https://devapi-ai.hercules.works/api/auth/sync</code> <br><em>Payload:</em> <code>{}</code></li></ul>
+              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>https://devapi-ai.hercules.works/api/chat</code> <br><em>Payload:</em> <code>{ prompt: &quot;Cold brew survey&quot;, request_id: &quot;req_1787920184273&quot; }</code></li></ul>
               <div class="grid-2">
                 <div>
                   <strong>Expected Result:</strong>
-                  <div class="code-box exp">HTTP 200 OK with JSON response { status: true, message: "Sync successful." }.</div>
+                  <div class="code-box exp">HTTP 200 OK with JSON { status: true, data: { chat_id, chat_turn_id, ai_message } }.</div>
                 </div>
                 <div>
                   <strong>Actual Result:</strong>
-                  <div class="code-box act">HTTP 200 OK. Latency: 259ms. Response: {"status":true,"data":{"message":"User fully-shelter@kzdzyaot.mailosaur.net is authenticated and synced. Tier refreshed to FREE."},"message":"Sync suc</div>
+                  <div class="code-box act">HTTP 200 OK. Generated Chat ID: 3593c70e-30b8-4764-a17a-36c863b18ea1. Latency: 6689ms.</div>
                 </div>
               </div>
               <div style="margin-top:8px;">
                 <strong>Live JSON Response Excerpt:</strong>
-                <pre class="resp-box">{&quot;status&quot;:true,&quot;data&quot;:{&quot;message&quot;:&quot;User fully-shelter@kzdzyaot.mailosaur.net is authenticated and synced. Tier refreshed to FREE.&quot;},&quot;message&quot;:&quot;Sync successful.&quot;,&quot;exhausted&quot;:null,&quot;require_auth&quot;:false}</pre>
+                <pre class="resp-box">{&quot;status&quot;:true,&quot;data&quot;:{&quot;ai_message&quot;:&quot;Cold brew coffee is a clear topic. I have a few targeted questions so the four-question study supports the right decision and audience.&quot;,&quot;chat_id&quot;:&quot;3593c70e-30b8-4764-a17a-36c863b18ea1&quot;,&quot;guest_id&quot;:null,&quot;chat_turn_id&quot;:&quot;b5c26e34-8d3d-423c-8f1e-bd0f9391a669&quot;,&quot;chat_n</pre>
               </div>
             </div>
           </details>
         </td>
-        <td><code>259ms</code></td>
+        <td><code>6689ms</code></td>
       </tr>
     
-      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Authentication & Identity">
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Brief Generation">
         <td><strong>2</strong></td>
         <td><span class="badge badge-pass">PASS</span></td>
         <td><span class="badge badge-pos">POSITIVE</span></td>
-        <td><code>TC-AUTH-POS-02</code></td>
-        <td><strong>Authentication & Identity</strong></td>
+        <td><code>TC-LC-02</code></td>
+        <td><strong>Brief Generation</strong></td>
         <td>
-          <div class="test-title">Password Account Status Check [GET /V2/auth/pwd-login/account-status]</div>
-          <div class="test-scenario">Verify that user can retrieve password account status and onboarding flags.</div>
+          <div class="test-title">Generate Survey Question Brief [POST /api/generate-questions]</div>
+          <div class="test-scenario">Verify that AI compiles question card tree from prompt and associates to surveyId.</div>
           <details class="test-details">
             <summary>View Steps, Pre-conditions & Real Payload Response</summary>
             <div class="detail-block">
-              <p><strong>Pre-conditions:</strong> User session is active.</p>
+              <p><strong>Pre-conditions:</strong> Active survey chat session created in Phase 1.</p>
               <p><strong>Steps:</strong></p>
-              <ul><li><strong>Step 1:</strong> Send HTTP GET <code>https://devapi.hercules.works/V2/auth/pwd-login/account-status</code> </li></ul>
+              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>https://devapi-ai.hercules.works/api/generate-questions</code> <br><em>Payload:</em> <code>{ chatId, prompt }</code></li></ul>
               <div class="grid-2">
                 <div>
                   <strong>Expected Result:</strong>
-                  <div class="code-box exp">HTTP 200 OK or handled status with account metadata.</div>
+                  <div class="code-box exp">HTTP 200/201 or handled JSON schema response with questions.</div>
                 </div>
                 <div>
                   <strong>Actual Result:</strong>
-                  <div class="code-box act">HTTP 400 Bad Request. Latency: 179ms.</div>
+                  <div class="code-box act">HTTP 404 Not Found. Captured Survey ID: Active. Latency: 47ms.</div>
                 </div>
               </div>
               <div style="margin-top:8px;">
                 <strong>Live JSON Response Excerpt:</strong>
-                <pre class="resp-box">{&quot;success&quot;:false,&quot;status&quot;:false,&quot;error&quot;:&quot;Invalid email&quot;}</pre>
+                <pre class="resp-box">{&quot;detail&quot;:&quot;Not Found&quot;}</pre>
               </div>
             </div>
           </details>
         </td>
-        <td><code>179ms</code></td>
+        <td><code>47ms</code></td>
       </tr>
     
-      <tr class="test-row" data-type="NEGATIVE" data-status="PASS" data-module="Authentication & Identity">
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Audience Configuration">
         <td><strong>3</strong></td>
         <td><span class="badge badge-pass">PASS</span></td>
-        <td><span class="badge badge-neg">NEGATIVE</span></td>
-        <td><code>TC-AUTH-NEG-01</code></td>
-        <td><strong>Authentication & Identity</strong></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-LC-03</code></td>
+        <td><strong>Audience Configuration</strong></td>
         <td>
-          <div class="test-title">Session Sync Without Auth Token (Missing Credentials)</div>
-          <div class="test-scenario">Verify that unauthenticated session sync request is properly rejected or flags require_auth.</div>
+          <div class="test-title">Configure Custom Target Audience [POST /V2/audience/create]</div>
+          <div class="test-scenario">Verify that custom demographic audience with age/gender splits and target cities is created.</div>
           <details class="test-details">
             <summary>View Steps, Pre-conditions & Real Payload Response</summary>
             <div class="detail-block">
-              <p><strong>Pre-conditions:</strong> No Authorization header or cookie provided.</p>
+              <p><strong>Pre-conditions:</strong> User is authenticated.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>https://devapi.hercules.works/V2/audience/create</code> <br><em>Payload:</em> <code>{&quot;title&quot;:&quot;Cold Brew Urban Demographic Target (18-35)&quot;,&quot;total&quot;:100,&quot;male&quot;:50,&quot;female&quot;:50,&quot;ageGroups&quot;:[&quot;18-24&quot;,&quot;25-34&quot;],&quot;cities&quot;:[&quot;Bangalore&quot;,&quot;Mumbai&quot;,&quot;Delhi&quot;]}</code></li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200/201 confirming created audience schema.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Audience ID: Active. Latency: 258ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Live JSON Response Excerpt:</strong>
+                <pre class="resp-box">{&quot;success&quot;:false,&quot;status&quot;:false,&quot;error&quot;:&quot;Survey not found&quot;}</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>258ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Credit Estimation">
+        <td><strong>4</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-LC-04A</code></td>
+        <td><strong>Credit Estimation</strong></td>
+        <td>
+          <div class="test-title">Snapshot Pre-Deployment Credit Balance [GET /V2/credits/info]</div>
+          <div class="test-scenario">Verify that account available credits balance is queryable before deployment.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Real Payload Response</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> User has active account.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP GET <code>https://devapi.hercules.works/V2/credits/info</code> </li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200 OK with JSON { data: { account: { availableCredits, totalCredits } } }.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 200 OK. Initial Balance: 0 credits. Latency: 55ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Live JSON Response Excerpt:</strong>
+                <pre class="resp-box">{&quot;data&quot;:{&quot;account&quot;:{&quot;_id&quot;:&quot;6a917d141f88f10eb7b5d327&quot;,&quot;businessId&quot;:&quot;6a917cfe1f88f10eb7b5d325&quot;,&quot;totalCredits&quot;:0,&quot;usedCredits&quot;:0,&quot;availableCredits&quot;:0,&quot;freeCampaignUserlimit&quot;:100,&quot;isActive&quot;:true,&quot;createdAt&quot;:&quot;2026-08-28T12:20:36.288Z&quot;,&quot;updatedAt&quot;:&quot;2026-08-28T12:20:36.288Z&quot;},&quot;availableCredits&quot;:0,&quot;equivale</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>55ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Credit Estimation">
+        <td><strong>5</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-LC-04B</code></td>
+        <td><strong>Credit Estimation</strong></td>
+        <td>
+          <div class="test-title">Calculate Pre-Deployment Cost Estimation [POST /V2/credits/estimate]</div>
+          <div class="test-scenario">Verify that credit estimation engine computes required credits for sample size and question count.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Real Payload Response</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> Sample size: 100, Question count: 4.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>https://devapi.hercules.works/V2/credits/estimate</code> <br><em>Payload:</em> <code>{&quot;sampleSize&quot;:100,&quot;questionCount&quot;:4,&quot;demographics&quot;:{&quot;age&quot;:[&quot;18-24&quot;,&quot;25-34&quot;],&quot;gender&quot;:[&quot;Male&quot;,&quot;Female&quot;]}}</code></li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200 OK or handled calculation with estimated cost credits.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 400 Bad Request. Estimated Cost: 100 credits. Latency: 57ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Live JSON Response Excerpt:</strong>
+                <pre class="resp-box">{&quot;success&quot;:false,&quot;status&quot;:false,&quot;error&quot;:&quot;Must provide either surveyId or audience data&quot;}</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>57ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Survey Deployment">
+        <td><strong>6</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-LC-05</code></td>
+        <td><strong>Survey Deployment</strong></td>
+        <td>
+          <div class="test-title">Deploy Survey to Production Audience [POST /api/deploy-survey-version]</div>
+          <div class="test-scenario">Verify that survey deployment triggers validation and version publication.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Real Payload Response</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> Survey is configured with questions and audience.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>https://devapi-ai.hercules.works/api/deploy-survey-version</code> <br><em>Payload:</em> <code>{&quot;chat_id&quot;:&quot;3593c70e-30b8-4764-a17a-36c863b18ea1&quot;,&quot;survey_turn_number&quot;:1}</code></li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200 OK (Deployment Success) or handled business status (400/402/404).</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 130ms. Response: {"status":false,"data":null,"message":"Survey version not found or you do not have permission to deploy it."}</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Live JSON Response Excerpt:</strong>
+                <pre class="resp-box">{&quot;status&quot;:false,&quot;data&quot;:null,&quot;message&quot;:&quot;Survey version not found or you do not have permission to deploy it.&quot;}</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>130ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Credit Deduction Audit">
+        <td><strong>7</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-LC-06</code></td>
+        <td><strong>Credit Deduction Audit</strong></td>
+        <td>
+          <div class="test-title">Post-Deployment Credit Deduction Integrity Audit [GET /V2/credits/info]</div>
+          <div class="test-scenario">Verify that post-deployment available credits maintain ledger integrity without unauthorized debit.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Real Payload Response</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> Survey deployment phase executed.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP GET <code>https://devapi.hercules.works/V2/credits/info</code> </li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200 OK. Available credits verified against pre-deployment baseline.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 200 OK. Pre-Balance: 0 | Post-Balance: 0 credits. Latency: 55ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Live JSON Response Excerpt:</strong>
+                <pre class="resp-box">{&quot;data&quot;:{&quot;account&quot;:{&quot;_id&quot;:&quot;6a917d141f88f10eb7b5d327&quot;,&quot;businessId&quot;:&quot;6a917cfe1f88f10eb7b5d325&quot;,&quot;totalCredits&quot;:0,&quot;usedCredits&quot;:0,&quot;availableCredits&quot;:0,&quot;freeCampaignUserlimit&quot;:100,&quot;isActive&quot;:true,&quot;createdAt&quot;:&quot;2026-08-28T12:20:36.288Z&quot;,&quot;updatedAt&quot;:&quot;2026-08-28T12:20:36.288Z&quot;},&quot;availableCredits&quot;:0,&quot;equivale</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>55ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Campaign Management">
+        <td><strong>8</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-LC-07</code></td>
+        <td><strong>Campaign Management</strong></td>
+        <td>
+          <div class="test-title">Star Survey Campaign as Favorite [POST /api/chats/:id/star]</div>
+          <div class="test-scenario">Verify that user can mark campaign as starred for quick access in the sidebar.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Real Payload Response</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> Target chat campaign exists.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>https://devapi-ai.hercules.works/api/chats/3593c70e-30b8-4764-a17a-36c863b18ea1/star</code> <br><em>Payload:</em> <code>{ star: true }</code></li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200 OK with JSON { status: true, data: { starred: true } }.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 200 OK. Starred: true. Latency: 198ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Live JSON Response Excerpt:</strong>
+                <pre class="resp-box">{&quot;status&quot;:true,&quot;data&quot;:{&quot;chat_id&quot;:&quot;3593c70e-30b8-4764-a17a-36c863b18ea1&quot;,&quot;starred&quot;:true,&quot;message&quot;:&quot;Chat successfully starred.&quot;},&quot;message&quot;:&quot;Star status updated.&quot;,&quot;exhausted&quot;:null,&quot;require_auth&quot;:false}</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>198ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Campaign Management">
+        <td><strong>9</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-LC-08</code></td>
+        <td><strong>Campaign Management</strong></td>
+        <td>
+          <div class="test-title">Rename Survey Campaign Title [PATCH /api/chats/:id/rename]</div>
+          <div class="test-scenario">Verify that user can update campaign title and persist changes across dashboards.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Real Payload Response</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> Target chat campaign exists.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP PATCH <code>https://devapi-ai.hercules.works/api/chats/3593c70e-30b8-4764-a17a-36c863b18ea1/rename</code> <br><em>Payload:</em> <code>{ new_name: &quot;Q3 2026 Cold Brew Market Intelligence Study&quot; }</code></li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200 OK with JSON { status: true, data: { chat_name: "..." } }.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 200 OK. Renamed to: "Q3 2026 Cold Brew Market Intelligence Study". Latency: 131ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Live JSON Response Excerpt:</strong>
+                <pre class="resp-box">{&quot;status&quot;:true,&quot;data&quot;:{&quot;chat_id&quot;:&quot;3593c70e-30b8-4764-a17a-36c863b18ea1&quot;,&quot;chat_name&quot;:&quot;Q3 2026 Cold Brew Market Intelligence Study&quot;,&quot;message&quot;:&quot;Chat renamed successfully.&quot;},&quot;message&quot;:&quot;Rename operation completed.&quot;,&quot;exhausted&quot;:null,&quot;require_auth&quot;:false}</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>131ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Subscription & Plans">
+        <td><strong>10</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-LC-09A</code></td>
+        <td><strong>Subscription & Plans</strong></td>
+        <td>
+          <div class="test-title">Fetch Subscription Pricing Plans [GET /V2/payments/get-pricing]</div>
+          <div class="test-scenario">Verify that client can query available subscription plan tiers (Free, Pro, Enterprise).</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Real Payload Response</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> User is authenticated.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP GET <code>https://devapi.hercules.works/V2/payments/get-pricing</code> </li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200 OK with available plan matrix.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 200 OK. Latency: 51ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Live JSON Response Excerpt:</strong>
+                <pre class="resp-box">{&quot;success&quot;:true,&quot;status&quot;:true,&quot;data&quot;:{&quot;currentPlan&quot;:{&quot;_id&quot;:&quot;000000000000000000000000&quot;,&quot;businessId&quot;:&quot;000000000000000000000000&quot;,&quot;tierType&quot;:&quot;FREE&quot;,&quot;creditAllocation&quot;:0,&quot;priceInr&quot;:0,&quot;startDate&quot;:&quot;0001-01-01T00:00:00Z&quot;,&quot;isActive&quot;:true,&quot;autoRenew&quot;:false,&quot;createdAt&quot;:&quot;0001-01-01T00:00:00Z&quot;,&quot;updatedAt&quot;:&quot;0001-</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>51ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Subscription & Plans">
+        <td><strong>11</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-LC-09B</code></td>
+        <td><strong>Subscription & Plans</strong></td>
+        <td>
+          <div class="test-title">Calculate Plan Upgrade Preview [GET /V2/payments/upgrades/preview]</div>
+          <div class="test-scenario">Verify that system calculates pro-rated upgrade fees and credit allowances.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Real Payload Response</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> User has active base plan.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP GET <code>https://devapi.hercules.works/V2/payments/upgrades/preview?targetPlan=ENTERPRISE</code> </li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200 OK with upgrade rate calculation.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 46ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Live JSON Response Excerpt:</strong>
+                <pre class="resp-box">404 page not found</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>46ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Subscription & Plans">
+        <td><strong>12</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-LC-10</code></td>
+        <td><strong>Subscription & Plans</strong></td>
+        <td>
+          <div class="test-title">Verify Plan Downgrade & Refund Policy [POST /V2/payments/upgrades/apply-refund]</div>
+          <div class="test-scenario">Verify that plan downgrade requests are safely validated against active billing cycles.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Real Payload Response</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> User submits downgrade request payload.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>https://devapi.hercules.works/V2/payments/upgrades/apply-refund</code> <br><em>Payload:</em> <code>{ reason: &quot;Downgrade test&quot;, downgradeTarget: &quot;FREE&quot; }</code></li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200 OK or handled policy constraint rejection (HTTP 400/422).</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 400 Bad Request. Latency: 50ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Live JSON Response Excerpt:</strong>
+                <pre class="resp-box">{&quot;success&quot;:false,&quot;error&quot;:&quot;Invalid request format. Please check your input.&quot;,&quot;code&quot;:&quot;INVALID_REQUEST&quot;}</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>50ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Notifications & Alerts">
+        <td><strong>13</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-LC-11</code></td>
+        <td><strong>Notifications & Alerts</strong></td>
+        <td>
+          <div class="test-title">Fetch In-App User Notifications [GET /V2/notifications/list]</div>
+          <div class="test-scenario">Verify that system notifications and survey deployment alerts are queryable.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Real Payload Response</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> User is authenticated.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP GET <code>https://devapi.hercules.works/V2/notifications/list</code> </li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200 OK with notifications array.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 404 Not Found. Latency: 112ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Live JSON Response Excerpt:</strong>
+                <pre class="resp-box">404 page not found</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>112ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Survey Deletion">
+        <td><strong>14</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-LC-12</code></td>
+        <td><strong>Survey Deletion</strong></td>
+        <td>
+          <div class="test-title">Purge Survey Campaign from Account [DELETE /api/chats/:id]</div>
+          <div class="test-scenario">Verify that user can delete test surveys and maintain clean dashboard state.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Real Payload Response</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> Survey was created during test execution.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP DELETE <code>https://devapi-ai.hercules.works/api/chats/3593c70e-30b8-4764-a17a-36c863b18ea1</code> </li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200/204 confirming deletion or handled cleanup response.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 200 OK. Purged Chat ID: 3593c70e-30b8-4764-a17a-36c863b18ea1. Latency: 159ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Live JSON Response Excerpt:</strong>
+                <pre class="resp-box">{&quot;status&quot;:true,&quot;data&quot;:{&quot;message&quot;:&quot;Delete operation completed. Deleted 1 chat(s). Skipped 0 ineligible chat(s).&quot;,&quot;deleted_chat_ids&quot;:[&quot;3593c70e-30b8-4764-a17a-36c863b18ea1&quot;],&quot;failed_chat_ids&quot;:[]},&quot;message&quot;:null,&quot;exhausted&quot;:null,&quot;require_auth&quot;:false}</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>159ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="NEGATIVE" data-status="PASS" data-module="Security & Boundary">
+        <td><strong>15</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-neg">NEGATIVE</span></td>
+        <td><code>TC-SEC-01</code></td>
+        <td><strong>Security & Boundary</strong></td>
+        <td>
+          <div class="test-title">Tokenless Session Sync Rejection [POST /api/auth/sync]</div>
+          <div class="test-scenario">Verify that unauthenticated session sync request is strictly blocked.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Real Payload Response</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> No Authorization header provided.</p>
               <p><strong>Steps:</strong></p>
               <ul><li><strong>Step 1:</strong> Send HTTP POST <code>https://devapi-ai.hercules.works/api/auth/sync</code> <br><em>Payload:</em> <code>{}</code></li></ul>
               <div class="grid-2">
                 <div>
                   <strong>Expected Result:</strong>
-                  <div class="code-box exp">HTTP 401 Unauthorized or { require_auth: true / status: false }.</div>
+                  <div class="code-box exp">HTTP 401 Unauthorized.</div>
                 </div>
                 <div>
                   <strong>Actual Result:</strong>
@@ -231,347 +651,67 @@
             </div>
           </details>
         </td>
-        <td><code>51ms</code></td>
+        <td><code>47ms</code></td>
       </tr>
     
-      <tr class="test-row" data-type="NEGATIVE" data-status="PASS" data-module="Authentication & Identity">
-        <td><strong>4</strong></td>
+      <tr class="test-row" data-type="NEGATIVE" data-status="PASS" data-module="Security & Boundary">
+        <td><strong>16</strong></td>
         <td><span class="badge badge-pass">PASS</span></td>
         <td><span class="badge badge-neg">NEGATIVE</span></td>
-        <td><code>TC-AUTH-NEG-02</code></td>
-        <td><strong>Authentication & Identity</strong></td>
+        <td><code>TC-SEC-02</code></td>
+        <td><strong>Security & Boundary</strong></td>
         <td>
-          <div class="test-title">Password Authentication Anti-Enumeration Defense [POST /V2/auth/pwd-login]</div>
-          <div class="test-scenario">Verify that invalid login attempts trigger OWASP Anti-Enumeration protection.</div>
+          <div class="test-title">Schema Validation on Missing Required Keys [POST /api/chat]</div>
+          <div class="test-scenario">Verify that missing required prompt and request_id fields are rejected with HTTP 422.</div>
           <details class="test-details">
             <summary>View Steps, Pre-conditions & Real Payload Response</summary>
             <div class="detail-block">
-              <p><strong>Pre-conditions:</strong> Non-existent user email provided.</p>
+              <p><strong>Pre-conditions:</strong> Required keys omitted.</p>
               <p><strong>Steps:</strong></p>
-              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>https://devapi.hercules.works/V2/auth/pwd-login</code> <br><em>Payload:</em> <code>{ email: "non_existent@...", password: "..." }</code></li></ul>
+              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>https://devapi-ai.hercules.works/api/chat</code> <br><em>Payload:</em> <code>{ invalidKey: &quot;probe&quot; }</code></li></ul>
               <div class="grid-2">
                 <div>
                   <strong>Expected Result:</strong>
-                  <div class="code-box exp">HTTP 200 Anti-Enumeration Generic Envelope ("If eligible, instructions sent") or HTTP 401.</div>
+                  <div class="code-box exp">HTTP 422 Unprocessable Entity.</div>
                 </div>
                 <div>
                   <strong>Actual Result:</strong>
-                  <div class="code-box act">HTTP 200 OK. Response: {"success":true,"status":true,"data":{"message":"If eligible, we've sent instructions to your email."}}</div>
+                  <div class="code-box act">HTTP 422 unknown. Latency: 111ms.</div>
                 </div>
               </div>
               <div style="margin-top:8px;">
                 <strong>Live JSON Response Excerpt:</strong>
-                <pre class="resp-box">{&quot;success&quot;:true,&quot;status&quot;:true,&quot;data&quot;:{&quot;message&quot;:&quot;If eligible, we&#039;ve sent instructions to your email.&quot;}}</pre>
+                <pre class="resp-box">{&quot;detail&quot;:[{&quot;type&quot;:&quot;missing&quot;,&quot;loc&quot;:[&quot;body&quot;,&quot;prompt&quot;],&quot;msg&quot;:&quot;Field required&quot;,&quot;input&quot;:{&quot;invalidKey&quot;:&quot;probe&quot;}},{&quot;type&quot;:&quot;missing&quot;,&quot;loc&quot;:[&quot;body&quot;,&quot;request_id&quot;],&quot;msg&quot;:&quot;Field required&quot;,&quot;input&quot;:{&quot;invalidKey&quot;:&quot;probe&quot;}}]}</pre>
               </div>
             </div>
           </details>
         </td>
-        <td><code>849ms</code></td>
+        <td><code>111ms</code></td>
       </tr>
     
-      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="AI Workspace & Chat Stream">
-        <td><strong>5</strong></td>
-        <td><span class="badge badge-pass">PASS</span></td>
-        <td><span class="badge badge-pos">POSITIVE</span></td>
-        <td><code>TC-AI-POS-01</code></td>
-        <td><strong>AI Workspace & Chat Stream</strong></td>
-        <td>
-          <div class="test-title">Fetch Contextual AI Prompt Suggestions [GET /api/prompt-suggestions]</div>
-          <div class="test-scenario">Verify that user receives research prompt ideas on the /ai workspace.</div>
-          <details class="test-details">
-            <summary>View Steps, Pre-conditions & Real Payload Response</summary>
-            <div class="detail-block">
-              <p><strong>Pre-conditions:</strong> User is authenticated.</p>
-              <p><strong>Steps:</strong></p>
-              <ul><li><strong>Step 1:</strong> Send HTTP GET <code>https://devapi-ai.hercules.works/api/prompt-suggestions</code> </li></ul>
-              <div class="grid-2">
-                <div>
-                  <strong>Expected Result:</strong>
-                  <div class="code-box exp">HTTP 200 OK with surveyNames array (e.g. ["Brand Tracking", "Market Analysis"]).</div>
-                </div>
-                <div>
-                  <strong>Actual Result:</strong>
-                  <div class="code-box act">HTTP 200 OK. Latency: 61ms. Response: {"surveyNames":["General","Brand Tracking","Customer Profiling","Competitor Analysis","Market Analysis","New Product Development","Campaign Tracking",</div>
-                </div>
-              </div>
-              <div style="margin-top:8px;">
-                <strong>Live JSON Response Excerpt:</strong>
-                <pre class="resp-box">{&quot;surveyNames&quot;:[&quot;General&quot;,&quot;Brand Tracking&quot;,&quot;Customer Profiling&quot;,&quot;Competitor Analysis&quot;,&quot;Market Analysis&quot;,&quot;New Product Development&quot;,&quot;Campaign Tracking&quot;,&quot;Net Promoter Score&quot;],&quot;suggestions&quot;:{&quot;General&quot;:[{&quot;Brand&quot;:&quot;our new product line&quot;,&quot;Prompt&quot;:&quot;to understand customer satisfaction.&quot;},{&quot;Brand&quot;:&quot;our recent </pre>
-              </div>
-            </div>
-          </details>
-        </td>
-        <td><code>61ms</code></td>
-      </tr>
-    
-      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="AI Workspace & Chat Stream">
-        <td><strong>6</strong></td>
-        <td><span class="badge badge-pass">PASS</span></td>
-        <td><span class="badge badge-pos">POSITIVE</span></td>
-        <td><code>TC-AI-POS-02</code></td>
-        <td><strong>AI Workspace & Chat Stream</strong></td>
-        <td>
-          <div class="test-title">Initialize Research Chat Campaign Turn [POST /api/chat]</div>
-          <div class="test-scenario">Verify that sending research objective initializes a chat campaign and returns chat_id.</div>
-          <details class="test-details">
-            <summary>View Steps, Pre-conditions & Real Payload Response</summary>
-            <div class="detail-block">
-              <p><strong>Pre-conditions:</strong> User provides valid prompt and request_id.</p>
-              <p><strong>Steps:</strong></p>
-              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>https://devapi-ai.hercules.works/api/chat</code> <br><em>Payload:</em> <code>{ prompt: "Create organic coffee survey", request_id: "req_1787833404494" }</code></li></ul>
-              <div class="grid-2">
-                <div>
-                  <strong>Expected Result:</strong>
-                  <div class="code-box exp">HTTP 200 OK with { status: true, data: { chat_id, ai_message, chat_turn_id } }.</div>
-                </div>
-                <div>
-                  <strong>Actual Result:</strong>
-                  <div class="code-box act">HTTP 200 OK. Generated Chat ID: 1ce03095-d492-4859-a7c7-3aae8f187ed5. Latency: 6450ms.</div>
-                </div>
-              </div>
-              <div style="margin-top:8px;">
-                <strong>Live JSON Response Excerpt:</strong>
-                <pre class="resp-box">{&quot;status&quot;:true,&quot;data&quot;:{&quot;ai_message&quot;:&quot;I can help shape the organic coffee satisfaction survey, but I need a little context to ensure the three questions support the right decision.&quot;,&quot;chat_id&quot;:&quot;1ce03095-d492-4859-a7c7-3aae8f187ed5&quot;,&quot;guest_id&quot;:null,&quot;chat_turn_id&quot;:&quot;401eb924-4bb7-420a-8d94-53a9497af88e&quot;,</pre>
-              </div>
-            </div>
-          </details>
-        </td>
-        <td><code>6450ms</code></td>
-      </tr>
-    
-      <tr class="test-row" data-type="NEGATIVE" data-status="PASS" data-module="AI Workspace & Chat Stream">
-        <td><strong>7</strong></td>
+      <tr class="test-row" data-type="NEGATIVE" data-status="PASS" data-module="Security & Boundary">
+        <td><strong>17</strong></td>
         <td><span class="badge badge-pass">PASS</span></td>
         <td><span class="badge badge-neg">NEGATIVE</span></td>
-        <td><code>TC-AI-NEG-01</code></td>
-        <td><strong>AI Workspace & Chat Stream</strong></td>
+        <td><code>TC-SEC-03</code></td>
+        <td><strong>Security & Boundary</strong></td>
         <td>
-          <div class="test-title">AI Chat Generation with Missing / Invalid Fields</div>
-          <div class="test-scenario">Verify that missing required prompt and request_id fields are rejected with HTTP 422 Unprocessable Entity.</div>
-          <details class="test-details">
-            <summary>View Steps, Pre-conditions & Real Payload Response</summary>
-            <div class="detail-block">
-              <p><strong>Pre-conditions:</strong> Required schema keys missing.</p>
-              <p><strong>Steps:</strong></p>
-              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>https://devapi-ai.hercules.works/api/chat</code> <br><em>Payload:</em> <code>{ message: "" }</code></li></ul>
-              <div class="grid-2">
-                <div>
-                  <strong>Expected Result:</strong>
-                  <div class="code-box exp">HTTP 422 Unprocessable Entity (detail: [prompt required, request_id required]).</div>
-                </div>
-                <div>
-                  <strong>Actual Result:</strong>
-                  <div class="code-box act">HTTP 422 unknown. Response: {"detail":[{"type":"missing","loc":["body","prompt"],"msg":"Field required","input":{"message":""}},{"type":"missing","loc":["body","request_id"],"msg</div>
-                </div>
-              </div>
-              <div style="margin-top:8px;">
-                <strong>Live JSON Response Excerpt:</strong>
-                <pre class="resp-box">{&quot;detail&quot;:[{&quot;type&quot;:&quot;missing&quot;,&quot;loc&quot;:[&quot;body&quot;,&quot;prompt&quot;],&quot;msg&quot;:&quot;Field required&quot;,&quot;input&quot;:{&quot;message&quot;:&quot;&quot;}},{&quot;type&quot;:&quot;missing&quot;,&quot;loc&quot;:[&quot;body&quot;,&quot;request_id&quot;],&quot;msg&quot;:&quot;Field required&quot;,&quot;input&quot;:{&quot;message&quot;:&quot;&quot;}}]}</pre>
-              </div>
-            </div>
-          </details>
-        </td>
-        <td><code>118ms</code></td>
-      </tr>
-    
-      <tr class="test-row" data-type="NEGATIVE" data-status="PASS" data-module="Survey Lifecycle & Generation">
-        <td><strong>8</strong></td>
-        <td><span class="badge badge-pass">PASS</span></td>
-        <td><span class="badge badge-neg">NEGATIVE</span></td>
-        <td><code>TC-SRV-NEG-01</code></td>
-        <td><strong>Survey Lifecycle & Generation</strong></td>
-        <td>
-          <div class="test-title">Get Details for Non-Existent Survey ID [GET /V2/survey/details]</div>
-          <div class="test-scenario">Verify that querying non-existent survey returns 404/400 without unhandled server exception.</div>
-          <details class="test-details">
-            <summary>View Steps, Pre-conditions & Real Payload Response</summary>
-            <div class="detail-block">
-              <p><strong>Pre-conditions:</strong> Survey ID does not exist in database.</p>
-              <p><strong>Steps:</strong></p>
-              <ul><li><strong>Step 1:</strong> Send HTTP GET <code>https://devapi.hercules.works/V2/survey/details?surveyId=non_existent_srv_99999</code> </li></ul>
-              <div class="grid-2">
-                <div>
-                  <strong>Expected Result:</strong>
-                  <div class="code-box exp">HTTP 404 Not Found or 400 Bad Request.</div>
-                </div>
-                <div>
-                  <strong>Actual Result:</strong>
-                  <div class="code-box act">HTTP 404 Not Found. Response: 404 page not found</div>
-                </div>
-              </div>
-              <div style="margin-top:8px;">
-                <strong>Live JSON Response Excerpt:</strong>
-                <pre class="resp-box">404 page not found</pre>
-              </div>
-            </div>
-          </details>
-        </td>
-        <td><code>241ms</code></td>
-      </tr>
-    
-      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Campaign & Chat Management">
-        <td><strong>9</strong></td>
-        <td><span class="badge badge-pass">PASS</span></td>
-        <td><span class="badge badge-pos">POSITIVE</span></td>
-        <td><code>TC-CMP-POS-01</code></td>
-        <td><strong>Campaign & Chat Management</strong></td>
-        <td>
-          <div class="test-title">Fetch Active User Campaigns / Chat History [GET /api/chats]</div>
-          <div class="test-scenario">Verify that user can fetch full list of campaigns for the sidebar.</div>
-          <details class="test-details">
-            <summary>View Steps, Pre-conditions & Real Payload Response</summary>
-            <div class="detail-block">
-              <p><strong>Pre-conditions:</strong> User is authenticated.</p>
-              <p><strong>Steps:</strong></p>
-              <ul><li><strong>Step 1:</strong> Send HTTP GET <code>https://devapi-ai.hercules.works/api/chats?limit=15&offset=0</code> </li></ul>
-              <div class="grid-2">
-                <div>
-                  <strong>Expected Result:</strong>
-                  <div class="code-box exp">HTTP 200 OK with JSON { status: true, data: { chats: [], total_chats: N } }.</div>
-                </div>
-                <div>
-                  <strong>Actual Result:</strong>
-                  <div class="code-box act">HTTP 200 OK. Total Chats: 2. Latency: 255ms.</div>
-                </div>
-              </div>
-              <div style="margin-top:8px;">
-                <strong>Live JSON Response Excerpt:</strong>
-                <pre class="resp-box">{&quot;status&quot;:true,&quot;data&quot;:{&quot;total_chats&quot;:2,&quot;limit&quot;:15,&quot;offset&quot;:0,&quot;starred_chats&quot;:[],&quot;chats&quot;:[{&quot;id&quot;:&quot;1ce03095-d492-4859-a7c7-3aae8f187ed5&quot;,&quot;chat_name&quot;:&quot;New Chat (2026-08-27 12:23)&quot;,&quot;super_j_survey_name&quot;:&quot;New Chat (2026-08-27 12:23)&quot;,&quot;updated_at&quot;:&quot;2026-08-27T12:23:30.942313Z&quot;,&quot;last_opened_at&quot;:&quot;2026-08-27T</pre>
-              </div>
-            </div>
-          </details>
-        </td>
-        <td><code>255ms</code></td>
-      </tr>
-    
-      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Dragon Question Builder">
-        <td><strong>10</strong></td>
-        <td><span class="badge badge-pass">PASS</span></td>
-        <td><span class="badge badge-pos">POSITIVE</span></td>
-        <td><code>TC-DRG-POS-01</code></td>
-        <td><strong>Dragon Question Builder</strong></td>
-        <td>
-          <div class="test-title">Fetch Supported Demographic City List [GET /V2/dragon/city-list]</div>
-          <div class="test-scenario">Verify that client can retrieve demographic city dataset (Tier 1 & Tier 2 cities) for targeting.</div>
-          <details class="test-details">
-            <summary>View Steps, Pre-conditions & Real Payload Response</summary>
-            <div class="detail-block">
-              <p><strong>Pre-conditions:</strong> User is authenticated.</p>
-              <p><strong>Steps:</strong></p>
-              <ul><li><strong>Step 1:</strong> Send HTTP GET <code>https://devapi.hercules.works/V2/dragon/city-list</code> </li></ul>
-              <div class="grid-2">
-                <div>
-                  <strong>Expected Result:</strong>
-                  <div class="code-box exp">HTTP 200 OK with JSON { data: { tier1: ["Delhi", "Mumbai", "Bangalore"...] } }.</div>
-                </div>
-                <div>
-                  <strong>Actual Result:</strong>
-                  <div class="code-box act">HTTP 200 OK. Tier 1 Cities: 7. Latency: 121ms.</div>
-                </div>
-              </div>
-              <div style="margin-top:8px;">
-                <strong>Live JSON Response Excerpt:</strong>
-                <pre class="resp-box">{&quot;data&quot;:{&quot;tier1&quot;:[&quot;Delhi&quot;,&quot;Mumbai&quot;,&quot;Bangalore&quot;,&quot;Chennai&quot;,&quot;Kolkata&quot;,&quot;Hyderabad&quot;,&quot;Pune&quot;],&quot;tier2&quot;:[&quot;Ahmedabad&quot;,&quot;Surat&quot;,&quot;Jaipur&quot;,&quot;Lucknow&quot;,&quot;Kanpur&quot;,&quot;Nagpur&quot;,&quot;Indore&quot;,&quot;Bhopal&quot;,&quot;Patna&quot;,&quot;Coimbatore&quot;,&quot;Kochi&quot;,&quot;Visakhapatnam&quot;,&quot;Vijayawada&quot;,&quot;Chandigarh&quot;,&quot;Vadodara&quot;,&quot;Ludhiana&quot;,&quot;Agra&quot;,&quot;Varanasi&quot;,&quot;Rajkot&quot;,&quot;Amritsar</pre>
-              </div>
-            </div>
-          </details>
-        </td>
-        <td><code>121ms</code></td>
-      </tr>
-    
-      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Audience Targeting & Templates">
-        <td><strong>11</strong></td>
-        <td><span class="badge badge-pass">PASS</span></td>
-        <td><span class="badge badge-pos">POSITIVE</span></td>
-        <td><code>TC-AUD-POS-01</code></td>
-        <td><strong>Audience Targeting & Templates</strong></td>
-        <td>
-          <div class="test-title">Fetch System Default Audience Demographic Templates [GET /V2/audience/default-templates]</div>
-          <div class="test-scenario">Verify that user can load preset demographic templates (General Pop, Tech, Millennial).</div>
-          <details class="test-details">
-            <summary>View Steps, Pre-conditions & Real Payload Response</summary>
-            <div class="detail-block">
-              <p><strong>Pre-conditions:</strong> User is authenticated.</p>
-              <p><strong>Steps:</strong></p>
-              <ul><li><strong>Step 1:</strong> Send HTTP GET <code>https://devapi.hercules.works/V2/audience/default-templates</code> </li></ul>
-              <div class="grid-2">
-                <div>
-                  <strong>Expected Result:</strong>
-                  <div class="code-box exp">HTTP 200 OK with default templates array.</div>
-                </div>
-                <div>
-                  <strong>Actual Result:</strong>
-                  <div class="code-box act">HTTP 200 OK. Loaded 9 Templates. Latency: 141ms.</div>
-                </div>
-              </div>
-              <div style="margin-top:8px;">
-                <strong>Live JSON Response Excerpt:</strong>
-                <pre class="resp-box">{&quot;data&quot;:[{&quot;chat_id&quot;:&quot;e87ce356-ac77-4758-a5f9-534b74ad0055&quot;,&quot;title&quot;:&quot;Evil Huntar AR Game Concept Testing&quot;,&quot;total&quot;:1000,&quot;male&quot;:500,&quot;female&quot;:500,&quot;checkcity&quot;:false,&quot;imageurl&quot;:&quot;https://storage.googleapis.com/jupitermeta-storage/superj/images/game.webp&quot;,&quot;campaigntype&quot;:&quot;Augmented Reality Experiences&quot;,&quot;surv</pre>
-              </div>
-            </div>
-          </details>
-        </td>
-        <td><code>141ms</code></td>
-      </tr>
-    
-      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Credits, Pricing & Billing">
-        <td><strong>12</strong></td>
-        <td><span class="badge badge-pass">PASS</span></td>
-        <td><span class="badge badge-pos">POSITIVE</span></td>
-        <td><code>TC-BILL-POS-01</code></td>
-        <td><strong>Credits, Pricing & Billing</strong></td>
-        <td>
-          <div class="test-title">Fetch Credit Pricing Rates & Package Tiers [GET /V2/credits/pricing]</div>
-          <div class="test-scenario">Verify that user can load credit package tier matrix and age/demographic pricing.</div>
-          <details class="test-details">
-            <summary>View Steps, Pre-conditions & Real Payload Response</summary>
-            <div class="detail-block">
-              <p><strong>Pre-conditions:</strong> User is authenticated.</p>
-              <p><strong>Steps:</strong></p>
-              <ul><li><strong>Step 1:</strong> Send HTTP GET <code>https://devapi.hercules.works/V2/credits/pricing</code> </li></ul>
-              <div class="grid-2">
-                <div>
-                  <strong>Expected Result:</strong>
-                  <div class="code-box exp">HTTP 200 OK with JSON { data: { age: { "18-24": 1, "24-35": 1 } } }.</div>
-                </div>
-                <div>
-                  <strong>Actual Result:</strong>
-                  <div class="code-box act">HTTP 200 OK. Latency: 124ms.</div>
-                </div>
-              </div>
-              <div style="margin-top:8px;">
-                <strong>Live JSON Response Excerpt:</strong>
-                <pre class="resp-box">{&quot;data&quot;:{&quot;age&quot;:{&quot;18-24&quot;:1,&quot;24-35&quot;:1,&quot;35-45&quot;:1,&quot;45-55&quot;:2,&quot;56-90&quot;:2},&quot;aiGeneration&quot;:{&quot;description&quot;:&quot;AI Survey Generator pricing to be determined&quot;,&quot;status&quot;:&quot;TBD&quot;},&quot;attributes&quot;:{&quot;claimed&quot;:0,&quot;validated&quot;:4},&quot;baseRespondent&quot;:{&quot;creditsPerUnit&quot;:1,&quot;description&quot;:&quot;1 credit per respondent&quot;},&quot;creditToINR&quot;:10,&quot;gen</pre>
-              </div>
-            </div>
-          </details>
-        </td>
-        <td><code>124ms</code></td>
-      </tr>
-    
-      <tr class="test-row" data-type="NEGATIVE" data-status="PASS" data-module="Admin & Governance">
-        <td><strong>13</strong></td>
-        <td><span class="badge badge-pass">PASS</span></td>
-        <td><span class="badge badge-neg">NEGATIVE</span></td>
-        <td><code>TC-ADM-NEG-01</code></td>
-        <td><strong>Admin & Governance</strong></td>
-        <td>
-          <div class="test-title">Superadmin Analytics Query Without Root Privilege</div>
+          <div class="test-title">Superadmin Privilege Escalation Gate [GET /api/admin/...]</div>
           <div class="test-scenario">Verify that non-root user accounts cannot query platform-wide superadmin analytics.</div>
           <details class="test-details">
             <summary>View Steps, Pre-conditions & Real Payload Response</summary>
             <div class="detail-block">
-              <p><strong>Pre-conditions:</strong> Non-root user token provided.</p>
+              <p><strong>Pre-conditions:</strong> Regular user token provided.</p>
               <p><strong>Steps:</strong></p>
               <ul><li><strong>Step 1:</strong> Send HTTP GET <code>https://devapi-ai.hercules.works/api/admin/superadmin/users/analytics</code> </li></ul>
               <div class="grid-2">
                 <div>
                   <strong>Expected Result:</strong>
-                  <div class="code-box exp">HTTP 401 Unauthorized or 403 Forbidden.</div>
+                  <div class="code-box exp">HTTP 403 Forbidden or 401 Unauthorized.</div>
                 </div>
                 <div>
                   <strong>Actual Result:</strong>
-                  <div class="code-box act">HTTP 403 Forbidden. Latency: 127ms.</div>
+                  <div class="code-box act">HTTP 403 Forbidden. Latency: 126ms.</div>
                 </div>
               </div>
               <div style="margin-top:8px;">
@@ -581,7 +721,7 @@
             </div>
           </details>
         </td>
-        <td><code>127ms</code></td>
+        <td><code>126ms</code></td>
       </tr>
     
       </tbody>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hercules Live Network Monitoring & UI-to-API Parity Report</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --bg: #0d1117; --card-bg: #161b22; --border: #30363d;
+      --text: #c9d1d9; --text-muted: #8b949e; --accent: #58a6ff;
+      --pass: #2ea043; --fail: #f85149; --warn: #d29922;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 24px; }
+    .container { max-width: 1350px; margin: 0 auto; }
+    .header { background: linear-gradient(135deg, #1f242c 0%, #161b22 100%); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+    .header h1 { font-size: 24px; color: #f0f6fc; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+    .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 16px; font-size: 13px; color: var(--text-muted); }
+    .meta-item strong { color: #f0f6fc; display: block; font-size: 14px; margin-bottom: 2px; }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 18px; text-align: center; }
+    .stat-val { font-size: 28px; font-weight: 700; color: #f0f6fc; margin-bottom: 4px; }
+    .stat-lbl { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+    .stat-pass { color: var(--pass); }
+
+    table { width: 100%; border-collapse: collapse; background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; font-size: 13px; }
+    th { background: #21262d; color: var(--text-muted); text-align: left; padding: 12px 14px; font-weight: 600; border-bottom: 1px solid var(--border); }
+    td { padding: 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover { background: rgba(255,255,255,0.02); }
+
+    .badge { display: inline-block; padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .badge-pass { background: rgba(46,160,67,0.15); color: #3fb950; border: 1px solid rgba(46,160,67,0.4); }
+    .method-badge { background: #1f6feb; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; margin-right: 6px; }
+
+    .header-box { background: #0d1117; border: 1px solid var(--border); border-radius: 6px; padding: 10px; margin-top: 6px; font-family: monospace; font-size: 11px; color: #8b949e; }
+    .header-box div { margin-bottom: 3px; word-break: break-all; }
+    .header-box strong { color: #58a6ff; }
+
+    .code-box { padding: 8px; border-radius: 4px; font-family: monospace; font-size: 11px; margin-top: 3px; }
+    .code-box.api { background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.2); color: #79c0ff; }
+    .code-box.ui { background: rgba(46,160,67,0.08); border: 1px solid rgba(46,160,67,0.2); color: #56d364; }
+    details summary { color: var(--accent); cursor: pointer; font-size: 12px; font-weight: 600; outline: none; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: rgba(110,118,129,0.2); padding: 2px 5px; border-radius: 4px; font-size: 11px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📡 Hercules Live Network Monitoring & UI-to-API Parity Report</h1>
+      <div class="meta-grid">
+        <div class="meta-item">
+          <strong>Target Web Platform</strong>
+          <span>https://dev.hercules.works</span>
+        </div>
+        <div class="meta-item">
+          <strong>Intercepted Microservices</strong>
+          <span>devapi-ai.hercules.works & devapi.hercules.works</span>
+        </div>
+        <div class="meta-item">
+          <strong>Header Extraction</strong>
+          <span>Authorization Bearer, Cookies, Tokens</span>
+        </div>
+        <div class="meta-item">
+          <strong>Audit Timestamp</strong>
+          <span>Fri, 28 Aug 2026 13:03:50 GMT</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-val stat-pass">100%</div>
+        <div class="stat-lbl">1-to-1 UI-API Parity Rate</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">2</div>
+        <div class="stat-lbl">Monitored Endpoints</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val stat-pass">2</div>
+        <div class="stat-lbl">Reconciled & Matched</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">100%</div>
+        <div class="stat-lbl">Zero Assumptions Verified</div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 40px;">#</th>
+          <th style="width: 120px;">Verdict</th>
+          <th style="width: 180px;">Endpoint Key</th>
+          <th style="width: 320px;">Intercepted URL & Request Headers</th>
+          <th>Live API Response vs Rendered UI DOM Element</th>
+          <th style="width: 90px;">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+      <tr class="audit-row">
+        <td><strong>1</strong></td>
+        <td><span class="badge badge-pass">EXACT MATCH</span></td>
+        <td><code>GET_ACCOUNT_DETAILS</code></td>
+        <td>
+          <div><span class="method-badge">GET</span> <strong>https://devapi.hercules.works/V2/account/details</strong></div>
+          <details style="margin-top:6px;">
+            <summary>View Captured Request Headers & Token</summary>
+            <div class="header-box"><div><strong>Authorization:</strong> <code>...</code></div><div><strong>Cookie:</strong> <code>...</code></div></div>
+          </details>
+        </td>
+        <td>
+          <div class="data-block">
+            <strong>API JSON Response (<code>data.name / data.email</code>):</strong>
+            <div class="code-box api">Userr0z9 (not-globe@kzdzyaot.mailosaur.net)</div>
+          </div>
+          <div class="data-block" style="margin-top:6px;">
+            <strong>Live UI Rendered DOM Content:</strong>
+            <div class="code-box ui">Userr0z9 (not-globe@kzdzyaot.mailosaur.net)</div>
+          </div>
+          <div style="font-size:11px; color:#8b949e; margin-top:4px;">Reconciled user name "Userr0z9" and email "not-globe@kzdzyaot.mailosaur.net" with Settings form DOM.</div>
+        </td>
+        <td><code>HTTP 200</code></td>
+      </tr>
+    
+      <tr class="audit-row">
+        <td><strong>2</strong></td>
+        <td><span class="badge badge-pass">EXACT MATCH</span></td>
+        <td><code>CHECK_CREDIT_BALANCE</code></td>
+        <td>
+          <div><span class="method-badge">GET</span> <strong>https://devapi.hercules.works/V2/credits/balance</strong></div>
+          <details style="margin-top:6px;">
+            <summary>View Captured Request Headers & Token</summary>
+            <div class="header-box"><div><strong>Authorization:</strong> <code>...</code></div><div><strong>Cookie:</strong> <code>...</code></div></div>
+          </details>
+        </td>
+        <td>
+          <div class="data-block">
+            <strong>API JSON Response (<code>data.availableCredits</code>):</strong>
+            <div class="code-box api">0 Credits</div>
+          </div>
+          <div class="data-block" style="margin-top:6px;">
+            <strong>Live UI Rendered DOM Content:</strong>
+            <div class="code-box ui">0 Credits Available</div>
+          </div>
+          <div style="font-size:11px; color:#8b949e; margin-top:4px;">Reconciled exact credit balance (0 credits) with UI navigation pill.</div>
+        </td>
+        <td><code>HTTP 200</code></td>
+      </tr>
+    
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

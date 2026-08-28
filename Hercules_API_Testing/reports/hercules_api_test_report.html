@@ -74,7 +74,7 @@
         </div>
         <div class="meta-item">
           <strong>Execution Timestamp</strong>
-          <span>Fri, 28 Aug 2026 12:40:39 GMT</span>
+          <span>Fri, 28 Aug 2026 13:17:49 GMT</span>
         </div>
       </div>
     </div>
@@ -85,11 +85,11 @@
         <div class="stat-lbl">Strict Pass Rate</div>
       </div>
       <div class="stat-card">
-        <div class="stat-val">20</div>
+        <div class="stat-val">23</div>
         <div class="stat-lbl">Total Scenarios Tested</div>
       </div>
       <div class="stat-card">
-        <div class="stat-val stat-pass">20</div>
+        <div class="stat-val stat-pass">23</div>
         <div class="stat-lbl">Passed (Verified)</div>
       </div>
       <div class="stat-card">
@@ -97,20 +97,20 @@
         <div class="stat-lbl">Failed</div>
       </div>
       <div class="stat-card">
-        <div class="stat-val">16 / 4</div>
+        <div class="stat-val">19 / 4</div>
         <div class="stat-lbl">Positive / Negative</div>
       </div>
       <div class="stat-card">
-        <div class="stat-val">791ms</div>
+        <div class="stat-val">710ms</div>
         <div class="stat-lbl">Avg Microservice Latency</div>
       </div>
     </div>
 
     <div class="controls">
-      <button class="btn active" onclick="filterTable('all')">All Tests (20)</button>
-      <button class="btn" onclick="filterTable('POSITIVE')">Positive (16)</button>
+      <button class="btn active" onclick="filterTable('all')">All Tests (23)</button>
+      <button class="btn" onclick="filterTable('POSITIVE')">Positive (19)</button>
       <button class="btn" onclick="filterTable('NEGATIVE')">Negative (4)</button>
-      <button class="btn" onclick="filterTable('PASS')">Passed (20)</button>
+      <button class="btn" onclick="filterTable('PASS')">Passed (23)</button>
       
       <input type="text" class="search-input" id="search" placeholder="Search by Module, Endpoint, Scenario or Keyword..." onkeyup="searchTable()">
     </div>
@@ -151,7 +151,7 @@
                 </div>
                 <div>
                   <strong>Actual Result:</strong>
-                  <div class="code-box act">HTTP 200 OK. Latency: 298ms. Response: {"status":true,"data":{"message":"User not-globe@kzdzyaot.mailosaur.net is authenticated and synced. Tier refreshed to F</div>
+                  <div class="code-box act">HTTP 200 OK. Latency: 238ms. Response: {"status":true,"data":{"message":"User not-globe@kzdzyaot.mailosaur.net is authenticated and synced. Tier refreshed to F</div>
                 </div>
               </div>
               <div style="margin-top:8px;">
@@ -161,7 +161,7 @@
             </div>
           </details>
         </td>
-        <td><code>298ms</code></td>
+        <td><code>238ms</code></td>
       </tr>
     
       <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Authentication & Identity">
@@ -186,7 +186,7 @@
                 </div>
                 <div>
                   <strong>Actual Result:</strong>
-                  <div class="code-box act">HTTP 200 OK. User: Userr0z9 (not-globe@kzdzyaot.mailosaur.net). Latency: 151ms.</div>
+                  <div class="code-box act">HTTP 200 OK. User: Userr0z9 (not-globe@kzdzyaot.mailosaur.net). Latency: 143ms.</div>
                 </div>
               </div>
               <div style="margin-top:8px;">
@@ -196,7 +196,7 @@
             </div>
           </details>
         </td>
-        <td><code>151ms</code></td>
+        <td><code>143ms</code></td>
       </tr>
     
       <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="AI Workspace">
@@ -221,7 +221,7 @@
                 </div>
                 <div>
                   <strong>Actual Result:</strong>
-                  <div class="code-box act">HTTP 200 OK. Categories: 8. Latency: 66ms.</div>
+                  <div class="code-box act">HTTP 200 OK. Categories: 8. Latency: 58ms.</div>
                 </div>
               </div>
               <div style="margin-top:8px;">
@@ -231,7 +231,7 @@
             </div>
           </details>
         </td>
-        <td><code>66ms</code></td>
+        <td><code>58ms</code></td>
       </tr>
     
       <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="AI Workspace">
@@ -248,7 +248,7 @@
             <div class="detail-block">
               <p><strong>Pre-conditions:</strong> User provides prompt and request_id.</p>
               <p><strong>Steps:</strong></p>
-              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>https://devapi-ai.hercules.works/api/chat</code> <br><em>Payload:</em> <code>{ prompt: &quot;Create cold brew survey&quot;, request_id: &quot;req_1787920824614_1&quot; }</code></li></ul>
+              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>https://devapi-ai.hercules.works/api/chat</code> <br><em>Payload:</em> <code>{ prompt: &quot;Create cold brew survey&quot;, request_id: &quot;req_1787923054089_1&quot; }</code></li></ul>
               <div class="grid-2">
                 <div>
                   <strong>Expected Result:</strong>
@@ -256,17 +256,17 @@
                 </div>
                 <div>
                   <strong>Actual Result:</strong>
-                  <div class="code-box act">HTTP 200 OK. Generated Chat ID: a1840990-40ca-49a6-b749-2ba15fc73ac1. Latency: 5487ms.</div>
+                  <div class="code-box act">HTTP 200 OK. Generated Chat ID: 4cf0621e-5b00-442b-9191-aa54062c6dd4. Latency: 6607ms.</div>
                 </div>
               </div>
               <div style="margin-top:8px;">
                 <strong>Live JSON Response Excerpt:</strong>
-                <pre class="resp-box">{&quot;status&quot;:true,&quot;data&quot;:{&quot;ai_message&quot;:&quot;Cold brew coffee is clear as the topic. I have a few quick questions so the three-question survey focuses on the right preferences and audience.&quot;,&quot;chat_id&quot;:&quot;a1840990-40ca-49a6-b749-2ba15fc73ac1&quot;,&quot;guest_id&quot;:null,&quot;chat_turn_id&quot;:&quot;8c96db4f-e47c-4217-9114-8ac71abcbd9f</pre>
+                <pre class="resp-box">{&quot;status&quot;:true,&quot;data&quot;:{&quot;ai_message&quot;:&quot;Cold brew coffee is clear as the topic; I have a few targeted questions so the survey supports the right consumer decision.&quot;,&quot;chat_id&quot;:&quot;4cf0621e-5b00-442b-9191-aa54062c6dd4&quot;,&quot;guest_id&quot;:null,&quot;chat_turn_id&quot;:&quot;9ccab53a-7776-4b1a-a75f-aa1b85a95c3e&quot;,&quot;chat_name&quot;:&quot;New Ch</pre>
               </div>
             </div>
           </details>
         </td>
-        <td><code>5487ms</code></td>
+        <td><code>6607ms</code></td>
       </tr>
     
       <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="AI Workspace">
@@ -283,7 +283,7 @@
             <div class="detail-block">
               <p><strong>Pre-conditions:</strong> Chat campaign created in Turn 1.</p>
               <p><strong>Steps:</strong></p>
-              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>https://devapi-ai.hercules.works/api/chat</code> <br><em>Payload:</em> <code>{ prompt: &quot;Focus on brand awareness...&quot;, chat_id: &quot;a1840990-40ca-49a6-b749-2ba15fc73ac1&quot;, request_id: &quot;req_1787920830101_2&quot; }</code></li></ul>
+              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>https://devapi-ai.hercules.works/api/chat</code> <br><em>Payload:</em> <code>{ prompt: &quot;Focus on brand awareness...&quot;, chat_id: &quot;4cf0621e-5b00-442b-9191-aa54062c6dd4&quot;, request_id: &quot;req_1787923060697_2&quot; }</code></li></ul>
               <div class="grid-2">
                 <div>
                   <strong>Expected Result:</strong>
@@ -291,17 +291,17 @@
                 </div>
                 <div>
                   <strong>Actual Result:</strong>
-                  <div class="code-box act">HTTP 200 OK. Latency: 6804ms. Response: {"status":true,"data":{"ai_message":"That gives the survey a clear measurement focus. I need a few details to make the t</div>
+                  <div class="code-box act">HTTP 200 OK. Latency: 5371ms. Response: {"status":true,"data":{"ai_message":"That focus is clear for the cold brew coffee survey. I have a few targeted question</div>
                 </div>
               </div>
               <div style="margin-top:8px;">
                 <strong>Live JSON Response Excerpt:</strong>
-                <pre class="resp-box">{&quot;status&quot;:true,&quot;data&quot;:{&quot;ai_message&quot;:&quot;That gives the survey a clear measurement focus. I need a few details to make the three questions meaningful and avoid measuring the wrong brand or audience.&quot;,&quot;chat_id&quot;:&quot;a1840990-40ca-49a6-b749-2ba15fc73ac1&quot;,&quot;guest_id&quot;:null,&quot;chat_turn_id&quot;:&quot;dfd50acb-be23-44b0-b99b</pre>
+                <pre class="resp-box">{&quot;status&quot;:true,&quot;data&quot;:{&quot;ai_message&quot;:&quot;That focus is clear for the cold brew coffee survey. I have a few targeted questions to make the measurements actionable.&quot;,&quot;chat_id&quot;:&quot;4cf0621e-5b00-442b-9191-aa54062c6dd4&quot;,&quot;guest_id&quot;:null,&quot;chat_turn_id&quot;:&quot;21e5f8e4-76b7-43d6-86bf-0a37ca3d05d5&quot;,&quot;chat_name&quot;:&quot;New Chat</pre>
               </div>
             </div>
           </details>
         </td>
-        <td><code>6804ms</code></td>
+        <td><code>5371ms</code></td>
       </tr>
     
       <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="AI Workspace">
@@ -318,7 +318,7 @@
             <div class="detail-block">
               <p><strong>Pre-conditions:</strong> Chat campaign exists in database.</p>
               <p><strong>Steps:</strong></p>
-              <ul><li><strong>Step 1:</strong> Send HTTP GET <code>https://devapi-ai.hercules.works/api/chats/a1840990-40ca-49a6-b749-2ba15fc73ac1</code> </li></ul>
+              <ul><li><strong>Step 1:</strong> Send HTTP GET <code>https://devapi-ai.hercules.works/api/chats/4cf0621e-5b00-442b-9191-aa54062c6dd4</code> </li></ul>
               <div class="grid-2">
                 <div>
                   <strong>Expected Result:</strong>
@@ -326,17 +326,17 @@
                 </div>
                 <div>
                   <strong>Actual Result:</strong>
-                  <div class="code-box act">HTTP 200 OK. Chat Name: "New Chat (2026-08-28 12:40)". Latency: 197ms.</div>
+                  <div class="code-box act">HTTP 200 OK. Chat Name: "New Chat (2026-08-28 13:17)". Latency: 168ms.</div>
                 </div>
               </div>
               <div style="margin-top:8px;">
                 <strong>Live JSON Response Excerpt:</strong>
-                <pre class="resp-box">{&quot;status&quot;:true,&quot;data&quot;:{&quot;chat_id&quot;:&quot;a1840990-40ca-49a6-b749-2ba15fc73ac1&quot;,&quot;user_id&quot;:&quot;6a917cfe1f88f10eb7b5d325&quot;,&quot;chat_name&quot;:&quot;New Chat (2026-08-28 12:40)&quot;,&quot;super_j_survey_id&quot;:&quot;PENDING_73745dc1-d6c5-445f-85e7-64b4a14cabeb&quot;,&quot;super_j_survey_name&quot;:&quot;New Chat (2026-08-28 12:40)&quot;,&quot;businessId&quot;:&quot;6a917cfe1f88f10e</pre>
+                <pre class="resp-box">{&quot;status&quot;:true,&quot;data&quot;:{&quot;chat_id&quot;:&quot;4cf0621e-5b00-442b-9191-aa54062c6dd4&quot;,&quot;user_id&quot;:&quot;6a917cfe1f88f10eb7b5d325&quot;,&quot;chat_name&quot;:&quot;New Chat (2026-08-28 13:17)&quot;,&quot;super_j_survey_id&quot;:&quot;PENDING_1e4558ff-e9ac-4d61-ac5a-690a15895282&quot;,&quot;super_j_survey_name&quot;:&quot;New Chat (2026-08-28 13:17)&quot;,&quot;businessId&quot;:&quot;6a917cfe1f88f10e</pre>
               </div>
             </div>
           </details>
         </td>
-        <td><code>197ms</code></td>
+        <td><code>168ms</code></td>
       </tr>
     
       <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Campaign Management">
@@ -353,7 +353,7 @@
             <div class="detail-block">
               <p><strong>Pre-conditions:</strong> Target chat campaign exists.</p>
               <p><strong>Steps:</strong></p>
-              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>https://devapi-ai.hercules.works/api/chats/a1840990-40ca-49a6-b749-2ba15fc73ac1/star</code> <br><em>Payload:</em> <code>{ star: true }</code></li></ul>
+              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>https://devapi-ai.hercules.works/api/chats/4cf0621e-5b00-442b-9191-aa54062c6dd4/star</code> <br><em>Payload:</em> <code>{ star: true }</code></li></ul>
               <div class="grid-2">
                 <div>
                   <strong>Expected Result:</strong>
@@ -361,17 +361,17 @@
                 </div>
                 <div>
                   <strong>Actual Result:</strong>
-                  <div class="code-box act">HTTP 200 OK. Starred: true. Latency: 193ms.</div>
+                  <div class="code-box act">HTTP 200 OK. Starred: true. Latency: 211ms.</div>
                 </div>
               </div>
               <div style="margin-top:8px;">
                 <strong>Live JSON Response Excerpt:</strong>
-                <pre class="resp-box">{&quot;status&quot;:true,&quot;data&quot;:{&quot;chat_id&quot;:&quot;a1840990-40ca-49a6-b749-2ba15fc73ac1&quot;,&quot;starred&quot;:true,&quot;message&quot;:&quot;Chat successfully starred.&quot;},&quot;message&quot;:&quot;Star status updated.&quot;,&quot;exhausted&quot;:null,&quot;require_auth&quot;:false}</pre>
+                <pre class="resp-box">{&quot;status&quot;:true,&quot;data&quot;:{&quot;chat_id&quot;:&quot;4cf0621e-5b00-442b-9191-aa54062c6dd4&quot;,&quot;starred&quot;:true,&quot;message&quot;:&quot;Chat successfully starred.&quot;},&quot;message&quot;:&quot;Star status updated.&quot;,&quot;exhausted&quot;:null,&quot;require_auth&quot;:false}</pre>
               </div>
             </div>
           </details>
         </td>
-        <td><code>193ms</code></td>
+        <td><code>211ms</code></td>
       </tr>
     
       <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Campaign Management">
@@ -388,7 +388,7 @@
             <div class="detail-block">
               <p><strong>Pre-conditions:</strong> Target chat campaign exists.</p>
               <p><strong>Steps:</strong></p>
-              <ul><li><strong>Step 1:</strong> Send HTTP PATCH <code>https://devapi-ai.hercules.works/api/chats/a1840990-40ca-49a6-b749-2ba15fc73ac1/rename</code> <br><em>Payload:</em> <code>{ new_name: &quot;Q3 Cold Brew Brand Perception Intelligence Study&quot; }</code></li></ul>
+              <ul><li><strong>Step 1:</strong> Send HTTP PATCH <code>https://devapi-ai.hercules.works/api/chats/4cf0621e-5b00-442b-9191-aa54062c6dd4/rename</code> <br><em>Payload:</em> <code>{ new_name: &quot;Q3 Cold Brew Brand Perception Intelligence Study&quot; }</code></li></ul>
               <div class="grid-2">
                 <div>
                   <strong>Expected Result:</strong>
@@ -396,17 +396,17 @@
                 </div>
                 <div>
                   <strong>Actual Result:</strong>
-                  <div class="code-box act">HTTP 200 OK. Renamed to: "Q3 Cold Brew Brand Perception Intelligence Study". Latency: 133ms.</div>
+                  <div class="code-box act">HTTP 200 OK. Renamed to: "Q3 Cold Brew Brand Perception Intelligence Study". Latency: 129ms.</div>
                 </div>
               </div>
               <div style="margin-top:8px;">
                 <strong>Live JSON Response Excerpt:</strong>
-                <pre class="resp-box">{&quot;status&quot;:true,&quot;data&quot;:{&quot;chat_id&quot;:&quot;a1840990-40ca-49a6-b749-2ba15fc73ac1&quot;,&quot;chat_name&quot;:&quot;Q3 Cold Brew Brand Perception Intelligence Study&quot;,&quot;message&quot;:&quot;Chat renamed successfully.&quot;},&quot;message&quot;:&quot;Rename operation completed.&quot;,&quot;exhausted&quot;:null,&quot;require_auth&quot;:false}</pre>
+                <pre class="resp-box">{&quot;status&quot;:true,&quot;data&quot;:{&quot;chat_id&quot;:&quot;4cf0621e-5b00-442b-9191-aa54062c6dd4&quot;,&quot;chat_name&quot;:&quot;Q3 Cold Brew Brand Perception Intelligence Study&quot;,&quot;message&quot;:&quot;Chat renamed successfully.&quot;},&quot;message&quot;:&quot;Rename operation completed.&quot;,&quot;exhausted&quot;:null,&quot;require_auth&quot;:false}</pre>
               </div>
             </div>
           </details>
         </td>
-        <td><code>133ms</code></td>
+        <td><code>129ms</code></td>
       </tr>
     
       <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Campaign Management">
@@ -431,17 +431,17 @@
                 </div>
                 <div>
                   <strong>Actual Result:</strong>
-                  <div class="code-box act">HTTP 200 OK. Total Campaigns: 5. Latency: 261ms.</div>
+                  <div class="code-box act">HTTP 200 OK. Total Campaigns: 5. Latency: 264ms.</div>
                 </div>
               </div>
               <div style="margin-top:8px;">
                 <strong>Live JSON Response Excerpt:</strong>
-                <pre class="resp-box">{&quot;status&quot;:true,&quot;data&quot;:{&quot;total_chats&quot;:5,&quot;limit&quot;:15,&quot;offset&quot;:0,&quot;starred_chats&quot;:[{&quot;id&quot;:&quot;a1840990-40ca-49a6-b749-2ba15fc73ac1&quot;,&quot;chat_name&quot;:&quot;Q3 Cold Brew Brand Perception Intelligence Study&quot;,&quot;super_j_survey_name&quot;:&quot;New Chat (2026-08-28 12:40)&quot;,&quot;updated_at&quot;:&quot;2026-08-28T12:40:37.459287Z&quot;,&quot;last_opened_at&quot;:&quot;2</pre>
+                <pre class="resp-box">{&quot;status&quot;:true,&quot;data&quot;:{&quot;total_chats&quot;:5,&quot;limit&quot;:15,&quot;offset&quot;:0,&quot;starred_chats&quot;:[{&quot;id&quot;:&quot;4cf0621e-5b00-442b-9191-aa54062c6dd4&quot;,&quot;chat_name&quot;:&quot;Q3 Cold Brew Brand Perception Intelligence Study&quot;,&quot;super_j_survey_name&quot;:&quot;New Chat (2026-08-28 13:17)&quot;,&quot;updated_at&quot;:&quot;2026-08-28T13:17:46.586820Z&quot;,&quot;last_opened_at&quot;:&quot;2</pre>
               </div>
             </div>
           </details>
         </td>
-        <td><code>261ms</code></td>
+        <td><code>264ms</code></td>
       </tr>
     
       <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Campaign Management">
@@ -458,7 +458,7 @@
             <div class="detail-block">
               <p><strong>Pre-conditions:</strong> Target chat campaign was created.</p>
               <p><strong>Steps:</strong></p>
-              <ul><li><strong>Step 1:</strong> Send HTTP DELETE <code>https://devapi-ai.hercules.works/api/chats/a1840990-40ca-49a6-b749-2ba15fc73ac1</code> </li></ul>
+              <ul><li><strong>Step 1:</strong> Send HTTP DELETE <code>https://devapi-ai.hercules.works/api/chats/4cf0621e-5b00-442b-9191-aa54062c6dd4</code> </li></ul>
               <div class="grid-2">
                 <div>
                   <strong>Expected Result:</strong>
@@ -466,17 +466,17 @@
                 </div>
                 <div>
                   <strong>Actual Result:</strong>
-                  <div class="code-box act">HTTP 200 OK. Purged Chat ID: a1840990-40ca-49a6-b749-2ba15fc73ac1. Latency: 150ms.</div>
+                  <div class="code-box act">HTTP 200 OK. Purged Chat ID: 4cf0621e-5b00-442b-9191-aa54062c6dd4. Latency: 146ms.</div>
                 </div>
               </div>
               <div style="margin-top:8px;">
                 <strong>Live JSON Response Excerpt:</strong>
-                <pre class="resp-box">{&quot;status&quot;:true,&quot;data&quot;:{&quot;message&quot;:&quot;Delete operation completed. Deleted 1 chat(s). Skipped 0 ineligible chat(s).&quot;,&quot;deleted_chat_ids&quot;:[&quot;a1840990-40ca-49a6-b749-2ba15fc73ac1&quot;],&quot;failed_chat_ids&quot;:[]},&quot;message&quot;:null,&quot;exhausted&quot;:null,&quot;require_auth&quot;:false}</pre>
+                <pre class="resp-box">{&quot;status&quot;:true,&quot;data&quot;:{&quot;message&quot;:&quot;Delete operation completed. Deleted 1 chat(s). Skipped 0 ineligible chat(s).&quot;,&quot;deleted_chat_ids&quot;:[&quot;4cf0621e-5b00-442b-9191-aa54062c6dd4&quot;],&quot;failed_chat_ids&quot;:[]},&quot;message&quot;:null,&quot;exhausted&quot;:null,&quot;require_auth&quot;:false}</pre>
               </div>
             </div>
           </details>
         </td>
-        <td><code>150ms</code></td>
+        <td><code>146ms</code></td>
       </tr>
     
       <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Audience & Demographics">
@@ -501,7 +501,7 @@
                 </div>
                 <div>
                   <strong>Actual Result:</strong>
-                  <div class="code-box act">HTTP 200 OK. Tier 1 Cities: 7. Latency: 231ms.</div>
+                  <div class="code-box act">HTTP 200 OK. Tier 1 Cities: 7. Latency: 135ms.</div>
                 </div>
               </div>
               <div style="margin-top:8px;">
@@ -511,7 +511,7 @@
             </div>
           </details>
         </td>
-        <td><code>231ms</code></td>
+        <td><code>135ms</code></td>
       </tr>
     
       <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Audience & Demographics">
@@ -536,7 +536,7 @@
                 </div>
                 <div>
                   <strong>Actual Result:</strong>
-                  <div class="code-box act">HTTP 200 OK. Preset Templates: 9. Latency: 139ms.</div>
+                  <div class="code-box act">HTTP 200 OK. Preset Templates: 9. Latency: 63ms.</div>
                 </div>
               </div>
               <div style="margin-top:8px;">
@@ -546,7 +546,7 @@
             </div>
           </details>
         </td>
-        <td><code>139ms</code></td>
+        <td><code>63ms</code></td>
       </tr>
     
       <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Credits & Billing">
@@ -571,7 +571,7 @@
                 </div>
                 <div>
                   <strong>Actual Result:</strong>
-                  <div class="code-box act">HTTP 200 OK. Latency: 133ms. Response: {"data":{"age":{"18-24":1,"24-35":1,"35-45":1,"45-55":2,"56-90":2},"aiGeneration":{"description":"AI Survey Generator pr</div>
+                  <div class="code-box act">HTTP 200 OK. Latency: 47ms. Response: {"data":{"age":{"18-24":1,"24-35":1,"35-45":1,"45-55":2,"56-90":2},"aiGeneration":{"description":"AI Survey Generator pr</div>
                 </div>
               </div>
               <div style="margin-top:8px;">
@@ -581,7 +581,7 @@
             </div>
           </details>
         </td>
-        <td><code>133ms</code></td>
+        <td><code>47ms</code></td>
       </tr>
     
       <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Credits & Billing">
@@ -606,7 +606,7 @@
                 </div>
                 <div>
                   <strong>Actual Result:</strong>
-                  <div class="code-box act">HTTP 200 OK. Available Credits: 0. Latency: 134ms.</div>
+                  <div class="code-box act">HTTP 200 OK. Available Credits: 0. Latency: 70ms.</div>
                 </div>
               </div>
               <div style="margin-top:8px;">
@@ -616,7 +616,7 @@
             </div>
           </details>
         </td>
-        <td><code>134ms</code></td>
+        <td><code>70ms</code></td>
       </tr>
     
       <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Credits & Billing">
@@ -641,17 +641,17 @@
                 </div>
                 <div>
                   <strong>Actual Result:</strong>
-                  <div class="code-box act">HTTP 200 OK. Free Limit: 100 users. Latency: 134ms.</div>
+                  <div class="code-box act">HTTP 200 OK. Free Limit: 100 users. Latency: 59ms.</div>
                 </div>
               </div>
               <div style="margin-top:8px;">
                 <strong>Live JSON Response Excerpt:</strong>
-                <pre class="resp-box">{&quot;data&quot;:{&quot;account&quot;:{&quot;_id&quot;:&quot;6a917d141f88f10eb7b5d327&quot;,&quot;businessId&quot;:&quot;6a917cfe1f88f10eb7b5d325&quot;,&quot;totalCredits&quot;:0,&quot;usedCredits&quot;:0,&quot;availableCredits&quot;:0,&quot;freeCampaignUserlimit&quot;:100,&quot;isActive&quot;:true,&quot;createdAt&quot;:&quot;2026-08-28T12:20:36.288Z&quot;,&quot;updatedAt&quot;:&quot;2026-08-28T12:20:36.288Z&quot;},&quot;availableCredits&quot;:0,&quot;equivale</pre>
+                <pre class="resp-box">{&quot;data&quot;:{&quot;account&quot;:{&quot;_id&quot;:&quot;6a917d141f88f10eb7b5d327&quot;,&quot;businessId&quot;:&quot;6a917cfe1f88f10eb7b5d325&quot;,&quot;totalCredits&quot;:0,&quot;usedCredits&quot;:0,&quot;availableCredits&quot;:0,&quot;freeCampaignUserlimit&quot;:100,&quot;isActive&quot;:true,&quot;createdAt&quot;:&quot;2026-08-28T12:20:36.288Z&quot;,&quot;updatedAt&quot;:&quot;2026-08-28T13:17:16.993Z&quot;},&quot;availableCredits&quot;:0,&quot;equivale</pre>
               </div>
             </div>
           </details>
         </td>
-        <td><code>134ms</code></td>
+        <td><code>59ms</code></td>
       </tr>
     
       <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Credits & Billing">
@@ -676,7 +676,7 @@
                 </div>
                 <div>
                   <strong>Actual Result:</strong>
-                  <div class="code-box act">HTTP 200 OK. Plan Packages: 5. Latency: 127ms.</div>
+                  <div class="code-box act">HTTP 200 OK. Plan Packages: 5. Latency: 133ms.</div>
                 </div>
               </div>
               <div style="margin-top:8px;">
@@ -686,11 +686,116 @@
             </div>
           </details>
         </td>
-        <td><code>127ms</code></td>
+        <td><code>133ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Credits & Billing">
+        <td><strong>17</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-BILL-05</code></td>
+        <td><strong>Credits & Billing</strong></td>
+        <td>
+          <div class="test-title">Initiate Credit Purchase & Plan Upgrade Order [POST /V2/payments/create-order]</div>
+          <div class="test-scenario">Verify that user can initiate purchase orders and receive gateway orderId & currency calculation.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Real Payload Response</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> User selects 100 Credits package.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>https://devapi.hercules.works/V2/payments/create-order</code> <br><em>Payload:</em> <code>{&quot;type&quot;:&quot;BUY_MORE&quot;,&quot;buyMorePlanId&quot;:&quot;buy_100&quot;,&quot;credits&quot;:100}</code></li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200 OK with JSON { success: true, data: { razorpayOrderId, amount, credits: 100 } }.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 200 OK. Razorpay Order: order_TVCfSgxxdFG4mU (₹1180). Latency: 111ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Live JSON Response Excerpt:</strong>
+                <pre class="resp-box">{&quot;data&quot;:{&quot;orderId&quot;:&quot;6a918a7b1f88f10eb7b5d35f&quot;,&quot;razorpayOrderId&quot;:&quot;order_TVCfSgxxdFG4mU&quot;,&quot;amount&quot;:118000,&quot;currency&quot;:&quot;INR&quot;,&quot;credits&quot;:100,&quot;keyId&quot;:&quot;rzp_test_S07wVU2qwWdH1y&quot;},&quot;message&quot;:&quot;Order created successfully&quot;,&quot;success&quot;:true}</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>111ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Credits & Billing">
+        <td><strong>18</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-BILL-06</code></td>
+        <td><strong>Credits & Billing</strong></td>
+        <td>
+          <div class="test-title">Retrieve Active Subscription Plan & Validity [GET /V2/credits/subscription]</div>
+          <div class="test-scenario">Verify that current organization subscription plan (tierType, validityDays, autoRenew) is queryable.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Real Payload Response</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> User has active account.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP GET <code>https://devapi.hercules.works/V2/credits/subscription</code> </li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200 OK with JSON { data: { tierType: "FREE", validityDays: 30, isActive: true } }.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 200 OK. Tier: FREE (Valid: 30 days). Latency: 55ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Live JSON Response Excerpt:</strong>
+                <pre class="resp-box">{&quot;data&quot;:{&quot;_id&quot;:&quot;6a917d141f88f10eb7b5d328&quot;,&quot;businessId&quot;:&quot;6a917cfe1f88f10eb7b5d325&quot;,&quot;tierType&quot;:&quot;FREE&quot;,&quot;creditAllocation&quot;:0,&quot;validityDays&quot;:30,&quot;priceInr&quot;:0,&quot;startDate&quot;:&quot;2026-08-28T12:20:36.288Z&quot;,&quot;endDate&quot;:&quot;2026-11-28T12:20:36.288Z&quot;,&quot;isActive&quot;:true,&quot;autoRenew&quot;:true,&quot;createdAt&quot;:&quot;2026-08-28T12:20:36.295Z&quot;,</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>55ms</code></td>
+      </tr>
+    
+      <tr class="test-row" data-type="POSITIVE" data-status="PASS" data-module="Credits & Billing">
+        <td><strong>19</strong></td>
+        <td><span class="badge badge-pass">PASS</span></td>
+        <td><span class="badge badge-pos">POSITIVE</span></td>
+        <td><code>TC-BILL-07</code></td>
+        <td><strong>Credits & Billing</strong></td>
+        <td>
+          <div class="test-title">Execute Credit Deduction for Deployment [POST /V2/credits/deduct]</div>
+          <div class="test-scenario">Verify that credit deduction engine processes deployment balances correctly.</div>
+          <details class="test-details">
+            <summary>View Steps, Pre-conditions & Real Payload Response</summary>
+            <div class="detail-block">
+              <p><strong>Pre-conditions:</strong> User executes campaign deployment.</p>
+              <p><strong>Steps:</strong></p>
+              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>https://devapi.hercules.works/V2/credits/deduct</code> <br><em>Payload:</em> <code>{ audienceSize: 10 }</code></li></ul>
+              <div class="grid-2">
+                <div>
+                  <strong>Expected Result:</strong>
+                  <div class="code-box exp">HTTP 200 OK with JSON { success: true, data: { freeTierUsed, newBalance } }.</div>
+                </div>
+                <div>
+                  <strong>Actual Result:</strong>
+                  <div class="code-box act">HTTP 200 OK. Message: "Free tier deployment successful". Latency: 70ms.</div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <strong>Live JSON Response Excerpt:</strong>
+                <pre class="resp-box">{&quot;data&quot;:{&quot;audienceSize&quot;:0,&quot;freeTierUsed&quot;:true,&quot;newBalance&quot;:0},&quot;message&quot;:&quot;Free tier deployment successful&quot;,&quot;success&quot;:true}</pre>
+              </div>
+            </div>
+          </details>
+        </td>
+        <td><code>70ms</code></td>
       </tr>
     
       <tr class="test-row" data-type="NEGATIVE" data-status="PASS" data-module="Security & Rejection Gates">
-        <td><strong>17</strong></td>
+        <td><strong>20</strong></td>
         <td><span class="badge badge-pass">PASS</span></td>
         <td><span class="badge badge-neg">NEGATIVE</span></td>
         <td><code>TC-SEC-01</code></td>
@@ -725,7 +830,7 @@
       </tr>
     
       <tr class="test-row" data-type="NEGATIVE" data-status="PASS" data-module="Security & Rejection Gates">
-        <td><strong>18</strong></td>
+        <td><strong>21</strong></td>
         <td><span class="badge badge-pass">PASS</span></td>
         <td><span class="badge badge-neg">NEGATIVE</span></td>
         <td><code>TC-SEC-02</code></td>
@@ -760,7 +865,7 @@
       </tr>
     
       <tr class="test-row" data-type="NEGATIVE" data-status="PASS" data-module="Security & Rejection Gates">
-        <td><strong>19</strong></td>
+        <td><strong>22</strong></td>
         <td><span class="badge badge-pass">PASS</span></td>
         <td><span class="badge badge-neg">NEGATIVE</span></td>
         <td><code>TC-SEC-03</code></td>
@@ -781,7 +886,7 @@
                 </div>
                 <div>
                   <strong>Actual Result:</strong>
-                  <div class="code-box act">HTTP 403 Forbidden. Latency: 125ms.</div>
+                  <div class="code-box act">HTTP 403 Forbidden. Latency: 133ms.</div>
                 </div>
               </div>
               <div style="margin-top:8px;">
@@ -791,32 +896,32 @@
             </div>
           </details>
         </td>
-        <td><code>125ms</code></td>
+        <td><code>133ms</code></td>
       </tr>
     
       <tr class="test-row" data-type="NEGATIVE" data-status="PASS" data-module="Security & Rejection Gates">
-        <td><strong>20</strong></td>
+        <td><strong>23</strong></td>
         <td><span class="badge badge-pass">PASS</span></td>
         <td><span class="badge badge-neg">NEGATIVE</span></td>
         <td><code>TC-SEC-04</code></td>
         <td><strong>Security & Rejection Gates</strong></td>
         <td>
           <div class="test-title">OWASP Account Enumeration Defense Gate [POST /V2/auth/pwd-login]</div>
-          <div class="test-scenario">Verify that invalid login attempts trigger generic envelope to prevent user enumeration.</div>
+          <div class="test-scenario">Verify that invalid login attempts trigger generic envelope or rejection to prevent user enumeration.</div>
           <details class="test-details">
             <summary>View Steps, Pre-conditions & Real Payload Response</summary>
             <div class="detail-block">
               <p><strong>Pre-conditions:</strong> Non-existent user email provided.</p>
               <p><strong>Steps:</strong></p>
-              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>https://devapi.hercules.works/V2/auth/pwd-login</code> <br><em>Payload:</em> <code>{ email: &quot;non_existent@domain.com&quot;, password: &quot;...&quot; }</code></li></ul>
+              <ul><li><strong>Step 1:</strong> Send HTTP POST <code>https://devapi.hercules.works/V2/auth/pwd-login</code> <br><em>Payload:</em> <code>{ email: &quot;probe_user_1787923068025@security-gate-test.com&quot;, password: &quot;...&quot; }</code></li></ul>
               <div class="grid-2">
                 <div>
                   <strong>Expected Result:</strong>
-                  <div class="code-box exp">HTTP 200 OK Generic Anti-Enumeration Envelope ("If eligible, instructions sent").</div>
+                  <div class="code-box exp">HTTP 200 OK Generic Anti-Enumeration Envelope or Handled Rejection.</div>
                 </div>
                 <div>
                   <strong>Actual Result:</strong>
-                  <div class="code-box act">HTTP 200 OK. Envelope Message: "If eligible, we've sent instructions to your email.". Latency: 913ms.</div>
+                  <div class="code-box act">HTTP 200 OK. Response: {"success":true,"status":true,"data":{"message":"If eligible, we've sent instructions to your email.. Latency: 1965ms.</div>
                 </div>
               </div>
               <div style="margin-top:8px;">
@@ -826,7 +931,7 @@
             </div>
           </details>
         </td>
-        <td><code>913ms</code></td>
+        <td><code>1965ms</code></td>
       </tr>
     
       </tbody>

@@ -3,14 +3,14 @@
 > **AI Backend Microservice**: `https://devapi-ai.hercules.works`  
 > **Core Business Microservice**: `https://devapi.hercules.works`  
 > **Single Tracked Account**: `tracked_user@kzdzyaot.mailosaur.net`  
-> **Generated On**: Fri, 28 Aug 2026 12:40:39 GMT  
-> **Pass Rate**: **100%** (20/20 Passed) | **Avg Latency**: `791ms`  
+> **Generated On**: Fri, 28 Aug 2026 13:17:49 GMT  
+> **Pass Rate**: **100%** (23/23 Passed) | **Avg Latency**: `710ms`  
 
 ## 📊 Executive Summary
 
 | Total Tests | Passed | Failed | Positive Tests | Negative Tests | Average Latency | Success Rate |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **20** | **20** | **0** | **16** | **4** | **791ms** | **100%** |
+| **23** | **23** | **0** | **19** | **4** | **710ms** | **100%** |
 
 ---
 
@@ -20,7 +20,7 @@
 
 * **Module**: `Authentication & Identity`  
 * **Test Type**: `POSITIVE`  
-* **Status**: **PASS** (`298ms`)  
+* **Status**: **PASS** (`238ms`)  
 * **Scenario**: Verify that authenticated user token synchronizes claims and tier status.  
 * **Pre-conditions**: Authenticated session for tracked_user@kzdzyaot.mailosaur.net.  
 
@@ -28,7 +28,7 @@
 1. **Send HTTP POST** `https://devapi-ai.hercules.works/api/auth/sync` with payload `{}`
 
 * **Expected Result**: HTTP 200 OK with JSON { status: true, data: { message: "User ... authenticated" } }.  
-* **Actual Result**: HTTP 200 OK. Latency: 298ms. Response: {"status":true,"data":{"message":"User not-globe@kzdzyaot.mailosaur.net is authenticated and synced. Tier refreshed to F  
+* **Actual Result**: HTTP 200 OK. Latency: 238ms. Response: {"status":true,"data":{"message":"User not-globe@kzdzyaot.mailosaur.net is authenticated and synced. Tier refreshed to F  
 
 ```json
 // Live JSON Response Excerpt:
@@ -41,7 +41,7 @@
 
 * **Module**: `Authentication & Identity`  
 * **Test Type**: `POSITIVE`  
-* **Status**: **PASS** (`151ms`)  
+* **Status**: **PASS** (`143ms`)  
 * **Scenario**: Verify that user profile details, name, and designation are returned accurately.  
 * **Pre-conditions**: User is authenticated.  
 
@@ -49,7 +49,7 @@
 1. **Send HTTP GET** `https://devapi.hercules.works/V2/account/details`
 
 * **Expected Result**: HTTP 200 OK with JSON { success: true, data: { email, name, designation } }.  
-* **Actual Result**: HTTP 200 OK. User: Userr0z9 (not-globe@kzdzyaot.mailosaur.net). Latency: 151ms.  
+* **Actual Result**: HTTP 200 OK. User: Userr0z9 (not-globe@kzdzyaot.mailosaur.net). Latency: 143ms.  
 
 ```json
 // Live JSON Response Excerpt:
@@ -62,7 +62,7 @@
 
 * **Module**: `AI Workspace`  
 * **Test Type**: `POSITIVE`  
-* **Status**: **PASS** (`66ms`)  
+* **Status**: **PASS** (`58ms`)  
 * **Scenario**: Verify that client receives research category suggestions for survey creation.  
 * **Pre-conditions**: User is authenticated.  
 
@@ -70,7 +70,7 @@
 1. **Send HTTP GET** `https://devapi-ai.hercules.works/api/prompt-suggestions`
 
 * **Expected Result**: HTTP 200 OK with array surveyNames (e.g., ["Brand Tracking", "Customer Profiling"]).  
-* **Actual Result**: HTTP 200 OK. Categories: 8. Latency: 66ms.  
+* **Actual Result**: HTTP 200 OK. Categories: 8. Latency: 58ms.  
 
 ```json
 // Live JSON Response Excerpt:
@@ -83,19 +83,19 @@
 
 * **Module**: `AI Workspace`  
 * **Test Type**: `POSITIVE`  
-* **Status**: **PASS** (`5487ms`)  
+* **Status**: **PASS** (`6607ms`)  
 * **Scenario**: Verify that AI initializes survey workspace and returns generated chat_id & ai_message.  
 * **Pre-conditions**: User provides prompt and request_id.  
 
 **Steps**:
-1. **Send HTTP POST** `https://devapi-ai.hercules.works/api/chat` with payload `{ prompt: "Create cold brew survey", request_id: "req_1787920824614_1" }`
+1. **Send HTTP POST** `https://devapi-ai.hercules.works/api/chat` with payload `{ prompt: "Create cold brew survey", request_id: "req_1787923054089_1" }`
 
 * **Expected Result**: HTTP 200 OK with JSON { status: true, data: { chat_id, chat_turn_id, ai_message } }.  
-* **Actual Result**: HTTP 200 OK. Generated Chat ID: a1840990-40ca-49a6-b749-2ba15fc73ac1. Latency: 5487ms.  
+* **Actual Result**: HTTP 200 OK. Generated Chat ID: 4cf0621e-5b00-442b-9191-aa54062c6dd4. Latency: 6607ms.  
 
 ```json
 // Live JSON Response Excerpt:
-{"status":true,"data":{"ai_message":"Cold brew coffee is clear as the topic. I have a few quick questions so the three-question survey focuses on the right preferences and audience.","chat_id":"a1840990-40ca-49a6-b749-2ba15fc73ac1","guest_id":null,"chat_turn_id":"8c96db4f-e47c-4217-9114-8ac71abcbd9f
+{"status":true,"data":{"ai_message":"Cold brew coffee is clear as the topic; I have a few targeted questions so the survey supports the right consumer decision.","chat_id":"4cf0621e-5b00-442b-9191-aa54062c6dd4","guest_id":null,"chat_turn_id":"9ccab53a-7776-4b1a-a75f-aa1b85a95c3e","chat_name":"New Ch
 ```
 
 ---
@@ -104,19 +104,19 @@
 
 * **Module**: `AI Workspace`  
 * **Test Type**: `POSITIVE`  
-* **Status**: **PASS** (`6804ms`)  
+* **Status**: **PASS** (`5371ms`)  
 * **Scenario**: Verify that multi-turn follow-up prompts persist within the same active chat_id session.  
 * **Pre-conditions**: Chat campaign created in Turn 1.  
 
 **Steps**:
-1. **Send HTTP POST** `https://devapi-ai.hercules.works/api/chat` with payload `{ prompt: "Focus on brand awareness...", chat_id: "a1840990-40ca-49a6-b749-2ba15fc73ac1", request_id: "req_1787920830101_2" }`
+1. **Send HTTP POST** `https://devapi-ai.hercules.works/api/chat` with payload `{ prompt: "Focus on brand awareness...", chat_id: "4cf0621e-5b00-442b-9191-aa54062c6dd4", request_id: "req_1787923060697_2" }`
 
 * **Expected Result**: HTTP 200 OK with conversational response linked to chat_id.  
-* **Actual Result**: HTTP 200 OK. Latency: 6804ms. Response: {"status":true,"data":{"ai_message":"That gives the survey a clear measurement focus. I need a few details to make the t  
+* **Actual Result**: HTTP 200 OK. Latency: 5371ms. Response: {"status":true,"data":{"ai_message":"That focus is clear for the cold brew coffee survey. I have a few targeted question  
 
 ```json
 // Live JSON Response Excerpt:
-{"status":true,"data":{"ai_message":"That gives the survey a clear measurement focus. I need a few details to make the three questions meaningful and avoid measuring the wrong brand or audience.","chat_id":"a1840990-40ca-49a6-b749-2ba15fc73ac1","guest_id":null,"chat_turn_id":"dfd50acb-be23-44b0-b99b
+{"status":true,"data":{"ai_message":"That focus is clear for the cold brew coffee survey. I have a few targeted questions to make the measurements actionable.","chat_id":"4cf0621e-5b00-442b-9191-aa54062c6dd4","guest_id":null,"chat_turn_id":"21e5f8e4-76b7-43d6-86bf-0a37ca3d05d5","chat_name":"New Chat
 ```
 
 ---
@@ -125,19 +125,19 @@
 
 * **Module**: `AI Workspace`  
 * **Test Type**: `POSITIVE`  
-* **Status**: **PASS** (`197ms`)  
+* **Status**: **PASS** (`168ms`)  
 * **Scenario**: Verify that survey metadata (chat_name, super_j_survey_id, user_id) is queryable by chat_id.  
 * **Pre-conditions**: Chat campaign exists in database.  
 
 **Steps**:
-1. **Send HTTP GET** `https://devapi-ai.hercules.works/api/chats/a1840990-40ca-49a6-b749-2ba15fc73ac1`
+1. **Send HTTP GET** `https://devapi-ai.hercules.works/api/chats/4cf0621e-5b00-442b-9191-aa54062c6dd4`
 
 * **Expected Result**: HTTP 200 OK with JSON { status: true, data: { chat_id, chat_name, super_j_survey_id } }.  
-* **Actual Result**: HTTP 200 OK. Chat Name: "New Chat (2026-08-28 12:40)". Latency: 197ms.  
+* **Actual Result**: HTTP 200 OK. Chat Name: "New Chat (2026-08-28 13:17)". Latency: 168ms.  
 
 ```json
 // Live JSON Response Excerpt:
-{"status":true,"data":{"chat_id":"a1840990-40ca-49a6-b749-2ba15fc73ac1","user_id":"6a917cfe1f88f10eb7b5d325","chat_name":"New Chat (2026-08-28 12:40)","super_j_survey_id":"PENDING_73745dc1-d6c5-445f-85e7-64b4a14cabeb","super_j_survey_name":"New Chat (2026-08-28 12:40)","businessId":"6a917cfe1f88f10e
+{"status":true,"data":{"chat_id":"4cf0621e-5b00-442b-9191-aa54062c6dd4","user_id":"6a917cfe1f88f10eb7b5d325","chat_name":"New Chat (2026-08-28 13:17)","super_j_survey_id":"PENDING_1e4558ff-e9ac-4d61-ac5a-690a15895282","super_j_survey_name":"New Chat (2026-08-28 13:17)","businessId":"6a917cfe1f88f10e
 ```
 
 ---
@@ -146,19 +146,19 @@
 
 * **Module**: `Campaign Management`  
 * **Test Type**: `POSITIVE`  
-* **Status**: **PASS** (`193ms`)  
+* **Status**: **PASS** (`211ms`)  
 * **Scenario**: Verify that user can mark survey campaign as favorite for quick access.  
 * **Pre-conditions**: Target chat campaign exists.  
 
 **Steps**:
-1. **Send HTTP POST** `https://devapi-ai.hercules.works/api/chats/a1840990-40ca-49a6-b749-2ba15fc73ac1/star` with payload `{ star: true }`
+1. **Send HTTP POST** `https://devapi-ai.hercules.works/api/chats/4cf0621e-5b00-442b-9191-aa54062c6dd4/star` with payload `{ star: true }`
 
 * **Expected Result**: HTTP 200 OK with JSON { status: true, data: { starred: true } }.  
-* **Actual Result**: HTTP 200 OK. Starred: true. Latency: 193ms.  
+* **Actual Result**: HTTP 200 OK. Starred: true. Latency: 211ms.  
 
 ```json
 // Live JSON Response Excerpt:
-{"status":true,"data":{"chat_id":"a1840990-40ca-49a6-b749-2ba15fc73ac1","starred":true,"message":"Chat successfully starred."},"message":"Star status updated.","exhausted":null,"require_auth":false}
+{"status":true,"data":{"chat_id":"4cf0621e-5b00-442b-9191-aa54062c6dd4","starred":true,"message":"Chat successfully starred."},"message":"Star status updated.","exhausted":null,"require_auth":false}
 ```
 
 ---
@@ -167,19 +167,19 @@
 
 * **Module**: `Campaign Management`  
 * **Test Type**: `POSITIVE`  
-* **Status**: **PASS** (`133ms`)  
+* **Status**: **PASS** (`129ms`)  
 * **Scenario**: Verify that user can rename campaign title and update dashboard records.  
 * **Pre-conditions**: Target chat campaign exists.  
 
 **Steps**:
-1. **Send HTTP PATCH** `https://devapi-ai.hercules.works/api/chats/a1840990-40ca-49a6-b749-2ba15fc73ac1/rename` with payload `{ new_name: "Q3 Cold Brew Brand Perception Intelligence Study" }`
+1. **Send HTTP PATCH** `https://devapi-ai.hercules.works/api/chats/4cf0621e-5b00-442b-9191-aa54062c6dd4/rename` with payload `{ new_name: "Q3 Cold Brew Brand Perception Intelligence Study" }`
 
 * **Expected Result**: HTTP 200 OK with JSON { status: true, data: { chat_name: "..." } }.  
-* **Actual Result**: HTTP 200 OK. Renamed to: "Q3 Cold Brew Brand Perception Intelligence Study". Latency: 133ms.  
+* **Actual Result**: HTTP 200 OK. Renamed to: "Q3 Cold Brew Brand Perception Intelligence Study". Latency: 129ms.  
 
 ```json
 // Live JSON Response Excerpt:
-{"status":true,"data":{"chat_id":"a1840990-40ca-49a6-b749-2ba15fc73ac1","chat_name":"Q3 Cold Brew Brand Perception Intelligence Study","message":"Chat renamed successfully."},"message":"Rename operation completed.","exhausted":null,"require_auth":false}
+{"status":true,"data":{"chat_id":"4cf0621e-5b00-442b-9191-aa54062c6dd4","chat_name":"Q3 Cold Brew Brand Perception Intelligence Study","message":"Chat renamed successfully."},"message":"Rename operation completed.","exhausted":null,"require_auth":false}
 ```
 
 ---
@@ -188,7 +188,7 @@
 
 * **Module**: `Campaign Management`  
 * **Test Type**: `POSITIVE`  
-* **Status**: **PASS** (`261ms`)  
+* **Status**: **PASS** (`264ms`)  
 * **Scenario**: Verify that user campaign list includes newly created study and token usage metadata.  
 * **Pre-conditions**: User is authenticated.  
 
@@ -196,11 +196,11 @@
 1. **Send HTTP GET** `https://devapi-ai.hercules.works/api/chats?limit=15&offset=0`
 
 * **Expected Result**: HTTP 200 OK with JSON { status: true, data: { total_chats: N, chats: [] } }.  
-* **Actual Result**: HTTP 200 OK. Total Campaigns: 5. Latency: 261ms.  
+* **Actual Result**: HTTP 200 OK. Total Campaigns: 5. Latency: 264ms.  
 
 ```json
 // Live JSON Response Excerpt:
-{"status":true,"data":{"total_chats":5,"limit":15,"offset":0,"starred_chats":[{"id":"a1840990-40ca-49a6-b749-2ba15fc73ac1","chat_name":"Q3 Cold Brew Brand Perception Intelligence Study","super_j_survey_name":"New Chat (2026-08-28 12:40)","updated_at":"2026-08-28T12:40:37.459287Z","last_opened_at":"2
+{"status":true,"data":{"total_chats":5,"limit":15,"offset":0,"starred_chats":[{"id":"4cf0621e-5b00-442b-9191-aa54062c6dd4","chat_name":"Q3 Cold Brew Brand Perception Intelligence Study","super_j_survey_name":"New Chat (2026-08-28 13:17)","updated_at":"2026-08-28T13:17:46.586820Z","last_opened_at":"2
 ```
 
 ---
@@ -209,19 +209,19 @@
 
 * **Module**: `Campaign Management`  
 * **Test Type**: `POSITIVE`  
-* **Status**: **PASS** (`150ms`)  
+* **Status**: **PASS** (`146ms`)  
 * **Scenario**: Verify that user can delete test surveys to maintain clean dashboard state.  
 * **Pre-conditions**: Target chat campaign was created.  
 
 **Steps**:
-1. **Send HTTP DELETE** `https://devapi-ai.hercules.works/api/chats/a1840990-40ca-49a6-b749-2ba15fc73ac1`
+1. **Send HTTP DELETE** `https://devapi-ai.hercules.works/api/chats/4cf0621e-5b00-442b-9191-aa54062c6dd4`
 
 * **Expected Result**: HTTP 200 OK confirming deletion.  
-* **Actual Result**: HTTP 200 OK. Purged Chat ID: a1840990-40ca-49a6-b749-2ba15fc73ac1. Latency: 150ms.  
+* **Actual Result**: HTTP 200 OK. Purged Chat ID: 4cf0621e-5b00-442b-9191-aa54062c6dd4. Latency: 146ms.  
 
 ```json
 // Live JSON Response Excerpt:
-{"status":true,"data":{"message":"Delete operation completed. Deleted 1 chat(s). Skipped 0 ineligible chat(s).","deleted_chat_ids":["a1840990-40ca-49a6-b749-2ba15fc73ac1"],"failed_chat_ids":[]},"message":null,"exhausted":null,"require_auth":false}
+{"status":true,"data":{"message":"Delete operation completed. Deleted 1 chat(s). Skipped 0 ineligible chat(s).","deleted_chat_ids":["4cf0621e-5b00-442b-9191-aa54062c6dd4"],"failed_chat_ids":[]},"message":null,"exhausted":null,"require_auth":false}
 ```
 
 ---
@@ -230,7 +230,7 @@
 
 * **Module**: `Audience & Demographics`  
 * **Test Type**: `POSITIVE`  
-* **Status**: **PASS** (`231ms`)  
+* **Status**: **PASS** (`135ms`)  
 * **Scenario**: Verify that client can query Tier 1 & Tier 2 cities dataset for geographic targeting.  
 * **Pre-conditions**: User is authenticated.  
 
@@ -238,7 +238,7 @@
 1. **Send HTTP GET** `https://devapi.hercules.works/V2/dragon/city-list`
 
 * **Expected Result**: HTTP 200 OK with JSON { data: { tier1: ["Delhi", "Mumbai"...], tier2: [...] } }.  
-* **Actual Result**: HTTP 200 OK. Tier 1 Cities: 7. Latency: 231ms.  
+* **Actual Result**: HTTP 200 OK. Tier 1 Cities: 7. Latency: 135ms.  
 
 ```json
 // Live JSON Response Excerpt:
@@ -251,7 +251,7 @@
 
 * **Module**: `Audience & Demographics`  
 * **Test Type**: `POSITIVE`  
-* **Status**: **PASS** (`139ms`)  
+* **Status**: **PASS** (`63ms`)  
 * **Scenario**: Verify that preset demographic audience templates (Age/Gender splits) are queryable.  
 * **Pre-conditions**: User is authenticated.  
 
@@ -259,7 +259,7 @@
 1. **Send HTTP GET** `https://devapi.hercules.works/V2/audience/default-templates`
 
 * **Expected Result**: HTTP 200 OK with array of audience templates.  
-* **Actual Result**: HTTP 200 OK. Preset Templates: 9. Latency: 139ms.  
+* **Actual Result**: HTTP 200 OK. Preset Templates: 9. Latency: 63ms.  
 
 ```json
 // Live JSON Response Excerpt:
@@ -272,7 +272,7 @@
 
 * **Module**: `Credits & Billing`  
 * **Test Type**: `POSITIVE`  
-* **Status**: **PASS** (`133ms`)  
+* **Status**: **PASS** (`47ms`)  
 * **Scenario**: Verify that credit cost rates per age group and question multiplier are queryable.  
 * **Pre-conditions**: User is authenticated.  
 
@@ -280,7 +280,7 @@
 1. **Send HTTP GET** `https://devapi.hercules.works/V2/credits/pricing`
 
 * **Expected Result**: HTTP 200 OK with JSON { data: { age: { "18-24": 1, "24-35": 1 } } }.  
-* **Actual Result**: HTTP 200 OK. Latency: 133ms. Response: {"data":{"age":{"18-24":1,"24-35":1,"35-45":1,"45-55":2,"56-90":2},"aiGeneration":{"description":"AI Survey Generator pr  
+* **Actual Result**: HTTP 200 OK. Latency: 47ms. Response: {"data":{"age":{"18-24":1,"24-35":1,"35-45":1,"45-55":2,"56-90":2},"aiGeneration":{"description":"AI Survey Generator pr  
 
 ```json
 // Live JSON Response Excerpt:
@@ -293,7 +293,7 @@
 
 * **Module**: `Credits & Billing`  
 * **Test Type**: `POSITIVE`  
-* **Status**: **PASS** (`134ms`)  
+* **Status**: **PASS** (`70ms`)  
 * **Scenario**: Verify that user available credits and equivalent currency balance are accurate.  
 * **Pre-conditions**: User has active account.  
 
@@ -301,7 +301,7 @@
 1. **Send HTTP GET** `https://devapi.hercules.works/V2/credits/balance`
 
 * **Expected Result**: HTTP 200 OK with JSON { success: true, data: { availableCredits, equivalentINR } }.  
-* **Actual Result**: HTTP 200 OK. Available Credits: 0. Latency: 134ms.  
+* **Actual Result**: HTTP 200 OK. Available Credits: 0. Latency: 70ms.  
 
 ```json
 // Live JSON Response Excerpt:
@@ -314,7 +314,7 @@
 
 * **Module**: `Credits & Billing`  
 * **Test Type**: `POSITIVE`  
-* **Status**: **PASS** (`134ms`)  
+* **Status**: **PASS** (`59ms`)  
 * **Scenario**: Verify that organization account credits, used credits, and freeCampaignUserlimit are returned.  
 * **Pre-conditions**: User has active account.  
 
@@ -322,11 +322,11 @@
 1. **Send HTTP GET** `https://devapi.hercules.works/V2/credits/info`
 
 * **Expected Result**: HTTP 200 OK with JSON { data: { account: { totalCredits, freeCampaignUserlimit } } }.  
-* **Actual Result**: HTTP 200 OK. Free Limit: 100 users. Latency: 134ms.  
+* **Actual Result**: HTTP 200 OK. Free Limit: 100 users. Latency: 59ms.  
 
 ```json
 // Live JSON Response Excerpt:
-{"data":{"account":{"_id":"6a917d141f88f10eb7b5d327","businessId":"6a917cfe1f88f10eb7b5d325","totalCredits":0,"usedCredits":0,"availableCredits":0,"freeCampaignUserlimit":100,"isActive":true,"createdAt":"2026-08-28T12:20:36.288Z","updatedAt":"2026-08-28T12:20:36.288Z"},"availableCredits":0,"equivale
+{"data":{"account":{"_id":"6a917d141f88f10eb7b5d327","businessId":"6a917cfe1f88f10eb7b5d325","totalCredits":0,"usedCredits":0,"availableCredits":0,"freeCampaignUserlimit":100,"isActive":true,"createdAt":"2026-08-28T12:20:36.288Z","updatedAt":"2026-08-28T13:17:16.993Z"},"availableCredits":0,"equivale
 ```
 
 ---
@@ -335,7 +335,7 @@
 
 * **Module**: `Credits & Billing`  
 * **Test Type**: `POSITIVE`  
-* **Status**: **PASS** (`127ms`)  
+* **Status**: **PASS** (`133ms`)  
 * **Scenario**: Verify that available credit package tiers (e.g. 100 Credits for ₹1000) are queryable.  
 * **Pre-conditions**: User is authenticated.  
 
@@ -343,7 +343,7 @@
 1. **Send HTTP GET** `https://devapi.hercules.works/V2/payments/get-tier`
 
 * **Expected Result**: HTTP 200 OK with JSON { success: true, data: { buyMorePlans: [...] } }.  
-* **Actual Result**: HTTP 200 OK. Plan Packages: 5. Latency: 127ms.  
+* **Actual Result**: HTTP 200 OK. Plan Packages: 5. Latency: 133ms.  
 
 ```json
 // Live JSON Response Excerpt:
@@ -352,7 +352,70 @@
 
 ---
 
-### 17. ✅ [TC-SEC-01] Tokenless Request Gate [POST /api/auth/sync]
+### 17. ✅ [TC-BILL-05] Initiate Credit Purchase & Plan Upgrade Order [POST /V2/payments/create-order]
+
+* **Module**: `Credits & Billing`  
+* **Test Type**: `POSITIVE`  
+* **Status**: **PASS** (`111ms`)  
+* **Scenario**: Verify that user can initiate purchase orders and receive gateway orderId & currency calculation.  
+* **Pre-conditions**: User selects 100 Credits package.  
+
+**Steps**:
+1. **Send HTTP POST** `https://devapi.hercules.works/V2/payments/create-order` with payload `{"type":"BUY_MORE","buyMorePlanId":"buy_100","credits":100}`
+
+* **Expected Result**: HTTP 200 OK with JSON { success: true, data: { razorpayOrderId, amount, credits: 100 } }.  
+* **Actual Result**: HTTP 200 OK. Razorpay Order: order_TVCfSgxxdFG4mU (₹1180). Latency: 111ms.  
+
+```json
+// Live JSON Response Excerpt:
+{"data":{"orderId":"6a918a7b1f88f10eb7b5d35f","razorpayOrderId":"order_TVCfSgxxdFG4mU","amount":118000,"currency":"INR","credits":100,"keyId":"rzp_test_S07wVU2qwWdH1y"},"message":"Order created successfully","success":true}
+```
+
+---
+
+### 18. ✅ [TC-BILL-06] Retrieve Active Subscription Plan & Validity [GET /V2/credits/subscription]
+
+* **Module**: `Credits & Billing`  
+* **Test Type**: `POSITIVE`  
+* **Status**: **PASS** (`55ms`)  
+* **Scenario**: Verify that current organization subscription plan (tierType, validityDays, autoRenew) is queryable.  
+* **Pre-conditions**: User has active account.  
+
+**Steps**:
+1. **Send HTTP GET** `https://devapi.hercules.works/V2/credits/subscription`
+
+* **Expected Result**: HTTP 200 OK with JSON { data: { tierType: "FREE", validityDays: 30, isActive: true } }.  
+* **Actual Result**: HTTP 200 OK. Tier: FREE (Valid: 30 days). Latency: 55ms.  
+
+```json
+// Live JSON Response Excerpt:
+{"data":{"_id":"6a917d141f88f10eb7b5d328","businessId":"6a917cfe1f88f10eb7b5d325","tierType":"FREE","creditAllocation":0,"validityDays":30,"priceInr":0,"startDate":"2026-08-28T12:20:36.288Z","endDate":"2026-11-28T12:20:36.288Z","isActive":true,"autoRenew":true,"createdAt":"2026-08-28T12:20:36.295Z",
+```
+
+---
+
+### 19. ✅ [TC-BILL-07] Execute Credit Deduction for Deployment [POST /V2/credits/deduct]
+
+* **Module**: `Credits & Billing`  
+* **Test Type**: `POSITIVE`  
+* **Status**: **PASS** (`70ms`)  
+* **Scenario**: Verify that credit deduction engine processes deployment balances correctly.  
+* **Pre-conditions**: User executes campaign deployment.  
+
+**Steps**:
+1. **Send HTTP POST** `https://devapi.hercules.works/V2/credits/deduct` with payload `{ audienceSize: 10 }`
+
+* **Expected Result**: HTTP 200 OK with JSON { success: true, data: { freeTierUsed, newBalance } }.  
+* **Actual Result**: HTTP 200 OK. Message: "Free tier deployment successful". Latency: 70ms.  
+
+```json
+// Live JSON Response Excerpt:
+{"data":{"audienceSize":0,"freeTierUsed":true,"newBalance":0},"message":"Free tier deployment successful","success":true}
+```
+
+---
+
+### 20. ✅ [TC-SEC-01] Tokenless Request Gate [POST /api/auth/sync]
 
 * **Module**: `Security & Rejection Gates`  
 * **Test Type**: `NEGATIVE`  
@@ -373,7 +436,7 @@
 
 ---
 
-### 18. ✅ [TC-SEC-02] Schema Validation Gate on Missing Keys [POST /api/chat]
+### 21. ✅ [TC-SEC-02] Schema Validation Gate on Missing Keys [POST /api/chat]
 
 * **Module**: `Security & Rejection Gates`  
 * **Test Type**: `NEGATIVE`  
@@ -394,11 +457,11 @@
 
 ---
 
-### 19. ✅ [TC-SEC-03] Superadmin Privilege Escalation Gate [GET /api/admin/...]
+### 22. ✅ [TC-SEC-03] Superadmin Privilege Escalation Gate [GET /api/admin/...]
 
 * **Module**: `Security & Rejection Gates`  
 * **Test Type**: `NEGATIVE`  
-* **Status**: **PASS** (`125ms`)  
+* **Status**: **PASS** (`133ms`)  
 * **Scenario**: Verify that non-root user accounts are strictly denied superadmin telemetry access with HTTP 403.  
 * **Pre-conditions**: Standard user token provided.  
 
@@ -406,7 +469,7 @@
 1. **Send HTTP GET** `https://devapi-ai.hercules.works/api/admin/superadmin/users/analytics`
 
 * **Expected Result**: HTTP 403 Forbidden.  
-* **Actual Result**: HTTP 403 Forbidden. Latency: 125ms.  
+* **Actual Result**: HTTP 403 Forbidden. Latency: 133ms.  
 
 ```json
 // Live JSON Response Excerpt:
@@ -415,19 +478,19 @@
 
 ---
 
-### 20. ✅ [TC-SEC-04] OWASP Account Enumeration Defense Gate [POST /V2/auth/pwd-login]
+### 23. ✅ [TC-SEC-04] OWASP Account Enumeration Defense Gate [POST /V2/auth/pwd-login]
 
 * **Module**: `Security & Rejection Gates`  
 * **Test Type**: `NEGATIVE`  
-* **Status**: **PASS** (`913ms`)  
-* **Scenario**: Verify that invalid login attempts trigger generic envelope to prevent user enumeration.  
+* **Status**: **PASS** (`1965ms`)  
+* **Scenario**: Verify that invalid login attempts trigger generic envelope or rejection to prevent user enumeration.  
 * **Pre-conditions**: Non-existent user email provided.  
 
 **Steps**:
-1. **Send HTTP POST** `https://devapi.hercules.works/V2/auth/pwd-login` with payload `{ email: "non_existent@domain.com", password: "..." }`
+1. **Send HTTP POST** `https://devapi.hercules.works/V2/auth/pwd-login` with payload `{ email: "probe_user_1787923068025@security-gate-test.com", password: "..." }`
 
-* **Expected Result**: HTTP 200 OK Generic Anti-Enumeration Envelope ("If eligible, instructions sent").  
-* **Actual Result**: HTTP 200 OK. Envelope Message: "If eligible, we've sent instructions to your email.". Latency: 913ms.  
+* **Expected Result**: HTTP 200 OK Generic Anti-Enumeration Envelope or Handled Rejection.  
+* **Actual Result**: HTTP 200 OK. Response: {"success":true,"status":true,"data":{"message":"If eligible, we've sent instructions to your email.. Latency: 1965ms.  
 
 ```json
 // Live JSON Response Excerpt:

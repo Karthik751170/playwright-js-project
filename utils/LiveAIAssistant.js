@@ -3,21 +3,25 @@ require('dotenv').config();
 
 class LiveAIAssistant {
   constructor() {
-    this.apiKeys = [
+    const keys = [
       process.env.GROQ_API_KEY,
       process.env.GROQ_API_KEY_2
-    ].filter(Boolean);
+    ].filter(k => k && typeof k === 'string' && k.trim() !== '');
+
+    this.apiKeys = [...new Set(keys)];
 
     this.models = [
-      process.env.GROQ_MODEL || 'openai/gpt-oss-20b',
-      'openai/gpt-oss-120b',
+      process.env.GROQ_MODEL || 'openai/gpt-oss-120b',
+      'openai/gpt-oss-20b',
       'qwen/qwen3.6-27b',
-      'llama-3.3-70b-versatile',
-      'llama-3.1-8b-instant'
+      'qwen/qwen3.8-27b',
+      'groq/compound'
     ];
 
     if (this.apiKeys.length === 0) {
       console.warn("\n⚠️ [LiveAIAssistant] No GROQ_API_KEY found in environment! Will fallback to heuristic/random answers.");
+    } else {
+      console.log(`[LiveAIAssistant] Groq AI engine active with ${this.apiKeys.length} key(s) configured.`);
     }
   }
 

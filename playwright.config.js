@@ -1,4 +1,7 @@
 const { defineConfig } = require('@playwright/test');
+const fs = require('fs');
+
+const storageState = fs.existsSync('.auth/apple-user.json') ? '.auth/apple-user.json' : undefined;
 
 module.exports = defineConfig({
   globalSetup: require.resolve('./utils/security/globalSetup.js'),
@@ -15,10 +18,10 @@ module.exports = defineConfig({
     }]
   ],
   use: {
-    headless: false,
+    headless: true,
     viewport: { width: 1280, height: 720 },
     ignoreHTTPSErrors: true,
-    storageState: '.auth/apple-user.json',
+    storageState: storageState,
     video: 'on',
     screenshot: 'on',
     trace: 'retain-on-failure',

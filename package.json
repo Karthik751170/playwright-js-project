@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "playwright test",
+    "test:all-18": "playwright test tests/DeploySurvey_Free100Users.spec.js tests/DeploySurvey_EditAudience_Validation.spec.js tests/DeploySurvey_NoEdit.spec.js tests/LoggedInSurveyCreation.spec.js tests/ValidateHerculesLogics.spec.js tests/ValidateAllHerculesLogics.spec.js tests/AskHerculesLogics.spec.js tests/AskHerculesQuestionLogics.spec.js tests/SurveyTest.spec.js tests/SuperJ_Answer6Surveys.spec.js tests/RunSuperJLiveSurvey.spec.js tests/RunSpecificSurvey.spec.js tests/TestActiveSurvey.spec.js tests/OnboardingTest.spec.js tests/SuperJ_EditProfileValidation.spec.js tests/SuperJ_CopyDIDValidation.spec.js tests/HerculesCreateAccount.spec.js tests/HerculesLoggedInFeaturesTest.spec.js --workers=1",
     "test:survey": "playwright test tests/SurveyTest.spec.js",
     "test:security": "playwright test --config=playwright.zap.config.js",
     "test:security:passive": "playwright test tests/security/ZapPassiveScan.spec.js --config=playwright.zap.config.js",

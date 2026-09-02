@@ -20,7 +20,7 @@ const fs = require('fs');
   await loginBtn.click();
   
   console.log('Logging in with provided credentials...');
-  await loginPage.loginWithEmail('kayimoh434@bejum.com');
+  await loginPage.loginWithEmail('ferad73521@neowd.com');
   
   console.log('Entering password...');
   const passwordInput = page.locator("input[type='password'], input[placeholder='Password']");

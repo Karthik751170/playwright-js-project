@@ -12,7 +12,7 @@ test.describe('Mailosaur Login Scraper', () => {
     console.log('Waiting for email input...');
     const emailInput = page.locator('input[type="email"], input[name="email"], input[placeholder*="email" i]');
     await emailInput.waitFor({ state: 'visible' });
-    await emailInput.fill('kayimoh434@bejum.com');
+    await emailInput.fill('ferad73521@neowd.com');
     
     // Check if password input is on the same page or if we need to click Next first
     const passwordInput = page.locator('input[type="password"], input[name="password"]');

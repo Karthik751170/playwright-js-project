@@ -12,7 +12,7 @@ const fs = require('fs');
   
   console.log('Filling in credentials...');
   // Find email and password inputs. Mailosaur usually uses name="email" and name="password"
-  await page.fill('input[type="email"]', 'kayimoh434@bejum.com');
+  await page.fill('input[type="email"]', 'ferad73521@neowd.com');
   await page.fill('input[type="password"]', 'Karthik@8342');
   
   console.log('Submitting login form...');

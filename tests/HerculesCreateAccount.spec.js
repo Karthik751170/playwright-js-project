@@ -47,7 +47,7 @@ test.describe('Hercules Authentication Flow', () => {
     await mailPage.bringToFront();
     
     const mailosaurUtility = new MailosaurUtility(mailPage, mailContext);
-    await mailosaurUtility.login('kayimoh434@bejum.com', 'Karthik@8342', serverId);
+    await mailosaurUtility.login('ferad73521@neowd.com', 'Karthik@8342', serverId);
     let newPage = await mailosaurUtility.fetchVerificationLink();
     
     

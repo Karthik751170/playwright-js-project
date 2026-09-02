@@ -1,7 +1,7 @@
 const BasePage = require('../../base/BasePage');
 const testData = require('../../config/testData');
 const LiveAIAssistant = require('../../utils/LiveAIAssistant');
-const HerculesWizardUtil = require('../../utils/HerculesWizardUtil');
+const HerculesWizardUtil = require('../../utils/EnterpriseWizardUtil');
 
 class HerculesSurveyGenerator extends BasePage {
   constructor(page) {

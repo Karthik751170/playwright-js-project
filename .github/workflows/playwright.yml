@@ -1,4 +1,4 @@
-name: Playwright E2E Tests (Parallel Cloud Execution)
+name: Playwright E2E Tests (Single Test Execution)
 
 on:
   push:
@@ -7,78 +7,17 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
     inputs:
-      execution_mode:
-        description: 'Execution Mode'
+      test_file:
+        description: 'Test file to run'
         required: true
-        default: 'parallel-matrix'
-        type: choice
-        options:
-          - parallel-matrix
-          - sequential
+        default: 'tests/DeploySurvey_Free100Users.spec.js'
+        type: string
 
 jobs:
-  test-parallel:
-    name: ${{ matrix.test_name }}
+  test-single:
+    name: Run Deploy Survey (Free 100 Users)
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - test_name: "1. Deploy Survey (Free 100 Users)"
-            test_file: "tests/DeploySurvey_Free100Users.spec.js"
-            slug: "deploy-free-100-users"
-          - test_name: "2. Deploy Survey (Edit Audience)"
-            test_file: "tests/DeploySurvey_EditAudience_Validation.spec.js"
-            slug: "deploy-edit-audience"
-          - test_name: "3. Deploy Survey (No Edit)"
-            test_file: "tests/DeploySurvey_NoEdit.spec.js"
-            slug: "deploy-no-edit"
-          - test_name: "4. Logged-in Survey Creation"
-            test_file: "tests/LoggedInSurveyCreation.spec.js"
-            slug: "loggedin-survey-creation"
-          - test_name: "5. Validate Hercules Logics"
-            test_file: "tests/ValidateHerculesLogics.spec.js"
-            slug: "validate-hercules-logics"
-          - test_name: "6. Validate All Hercules Logics"
-            test_file: "tests/ValidateAllHerculesLogics.spec.js"
-            slug: "validate-all-logics"
-          - test_name: "7. Ask Hercules Logics"
-            test_file: "tests/AskHerculesLogics.spec.js"
-            slug: "ask-hercules-logics"
-          - test_name: "8. Ask Hercules Question Logics"
-            test_file: "tests/AskHerculesQuestionLogics.spec.js"
-            slug: "ask-hercules-question-logics"
-          - test_name: "9. Survey Flow Respondent"
-            test_file: "tests/SurveyTest.spec.js"
-            slug: "survey-test"
-          - test_name: "10. SuperJ Answer 6 Surveys"
-            test_file: "tests/SuperJ_Answer6Surveys.spec.js"
-            slug: "superj-answer-6"
-          - test_name: "11. Run SuperJ Live Survey"
-            test_file: "tests/RunSuperJLiveSurvey.spec.js"
-            slug: "run-superj-live"
-          - test_name: "12. Run Specific Survey"
-            test_file: "tests/RunSpecificSurvey.spec.js"
-            slug: "run-specific-survey"
-          - test_name: "13. Test Active Survey"
-            test_file: "tests/TestActiveSurvey.spec.js"
-            slug: "test-active-survey"
-          - test_name: "14. First-time Onboarding"
-            test_file: "tests/OnboardingTest.spec.js"
-            slug: "onboarding-test"
-          - test_name: "15. SuperJ Edit Profile Validation"
-            test_file: "tests/SuperJ_EditProfileValidation.spec.js"
-            slug: "superj-edit-profile"
-          - test_name: "16. SuperJ Copy DID Validation"
-            test_file: "tests/SuperJ_CopyDIDValidation.spec.js"
-            slug: "superj-copy-did"
-          - test_name: "17. Hercules Create Account"
-            test_file: "tests/HerculesCreateAccount.spec.js"
-            slug: "hercules-create-account"
-          - test_name: "18. Hercules Logged-In Features"
-            test_file: "tests/HerculesLoggedInFeaturesTest.spec.js"
-            slug: "hercules-loggedin-features"
 
     container:
       image: mcr.microsoft.com/playwright:v1.61.1-noble
@@ -96,7 +35,7 @@ jobs:
       - name: Install Dependencies
         run: npm ci || npm install
 
-      - name: Run Headed Test in Virtual Display (${{ matrix.test_name }})
+      - name: Run Headed Test in Virtual Display
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GROQ_API_KEY_2: ${{ secrets.GROQ_API_KEY_2 }}
@@ -107,13 +46,14 @@ jobs:
           MAILOSAUR_SERVER_ID: ${{ secrets.MAILOSAUR_SERVER_ID }}
           CI: true
         run: |
-          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" npx playwright test ${{ matrix.test_file }} --headed --reporter=list,html,github
+          TEST_FILE="${{ github.event.inputs.test_file || 'tests/DeploySurvey_Free100Users.spec.js' }}"
+          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" npx playwright test "$TEST_FILE" --headed --reporter=list,html,github
 
       - name: Upload Test Report Artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: report-${{ matrix.slug }}
+          name: report-deploy-free-100-users
           path: |
             playwright-report/
             test-results/

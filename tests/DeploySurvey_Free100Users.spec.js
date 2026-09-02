@@ -95,7 +95,7 @@ async function generateSurvey(page) {
         console.log('WARNING: Loop timed out after 10 minutes without finding Generate Brief or Create Survey.');
     }
 
-    console.log('Questionnaire finished. Checking for "Generate Research Brief" or "Create Survey" button (up to 5 minutes)...');
+    console.log('Questionnaire finished. Checking for "Generate Research Brief", "Create Survey", or Editor transition (up to 5 minutes)...');
     
     const generateResearchBtn = page.locator('button')
         .filter({ hasText: /generate.*brief|build.*brief|yes.*brief|generate.*research|research.*brief/i })
@@ -112,18 +112,27 @@ async function generateSurvey(page) {
     const startWaitTime = Date.now();
     let promptSent = false;
     while (Date.now() - startWaitTime < 300000) {
+        if (page.url().includes('editor') || await page.locator("//span[text()='Deploy']").first().isVisible().catch(() => false)) {
+            console.log('Transitioned to Survey Editor screen!');
+            break;
+        }
+
         if (await surveyGenerator.handleSelectAndRunItThisWay().catch(() => false)) {
             continue;
         }
+
         if (await createSurveyBtn.isVisible().catch(() => false)) {
-            console.log('Found Create Survey button directly!');
+            console.log('Found Create Survey button! Clicking it...');
+            await page.waitForTimeout(1000);
+            await createSurveyBtn.click({ force: true }).catch(() => {});
+            await page.waitForTimeout(3000);
             break;
         }
+
         if (await generateResearchBtn.isVisible().catch(() => false)) {
             console.log('Found "Generate Research Brief" button! Clicking it...');
             await generateResearchBtn.click({ force: true }).catch(() => {});
             await page.waitForTimeout(3000);
-            break;
         }
         
         // If no button is visible after 15 seconds, send chat confirmation to trigger survey creation
@@ -133,11 +142,35 @@ async function generateSurvey(page) {
                 console.log('Chat input active without buttons. Prompting Hercules to create the survey...');
                 await chatInput.fill('Yes, please include these dimensions and create the survey.');
                 await page.waitForTimeout(500);
-                await chatInput.press('Enter').catch(() => {});
+                const sendBtn = page.locator('button[aria-label="submit button"]').or(page.getByRole('button', { name: 'Send' })).first();
+                if (await sendBtn.isVisible().catch(() => false)) {
+                    await sendBtn.click({ force: true }).catch(() => {});
+                } else {
+                    await chatInput.press('Enter').catch(() => {});
+                }
                 promptSent = true;
             }
         }
         await page.waitForTimeout(2000);
+    }
+
+    // Secondary wait for Create Survey if brief was generated
+    if (!page.url().includes('editor') && !await page.locator("//span[text()='Deploy']").first().isVisible().catch(() => false)) {
+        console.log('Waiting for final "Create Survey" button or Editor transition...');
+        const secondWaitStart = Date.now();
+        while (Date.now() - secondWaitStart < 180000) {
+            if (page.url().includes('editor') || await page.locator("//span[text()='Deploy']").first().isVisible().catch(() => false)) {
+                console.log('Survey Editor reached!');
+                break;
+            }
+            if (await createSurveyBtn.isVisible().catch(() => false)) {
+                console.log('Found Create Survey button! Clicking it...');
+                await createSurveyBtn.click({ force: true }).catch(() => {});
+                await page.waitForTimeout(3000);
+                break;
+            }
+            await page.waitForTimeout(2000);
+        }
     }
 
     // AUDIENCE PARSING: Extract location (city) if configured in audience panel
@@ -156,26 +189,6 @@ async function generateSurvey(page) {
         }
     } catch (e) {}
     console.log(`[Test] Using onboarding location: ${targetCity}`);
-
-    console.log('Waiting up to 5 minutes for "Yes, create the survey." / "Create Survey" button...');
-    await createSurveyBtn.waitFor({ state: 'visible', timeout: 300000 });
-    console.log('Found Create Survey button! Waiting 3 seconds...');
-    await page.waitForTimeout(3000);
-
-    console.log('Clicking Create Survey button...');
-    await createSurveyBtn.scrollIntoViewIfNeeded().catch(() => {});
-    await createSurveyBtn.click({ timeout: 5000 }).catch(async () => {
-        console.log('Standard click failed on create survey, trying force click...');
-        await createSurveyBtn.click({ force: true });
-    });
-    console.log('Clicked Create Survey button via standard click.');
-
-    try {
-        await createSurveyBtn.waitFor({ state: 'hidden', timeout: 15000 });
-        console.log('Create survey button is no longer visible.');
-    } catch (e) {
-        console.log('Button still visible after click, continuing...');
-    }
 
     console.log('Waiting for Survey generation to finish and Deploy button to appear (up to 10 minutes)...');
     

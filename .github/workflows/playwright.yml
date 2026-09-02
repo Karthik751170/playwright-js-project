@@ -1,4 +1,4 @@
-name: Playwright E2E Tests (Sequential Cloud Execution)
+name: Playwright E2E Tests (Parallel Cloud Execution)
 
 on:
   push:
@@ -7,23 +7,81 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
     inputs:
-      test_suite:
-        description: 'Test suite to run'
+      execution_mode:
+        description: 'Execution Mode'
         required: true
-        default: 'all-18-scripts'
+        default: 'parallel-matrix'
         type: choice
         options:
-          - all-18-scripts
-          - deploy-free-100-users
-          - validate-logics
-          - survey-test
-          - all
+          - parallel-matrix
+          - sequential
 
 jobs:
-  test:
-    name: Run E2E Test Suite in GitHub Cloud
-    timeout-minutes: 360
+  test-parallel:
+    name: ${{ matrix.test_name }}
     runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - test_name: "1. Deploy Survey (Free 100 Users)"
+            test_file: "tests/DeploySurvey_Free100Users.spec.js"
+            slug: "deploy-free-100-users"
+          - test_name: "2. Deploy Survey (Edit Audience)"
+            test_file: "tests/DeploySurvey_EditAudience_Validation.spec.js"
+            slug: "deploy-edit-audience"
+          - test_name: "3. Deploy Survey (No Edit)"
+            test_file: "tests/DeploySurvey_NoEdit.spec.js"
+            slug: "deploy-no-edit"
+          - test_name: "4. Logged-in Survey Creation"
+            test_file: "tests/LoggedInSurveyCreation.spec.js"
+            slug: "loggedin-survey-creation"
+          - test_name: "5. Validate Hercules Logics"
+            test_file: "tests/ValidateHerculesLogics.spec.js"
+            slug: "validate-hercules-logics"
+          - test_name: "6. Validate All Hercules Logics"
+            test_file: "tests/ValidateAllHerculesLogics.spec.js"
+            slug: "validate-all-logics"
+          - test_name: "7. Ask Hercules Logics"
+            test_file: "tests/AskHerculesLogics.spec.js"
+            slug: "ask-hercules-logics"
+          - test_name: "8. Ask Hercules Question Logics"
+            test_file: "tests/AskHerculesQuestionLogics.spec.js"
+            slug: "ask-hercules-question-logics"
+          - test_name: "9. Survey Flow Respondent"
+            test_file: "tests/SurveyTest.spec.js"
+            slug: "survey-test"
+          - test_name: "10. SuperJ Answer 6 Surveys"
+            test_file: "tests/SuperJ_Answer6Surveys.spec.js"
+            slug: "superj-answer-6"
+          - test_name: "11. Run SuperJ Live Survey"
+            test_file: "tests/RunSuperJLiveSurvey.spec.js"
+            slug: "run-superj-live"
+          - test_name: "12. Run Specific Survey"
+            test_file: "tests/RunSpecificSurvey.spec.js"
+            slug: "run-specific-survey"
+          - test_name: "13. Test Active Survey"
+            test_file: "tests/TestActiveSurvey.spec.js"
+            slug: "test-active-survey"
+          - test_name: "14. First-time Onboarding"
+            test_file: "tests/OnboardingTest.spec.js"
+            slug: "onboarding-test"
+          - test_name: "15. SuperJ Edit Profile Validation"
+            test_file: "tests/SuperJ_EditProfileValidation.spec.js"
+            slug: "superj-edit-profile"
+          - test_name: "16. SuperJ Copy DID Validation"
+            test_file: "tests/SuperJ_CopyDIDValidation.spec.js"
+            slug: "superj-copy-did"
+          - test_name: "17. Hercules Create Account"
+            test_file: "tests/HerculesCreateAccount.spec.js"
+            slug: "hercules-create-account"
+          - test_name: "18. Hercules Logged-In Features"
+            test_file: "tests/HerculesLoggedInFeaturesTest.spec.js"
+            slug: "hercules-loggedin-features"
+
+    container:
+      image: mcr.microsoft.com/playwright:v1.61.1-noble
 
     steps:
       - name: Checkout Codebase
@@ -38,10 +96,7 @@ jobs:
       - name: Install Dependencies
         run: npm ci || npm install
 
-      - name: Install Playwright Browsers & System Deps
-        run: npx playwright install --with-deps chromium
-
-      - name: Run Playwright Tests (Sequentially in Headless Cloud)
+      - name: Run Test (${{ matrix.test_name }})
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GROQ_API_KEY_2: ${{ secrets.GROQ_API_KEY_2 }}
@@ -52,63 +107,16 @@ jobs:
           MAILOSAUR_SERVER_ID: ${{ secrets.MAILOSAUR_SERVER_ID }}
           CI: true
         run: |
-          if [ "${{ github.event.inputs.test_suite }}" = "validate-logics" ]; then
-            npx playwright test tests/ValidateHerculesLogics.spec.js --workers=1 --reporter=list,html,github
-          elif [ "${{ github.event.inputs.test_suite }}" = "survey-test" ]; then
-            npx playwright test tests/SurveyTest.spec.js --workers=1 --reporter=list,html,github
-          elif [ "${{ github.event.inputs.test_suite }}" = "deploy-free-100-users" ]; then
-            npx playwright test tests/DeploySurvey_Free100Users.spec.js --workers=1 --reporter=list,html,github
-          elif [ "${{ github.event.inputs.test_suite }}" = "all" ]; then
-            npx playwright test tests/DeploySurvey_Free100Users.spec.js tests/ValidateHerculesLogics.spec.js --workers=1 --reporter=list,html,github
-          else
-            # Default: Run all 18 primary E2E scripts one after another sequentially
-            npx playwright test \
-              tests/DeploySurvey_Free100Users.spec.js \
-              tests/DeploySurvey_EditAudience_Validation.spec.js \
-              tests/DeploySurvey_NoEdit.spec.js \
-              tests/LoggedInSurveyCreation.spec.js \
-              tests/ValidateHerculesLogics.spec.js \
-              tests/ValidateAllHerculesLogics.spec.js \
-              tests/AskHerculesLogics.spec.js \
-              tests/AskHerculesQuestionLogics.spec.js \
-              tests/SurveyTest.spec.js \
-              tests/SuperJ_Answer6Surveys.spec.js \
-              tests/RunSuperJLiveSurvey.spec.js \
-              tests/RunSpecificSurvey.spec.js \
-              tests/TestActiveSurvey.spec.js \
-              tests/OnboardingTest.spec.js \
-              tests/SuperJ_EditProfileValidation.spec.js \
-              tests/SuperJ_CopyDIDValidation.spec.js \
-              tests/HerculesCreateAccount.spec.js \
-              tests/HerculesLoggedInFeaturesTest.spec.js \
-              --workers=1 --reporter=list,html,github || true
-          fi
+          npx playwright test ${{ matrix.test_file }} --reporter=list,html,github
 
-      - name: Generate Summary Report for GitHub Actions
-        if: always()
-        run: |
-          echo "## 🚀 Playwright E2E Sequential Execution Summary" >> $GITHUB_STEP_SUMMARY
-          echo "- **Execution Mode**: Headless Sequential Cloud Runner (\`workers: 1\`)" >> $GITHUB_STEP_SUMMARY
-          echo "- **Target Environment**: DEV (Hercules B2B & Super J)" >> $GITHUB_STEP_SUMMARY
-          echo "- **AI Engine**: Groq LLM (Llama 3.3)" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📦 Test Artifacts Available Below:" >> $GITHUB_STEP_SUMMARY
-          echo "- **Playwright HTML Report**: Download \`playwright-html-report\` artifact below" >> $GITHUB_STEP_SUMMARY
-          echo "- **Execution Videos & Traces**: Download \`test-results\` artifact below" >> $GITHUB_STEP_SUMMARY
-
-      - name: Upload Playwright Test Report Artifact
+      - name: Upload Test Report Artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-html-report
-          path: playwright-report/
+          name: report-${{ matrix.slug }}
+          path: |
+            playwright-report/
+            test-results/
           retention-days: 14
 
-      - name: Upload Test Results & Videos Artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results
-          path: test-results/
-          retention-days: 14
 

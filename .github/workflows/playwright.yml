@@ -96,7 +96,7 @@ jobs:
       - name: Install Dependencies
         run: npm ci || npm install
 
-      - name: Run Test (${{ matrix.test_name }})
+      - name: Run Headed Test in Virtual Display (${{ matrix.test_name }})
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GROQ_API_KEY_2: ${{ secrets.GROQ_API_KEY_2 }}
@@ -107,7 +107,7 @@ jobs:
           MAILOSAUR_SERVER_ID: ${{ secrets.MAILOSAUR_SERVER_ID }}
           CI: true
         run: |
-          npx playwright test ${{ matrix.test_file }} --reporter=list,html,github
+          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" npx playwright test ${{ matrix.test_file }} --headed --reporter=list,html,github
 
       - name: Upload Test Report Artifact
         if: always()

@@ -18,7 +18,7 @@ module.exports = defineConfig({
     }]
   ],
   use: {
-    headless: false,
+    headless: process.env.HEADED === 'true' ? false : true,
     viewport: { width: 1280, height: 720 },
     ignoreHTTPSErrors: true,
     storageState: storageState,

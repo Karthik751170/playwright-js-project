@@ -39,9 +39,12 @@ async function generateSurvey(page) {
     const submitBtn = page.locator('button[aria-label="submit button"]').or(page.getByRole('button', { name: 'Send' })).first();
     await submitBtn.scrollIntoViewIfNeeded().catch(() => {});
     await submitBtn.click({ force: true });
+    await page.waitForTimeout(2000);
 
     console.log('\nNavigating through AI questionnaire (if it appears)...');
     const surveyGenerator = new HerculesSurveyGenerator(page);
+    surveyGenerator.promptText = randomPrompt;
+    await surveyGenerator.handleSelectAndRunItThisWay().catch(() => {});
     const finalGenerateSurveyBtn = page.locator('button', { hasText: /create.*survey|generate.*survey/i }).first();
     
     let loopCount = 0;
@@ -49,6 +52,12 @@ async function generateSurvey(page) {
     while (loopCount < 15) {
         await page.waitForTimeout(3000);
         loopCount++;
+
+        // Check for B2B decision-maker modal at start of each iteration
+        if (await surveyGenerator.handleSelectAndRunItThisWay().catch(() => false)) {
+            consecutiveFails = 0;
+            continue;
+        }
 
         // If the server went straight to the loading screen, brief, or editor, break!
         if (page.url().includes('editor')) {
@@ -95,7 +104,7 @@ async function generateSurvey(page) {
         console.log('WARNING: Loop timed out after 10 minutes without finding Generate Brief or Create Survey.');
     }
 
-    console.log('Questionnaire finished. Checking for "Generate Research Brief", "Create Survey", or Editor transition (up to 5 minutes)...');
+    console.log('Questionnaire finished. Checking for "Generate Research Brief", "Create Survey", Secondary Research, or Editor transition (up to 5 minutes)...');
     
     const generateResearchBtn = page.locator('button')
         .filter({ hasText: /generate.*brief|build.*brief|yes.*brief|generate.*research|research.*brief/i })
@@ -111,8 +120,10 @@ async function generateSurvey(page) {
 
     const startWaitTime = Date.now();
     let promptSent = false;
+    let briefClicked = false;
+
     while (Date.now() - startWaitTime < 300000) {
-        if (page.url().includes('editor') || await page.locator("//span[text()='Deploy']").first().isVisible().catch(() => false)) {
+        if (page.url().includes('editor') || await page.locator("//span[text()='Deploy']").or(page.locator("button:has-text('Deploy')")).first().isVisible().catch(() => false)) {
             console.log('Transitioned to Survey Editor screen!');
             break;
         }
@@ -129,37 +140,45 @@ async function generateSurvey(page) {
             break;
         }
 
-        if (await generateResearchBtn.isVisible().catch(() => false)) {
+        if (!briefClicked && await generateResearchBtn.isVisible().catch(() => false)) {
             console.log('Found "Generate Research Brief" button! Clicking it...');
             await generateResearchBtn.click({ force: true }).catch(() => {});
+            briefClicked = true;
             await page.waitForTimeout(3000);
         }
         
-        // If no button is visible after 15 seconds, send chat confirmation to trigger survey creation
-        if (!promptSent && (Date.now() - startWaitTime > 15000)) {
-            const chatInput = page.locator("#prompt, textarea[aria-label*='Ask Hercules' i], textarea[placeholder*='Ask Hercules' i], textarea").first();
-            if (await chatInput.isVisible().catch(() => false)) {
-                console.log('Chat input active without buttons. Prompting Hercules to create the survey...');
-                await chatInput.fill('Yes, please include these dimensions and create the survey.');
-                await page.waitForTimeout(500);
-                const sendBtn = page.locator('button[aria-label="submit button"]').or(page.getByRole('button', { name: 'Send' })).first();
-                if (await sendBtn.isVisible().catch(() => false)) {
-                    await sendBtn.click({ force: true }).catch(() => {});
-                } else {
-                    await chatInput.press('Enter').catch(() => {});
+        // ONLY if Secondary Research / Dimensions explicitly appear on the screen, send confirmation prompt
+        if (!promptSent) {
+            const secondaryResearchCard = page.locator("div, section, h2, h3, p").filter({ 
+                hasText: /secondary research|research dimensions|key dimensions|synthesized dimensions/i 
+            }).first();
+            
+            if (await secondaryResearchCard.isVisible({ timeout: 500 }).catch(() => false)) {
+                const chatInput = page.locator("#prompt, textarea[aria-label*='Ask Hercules' i], textarea[placeholder*='Ask Hercules' i]").first();
+                if (await chatInput.isVisible().catch(() => false)) {
+                    console.log('Secondary research detected! Prompting Hercules to create survey based on secondary research...');
+                    await chatInput.fill('Yes, please include these secondary research dimensions and create the survey.');
+                    await page.waitForTimeout(500);
+                    const sendBtn = page.locator('button[aria-label="submit button"]').or(page.getByRole('button', { name: 'Send' })).first();
+                    if (await sendBtn.isVisible().catch(() => false)) {
+                        await sendBtn.click({ force: true }).catch(() => {});
+                    } else {
+                        await chatInput.press('Enter').catch(() => {});
+                    }
+                    promptSent = true;
+                    await page.waitForTimeout(3000);
                 }
-                promptSent = true;
             }
         }
         await page.waitForTimeout(2000);
     }
 
     // Secondary wait for Create Survey if brief was generated
-    if (!page.url().includes('editor') && !await page.locator("//span[text()='Deploy']").first().isVisible().catch(() => false)) {
+    if (!page.url().includes('editor') && !await page.locator("//span[text()='Deploy']").or(page.locator("button:has-text('Deploy')")).first().isVisible().catch(() => false)) {
         console.log('Waiting for final "Create Survey" button or Editor transition...');
         const secondWaitStart = Date.now();
         while (Date.now() - secondWaitStart < 180000) {
-            if (page.url().includes('editor') || await page.locator("//span[text()='Deploy']").first().isVisible().catch(() => false)) {
+            if (page.url().includes('editor') || await page.locator("//span[text()='Deploy']").or(page.locator("button:has-text('Deploy')")).first().isVisible().catch(() => false)) {
                 console.log('Survey Editor reached!');
                 break;
             }
@@ -192,8 +211,11 @@ async function generateSurvey(page) {
 
     console.log('Waiting for Survey generation to finish and Deploy button to appear (up to 10 minutes)...');
     
-    // const editorDeployBtn = page.locator("button:has-text('Deploy')").first();
-    const editorDeployBtn = page.locator("//span[text()='Deploy']").first();
+    const editorDeployBtn = page.locator("button:has-text('Deploy')")
+        .or(page.locator("//span[text()='Deploy']"))
+        .or(page.locator("//button[contains(., 'Deploy')]"))
+        .or(page.getByRole('button', { name: /deploy/i }))
+        .first();
     const reviewComplete = page.locator("text=/AI Content Review Complete|Share this Survey with friends|View Audience/i").first();
     
     const startTime = Date.now();
@@ -273,8 +295,11 @@ test('Deploy survey to 100 Users for Free', async ({ browser }) => {
             await audienceBannerClose.click({ force: true }).catch(() => {});
         }
 
-        // const cardDeployBtn = page.locator("button:has-text('Deploy')").first();
-        const cardDeployBtn = page.locator("//span[text()='Deploy']").first();
+        const cardDeployBtn = page.locator("button:has-text('Deploy')")
+            .or(page.locator("//span[text()='Deploy']"))
+            .or(page.locator("//button[contains(., 'Deploy')]"))
+            .or(page.getByRole('button', { name: /deploy/i }))
+            .first();
         await cardDeployBtn.waitFor({ state: 'visible', timeout: 60000 });
         console.log('Clicking Deploy button on survey card...');
         await cardDeployBtn.click({ force: true });

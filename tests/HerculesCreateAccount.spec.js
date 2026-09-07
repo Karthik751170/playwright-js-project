@@ -18,8 +18,8 @@ test.describe('Hercules Authentication Flow', () => {
     const herculesContext = await browser.newContext();
     let page = await herculesContext.newPage();
     
-    // Hardcode Server ID provided by the user
-    const serverId = 'kzdzyaot';
+    // Server ID for Mailosaur
+    const serverId = process.env.MAILOSAUR_SERVER_ID || 'rrepibcg';
     const domain = `${serverId}.mailosaur.net`;
     
     const randomString = Math.random().toString(36).substring(2, 10);

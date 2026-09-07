@@ -38,6 +38,7 @@ class HerculesSurveyGenerator extends BasePage {
     this.editAudienceWaitBtn = page.locator('button:has-text("Edit Audience")');
     this.cancelBtn = page.locator('button:has-text("Cancel")');
     this.closeSignInBtn = page.locator("button[aria-label='close']");
+    this.promptText = '';
   }
 
   async clickRetry() {
@@ -126,7 +127,7 @@ class HerculesSurveyGenerator extends BasePage {
       options.push((await optionsLocator.nth(i).innerText().catch(() => '')).trim());
     }
 
-    const aiContext = contextText || testData.surveyContext.fallbackText;
+    const aiContext = contextText || this.promptText || testData.surveyContext.fallbackText;
     const response = await LiveAIAssistant.answerQuestion(aiContext, questionText, 'multi', options);
     
     // De-dupe and keep only valid indices. The AI (or its fallback) sometimes returns a single
@@ -188,7 +189,7 @@ class HerculesSurveyGenerator extends BasePage {
         options.push((await optionsLocator.nth(i).innerText().catch(() => '')).trim());
       }
 
-      const aiContext = contextText || testData.surveyContext.fallbackText;
+      const aiContext = contextText || this.promptText || testData.surveyContext.fallbackText;
       const response = await LiveAIAssistant.answerQuestion(aiContext, questionText, 'single', options);
       
       let indexToClick = response.index;
@@ -227,6 +228,9 @@ class HerculesSurveyGenerator extends BasePage {
         .or(this.page.locator('input[placeholder*="Add your own" i]'))
         .or(this.page.locator('input[placeholder*="Add your" i]'))
         .or(this.page.locator('input[placeholder*="Type" i]'))
+        .or(this.page.locator('textarea[placeholder*="Add" i]'))
+        .or(this.page.locator('textarea[placeholder*="Type" i]'))
+        .or(this.page.locator("div[class*='question' i] input, div[class*='card' i] input, div[class*='question' i] textarea, div[class*='card' i] textarea"))
         .filter({ hasNot: this.page.locator('#prompt') })
         .filter({ hasNot: this.page.locator('[aria-label*="Ask Hercules" i]') })
         .first();
@@ -239,19 +243,15 @@ class HerculesSurveyGenerator extends BasePage {
         return false;
       }
 
-      const aiContext = contextText || testData.surveyContext.fallbackText;
+      const aiContext = contextText || this.promptText || testData.surveyContext.fallbackText;
       const response = await LiveAIAssistant.answerQuestion(aiContext, questionText, 'text');
       
-      const dynamicFallback = `Our survey focuses on ${questionText.substring(0, 40)} to optimize pricing and user engagement effectively.`;
+      const dynamicFallback = `Our survey focuses on ${questionText.substring(0, 50)} to thoroughly evaluate user experience and market engagement.`;
       let answerToUse = (response && response.answer && !response.answer.includes("streamlining our workflows")) ? response.answer : dynamicFallback;
-      // Sanitize: clean markdown, take first sentence, cap to 120 chars for questionnaire text input
+      // Sanitize: clean markdown, remove newlines, preserve full articulated text
       answerToUse = answerToUse.replace(/[*#_`\n\r]/g, ' ').replace(/\s+/g, ' ').trim();
-      if (answerToUse.length > 120) {
-          const firstSentence = answerToUse.split('.')[0];
-          answerToUse = (firstSentence.length > 15 && firstSentence.length <= 120) ? firstSentence : answerToUse.substring(0, 115);
-      }
 
-      console.log(`[HerculesSurveyGenerator] Found questionnaire text input. AI generated answer: "${answerToUse}"`);
+      console.log(`[HerculesSurveyGenerator] Found questionnaire text input. AI generated FULL answer (${answerToUse.length} chars): "${answerToUse}"`);
       await questionnaireInput.fill(answerToUse);
       await this.page.waitForTimeout(500);
       console.log('[HerculesSurveyGenerator] Pressing Enter on questionnaire text input...');

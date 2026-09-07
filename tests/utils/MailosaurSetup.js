@@ -9,7 +9,7 @@ async function setupMailosaurAccount(browser) {
     const mailPage = await mailContext.newPage();
     
     // Log into Mailosaur FIRST
-    const serverId = 'kzdzyaot';
+    const serverId = process.env.MAILOSAUR_SERVER_ID || 'rrepibcg';
     const mailosaurUtility = new MailosaurUtility(mailPage, mailContext);
     await mailosaurUtility.login('ferad73521@neowd.com', 'Karthik@8342', serverId);
     

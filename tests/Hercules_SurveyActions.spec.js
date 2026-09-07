@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const HerculesHomePage = require('../pages/hercules/HerculesHomePage');
 const HerculesLoginPage = require('../pages/hercules/HerculesLoginPage');
+const TEST_CREDS = require('../config/testCredentials');
 
 test.describe('Hercules Dashboard Survey Actions', () => {
 
@@ -30,7 +31,7 @@ test.describe('Hercules Dashboard Survey Actions', () => {
     await popup.waitForLoadState('domcontentloaded');
     
     const GOOGLE_EMAIL = process.env.GOOGLE_EMAIL || 'karthik@jupitermeta.io';
-    const GOOGLE_PASSWORD = process.env.GOOGLE_PASSWORD || 'Karthik@8342';
+    const GOOGLE_PASSWORD = process.env.GOOGLE_PASSWORD || TEST_CREDS.google.password;
     
     console.log(`Filling Google Email: ${GOOGLE_EMAIL}...`);
     const emailInput = popup.getByRole('textbox', { name: 'Email or phone' });

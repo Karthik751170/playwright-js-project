@@ -2,6 +2,7 @@ const { test, chromium } = require('playwright');
 const HerculesHomePage = require('./pages/hercules/HerculesHomePage');
 const HerculesSignupPage = require('./pages/hercules/HerculesSignupPage');
 const fs = require('fs');
+const TEST_CREDS = require('./config/testCredentials');
 
 (async () => {
   const browser = await chromium.launch({ headless: false });
@@ -33,7 +34,7 @@ const fs = require('fs');
   await signupPage.signUpWithEmail(tempEmail);
   
   console.log('Entering password on the post-signup screen...');
-  await signupPage.createPassword('TestPassword@2026!');
+  await signupPage.createPassword(TEST_CREDS.signupPassword);
 
   console.log('Opening 1secmail to check for verification email...');
   await page2.bringToFront();

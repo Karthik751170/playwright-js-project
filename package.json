@@ -25,7 +25,9 @@
     "allure:clear": "rm -rf allure-results allure-report",
     "docker:build": "docker compose build",
     "docker:test": "docker compose up --build --exit-code-from playwright-tests",
-    "docker:security": "docker compose up --build --exit-code-from playwright-tests"
+    "docker:security": "docker compose up --build --exit-code-from playwright-tests",
+    "audit:browser": "playwright test tests/security/PlaywrightSecurityAudit.spec.js",
+    "security:all": "node scripts/fullSecuritySuite.js && playwright test tests/security/AdvancedAppSecAudit.spec.js tests/security/PlaywrightSecurityAudit.spec.js"
   },
   "keywords": [],
   "author": "",

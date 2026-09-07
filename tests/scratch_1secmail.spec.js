@@ -1,5 +1,6 @@
 const { test, expect } = require('@playwright/test');
 const HerculesSignupPage = require('../pages/hercules/HerculesSignupPage');
+const TEST_CREDS = require('../config/testCredentials');
 
 test('Test 1secmail API for Hercules Verification', async ({ context }) => {
     test.setTimeout(120000); // 2 minutes
@@ -22,7 +23,7 @@ test('Test 1secmail API for Hercules Verification', async ({ context }) => {
 
     const signupPage = new HerculesSignupPage(herculesPage);
     await signupPage.signUpWithEmail(tempEmail);
-    await signupPage.createPassword('Karthik@8342');
+    await signupPage.createPassword(TEST_CREDS.signupPassword);
     
     console.log('Signup complete on Hercules. Waiting for email via API...');
 

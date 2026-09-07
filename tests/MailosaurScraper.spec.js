@@ -1,5 +1,6 @@
 const { test, expect } = require('@playwright/test');
 const fs = require('fs');
+const TEST_CREDS = require('../config/testCredentials');
 
 test.describe('Mailosaur Login Scraper', () => {
 
@@ -12,7 +13,7 @@ test.describe('Mailosaur Login Scraper', () => {
     console.log('Waiting for email input...');
     const emailInput = page.locator('input[type="email"], input[name="email"], input[placeholder*="email" i]');
     await emailInput.waitFor({ state: 'visible' });
-    await emailInput.fill('ferad73521@neowd.com');
+    await emailInput.fill(TEST_CREDS.mailosaur.email);
     
     // Check if password input is on the same page or if we need to click Next first
     const passwordInput = page.locator('input[type="password"], input[name="password"]');
@@ -29,7 +30,7 @@ test.describe('Mailosaur Login Scraper', () => {
     }
     
     console.log('Filling in password...');
-    await passwordInput.first().fill('Karthik@8342');
+    await passwordInput.first().fill(TEST_CREDS.mailosaur.password);
     
     console.log('Submitting login form...');
     const submitBtn = page.locator('button[type="submit"], button:has-text("Log in"), button:has-text("Sign in")');

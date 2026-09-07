@@ -2,6 +2,7 @@ const { test, chromium } = require('playwright');
 const HerculesHomePage = require('./pages/hercules/HerculesHomePage');
 const HerculesLoginPage = require('./pages/hercules/HerculesLoginPage');
 const fs = require('fs');
+const TEST_CREDS = require('./config/testCredentials');
 
 (async () => {
   const browser = await chromium.launch({ headless: false });
@@ -20,12 +21,12 @@ const fs = require('fs');
   await loginBtn.click();
   
   console.log('Logging in with provided credentials...');
-  await loginPage.loginWithEmail('ferad73521@neowd.com');
+  await loginPage.loginWithEmail(TEST_CREDS.mailosaur.email);
   
   console.log('Entering password...');
   const passwordInput = page.locator("input[type='password'], input[placeholder='Password']");
   await passwordInput.waitFor({ state: 'visible' });
-  await passwordInput.fill('Karthik@8342');
+  await passwordInput.fill(TEST_CREDS.mailosaur.password);
   
   console.log('Clicking final Log In button...');
   const submitLoginBtn = page.locator("button:has-text('Log In'), button:has-text('Submit'), button[type='submit']").last();

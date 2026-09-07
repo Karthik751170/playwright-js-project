@@ -15,47 +15,140 @@ class SecurityReporter {
   }
 
   loadSuppressions() {
+    let raw = [];
     try {
       const configPath = path.join(process.cwd(), 'config', 'security-suppressions.json');
       if (fs.existsSync(configPath)) {
-        const raw = fs.readFileSync(configPath, 'utf-8');
-        const parsed = JSON.parse(raw);
-        return parsed.suppressions || [];
+        const parsed = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+        raw = parsed.suppressions || [];
       }
     } catch (e) {
       console.warn('[SecurityReporter] Warning: Unable to parse security-suppressions.json:', e.message);
+      return [];
     }
-    return [];
+
+    // A suppression silences a real finding, so it must be fully specified.
+    // Anything missing a code, target, expiry or approver is discarded loudly
+    // rather than silently granting a blanket pass.
+    return raw.filter((sup) => {
+      const missing = ['code', 'target', 'expiresAt', 'approvedBy'].filter((k) => !sup[k]);
+      if (missing.length > 0) {
+        console.warn(
+          `[SecurityReporter] Ignoring malformed suppression ${sup.code || '(no code)'}: ` +
+          `missing required field(s) ${missing.join(', ')}. Finding will NOT be suppressed.`
+        );
+        return false;
+      }
+      if (Number.isNaN(Date.parse(sup.expiresAt))) {
+        console.warn(`[SecurityReporter] Ignoring suppression ${sup.code}: unparseable expiresAt "${sup.expiresAt}".`);
+        return false;
+      }
+      return true;
+    });
+  }
+
+  /**
+   * Resolves whether a finding is covered by an in-date, in-scope suppression.
+   * Matching requires the code AND the target to line up: a risk accepted on
+   * one host is not accepted everywhere. Expired suppressions do not suppress —
+   * they are reported as blocking so stale exceptions cannot hide a regression.
+   * @returns {{ state: 'NONE' | 'ACTIVE' | 'EXPIRED', suppression?: object }}
+   */
+  resolveSuppression(finding) {
+    const candidates = this.suppressions.filter((sup) => {
+      if (sup.code !== finding.code) return false;
+      if (sup.target === '*') return true;
+      if (sup.target === this.targetUrl) return true;
+      // Tolerate a trailing-slash mismatch between config and the live target.
+      return sup.target.replace(/\/$/, '') === (this.targetUrl || '').replace(/\/$/, '');
+    });
+
+    if (candidates.length === 0) return { state: 'NONE' };
+
+    const now = Date.now();
+    const active = candidates.find((sup) => Date.parse(sup.expiresAt) >= now);
+    if (active) return { state: 'ACTIVE', suppression: active };
+
+    // Every candidate is past its review date.
+    const mostRecent = candidates.sort((a, b) => Date.parse(b.expiresAt) - Date.parse(a.expiresAt))[0];
+    return { state: 'EXPIRED', suppression: mostRecent };
   }
 
   logFinding(finding) {
-    // Check if this finding is triaged in suppressions
-    const suppression = this.suppressions.find(s => s.code === finding.code);
-    if (suppression && finding.status !== 'PASS') {
-      finding.status = 'SUPPRESSED';
-      finding.suppressionReason = suppression.reason;
-      finding.suppressionApprovedBy = suppression.approvedBy;
+    if (finding.status !== 'PASS') {
+      const { state, suppression } = this.resolveSuppression(finding);
+
+      if (state === 'ACTIVE') {
+        finding.originalStatus = finding.status;
+        finding.status = 'SUPPRESSED';
+        finding.suppressionReason = suppression.reason;
+        finding.suppressionApprovedBy = suppression.approvedBy;
+        finding.suppressionExpiresAt = suppression.expiresAt;
+      } else if (state === 'EXPIRED') {
+        // Keep the real status and mark it blocking: the accepted-risk window closed.
+        finding.suppressionExpired = true;
+        finding.suppressionExpiresAt = suppression.expiresAt;
+        finding.suppressionReason = suppression.reason;
+        finding.suppressionApprovedBy = suppression.approvedBy;
+        console.warn(
+          `  ⏰ [EXPIRED SUPPRESSION] ${finding.code} — accepted risk lapsed on ${suppression.expiresAt} ` +
+          `(approved by ${suppression.approvedBy}). Re-triage required; finding is now blocking.`
+        );
+      }
     }
 
     this.records.push(finding);
 
-    const icons = { PASS: '✅', WARN: '⚠️ ', FAIL: '❌', SUPPRESSED: '🛡️' };
-    console.log(`  ${icons[finding.status] || '•'} [${finding.status}] ${finding.code} - ${finding.name}`);
+    const icons = { PASS: '✅', WARN: '⚠️ ', FAIL: '❌', SUPPRESSED: '🛡️', INCONCLUSIVE: '❓' };
+    const suffix = finding.suppressionExpired ? ' (suppression EXPIRED)' : '';
+    console.log(`  ${icons[finding.status] || '•'} [${finding.status}] ${finding.code} - ${finding.name}${suffix}`);
   }
 
   getMetrics() {
-    const passCount = this.records.filter(r => r.status === 'PASS').length;
-    const warnCount = this.records.filter(r => r.status === 'WARN').length;
-    const failCount = this.records.filter(r => r.status === 'FAIL').length;
-    const suppressedCount = this.records.filter(r => r.status === 'SUPPRESSED').length;
+    const by = (status) => this.records.filter((r) => r.status === status).length;
+    const passCount = by('PASS');
+    const warnCount = by('WARN');
+    const failCount = by('FAIL');
+    const suppressedCount = by('SUPPRESSED');
+    const inconclusiveCount = by('INCONCLUSIVE');
     const totalCount = this.records.length;
-    const complianceScore = totalCount > 0 ? Math.round(((passCount + suppressedCount) / totalCount) * 100) : 0;
+    const expiredSuppressionCount = this.records.filter((r) => r.suppressionExpired).length;
 
-    return { passCount, warnCount, failCount, suppressedCount, totalCount, complianceScore };
+    // Only controls that actually reached a verdict count toward the score.
+    // Suppressed (accepted risk) and INCONCLUSIVE (probe never reached the sink)
+    // are excluded from BOTH sides of the ratio so neither inflates compliance.
+    const assessedCount = totalCount - suppressedCount - inconclusiveCount;
+    const complianceScore = assessedCount > 0 ? Math.round((passCount / assessedCount) * 100) : 0;
+
+    return {
+      passCount,
+      warnCount,
+      failCount,
+      suppressedCount,
+      inconclusiveCount,
+      expiredSuppressionCount,
+      assessedCount,
+      totalCount,
+      complianceScore,
+    };
   }
 
-  generateHtmlReport(filename = 'owasp-enterprise-10-10-report.html') {
-    const { passCount, warnCount, failCount, suppressedCount, totalCount, complianceScore } = this.getMetrics();
+  /**
+   * Blocking failures for CI. FAIL findings block, and so does any finding whose
+   * accepted-risk suppression has lapsed.
+   */
+  getBlockingFindings() {
+    return this.records.filter((r) => r.status === 'FAIL' || r.suppressionExpired);
+  }
+
+  /** Process exit code for CI gating: 1 when anything blocking is present. */
+  getExitCode() {
+    return this.getBlockingFindings().length > 0 ? 1 : 0;
+  }
+
+  generateHtmlReport(filename = 'dast-security-audit-report.html') {
+    const { passCount, warnCount, failCount, suppressedCount, inconclusiveCount,
+            expiredSuppressionCount, assessedCount, totalCount, complianceScore } = this.getMetrics();
 
     if (!fs.existsSync(this.outputDir)) {
       fs.mkdirSync(this.outputDir, { recursive: true });
@@ -80,6 +173,7 @@ class SecurityReporter {
       --warn: #f59e0b;
       --fail: #ef4444;
       --suppressed: #818cf8;
+      --inconclusive: #64748b;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
     body { background: var(--bg); color: var(--text); padding: 40px 20px; }
@@ -99,6 +193,7 @@ class SecurityReporter {
     .val-score { color: var(--accent); }
     .val-pass { color: var(--pass); }
     .val-suppressed { color: var(--suppressed); }
+    .val-inconclusive { color: var(--inconclusive); }
     .val-warn { color: var(--warn); }
     .val-fail { color: var(--fail); }
     
@@ -117,6 +212,7 @@ class SecurityReporter {
     .finding-card.status-SUPPRESSED { border-left: 4px solid var(--suppressed); }
     .finding-card.status-WARN { border-left: 4px solid var(--warn); }
     .finding-card.status-FAIL { border-left: 4px solid var(--fail); }
+    .finding-card.status-INCONCLUSIVE { border-left: 4px solid var(--inconclusive); }
     
     .card-header { padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
     .card-header:hover { background: rgba(255,255,255,0.02); }
@@ -126,6 +222,7 @@ class SecurityReporter {
     .badge-SUPPRESSED { background: rgba(129, 140, 248, 0.15); color: var(--suppressed); }
     .badge-WARN { background: rgba(245, 158, 11, 0.15); color: var(--warn); }
     .badge-FAIL { background: rgba(239, 68, 68, 0.15); color: var(--fail); }
+    .badge-INCONCLUSIVE { background: rgba(100, 116, 139, 0.18); color: #cbd5e1; }
     
     .finding-code { font-family: monospace; font-size: 12px; color: var(--muted); }
     .finding-name { font-weight: 600; font-size: 14px; color: #fff; }
@@ -140,6 +237,11 @@ class SecurityReporter {
     .proof-box .p-label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.05em; }
     .proof-box .p-val { font-size: 13px; color: #e2e8f0; line-height: 1.4; }
     
+    .expiry-banner { background: rgba(239, 68, 68, 0.12); border: 1px solid var(--fail); border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; }
+    .expiry-banner .t { font-weight: 800; color: var(--fail); font-size: 14px; margin-bottom: 4px; }
+    .expiry-banner .d { font-size: 13px; color: #fecaca; }
+    .scope-note { font-size: 12px; color: var(--muted); margin-bottom: 18px; line-height: 1.5; }
+    
     .evidence-block { background: #020617; border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-family: monospace; font-size: 12px; color: #38bdf8; overflow-x: auto; white-space: pre-wrap; word-break: break-all; }
   </style>
 </head>
@@ -150,15 +252,29 @@ class SecurityReporter {
       <div class="meta">
         <span><strong>Target:</strong> ${this.targetUrl}</span>
         <span><strong>Audit Time:</strong> ${new Date().toUTCString()}</span>
-        <span><strong>Total Controls Verified:</strong> ${totalCount}</span>
+        <span><strong>Controls Executed:</strong> ${totalCount}</span>
+        <span><strong>Reached A Verdict:</strong> ${assessedCount}</span>
         <span><strong>Scope Verified:</strong> Authorized Host</span>
       </div>
+    </div>
+
+    ${expiredSuppressionCount > 0 ? `
+    <div class="expiry-banner">
+      <div class="t">⏰ ${expiredSuppressionCount} accepted-risk suppression(s) have EXPIRED</div>
+      <div class="d">These findings are no longer silenced and are counted as blocking. Re-triage them in config/security-suppressions.json or remediate the underlying issue.</div>
+    </div>` : ''}
+
+    <div class="scope-note">
+      <strong>How to read this report:</strong> the score is ${passCount} passed out of ${assessedCount} controls that reached a verdict.
+      ${suppressedCount} triaged and ${inconclusiveCount} inconclusive control(s) are excluded from both sides of that ratio.
+      <em>Inconclusive</em> means the probe could not reach an exercisable sink (for example, an injection payload sent to a
+      static page that never reads the parameter) — it is evidence of nothing and must not be read as a pass.
     </div>
 
     <div class="summary-grid">
       <div class="metric-card active" id="card-all" onclick="applyFilter('ALL')">
         <div class="val val-score">${complianceScore}%</div>
-        <div class="label">Compliance Score</div>
+        <div class="label">Pass Rate (${passCount}/${assessedCount} assessed)</div>
       </div>
       <div class="metric-card" id="card-pass" onclick="applyFilter('PASS')">
         <div class="val val-pass">${passCount}</div>
@@ -176,6 +292,10 @@ class SecurityReporter {
         <div class="val val-fail">${failCount}</div>
         <div class="label">Critical / High Flaws</div>
       </div>
+      <div class="metric-card" id="card-inconclusive" onclick="applyFilter('INCONCLUSIVE')">
+        <div class="val val-inconclusive">${inconclusiveCount}</div>
+        <div class="label">Inconclusive / No Sink</div>
+      </div>
     </div>
 
     <div class="filter-bar">
@@ -185,6 +305,7 @@ class SecurityReporter {
         <button class="pill" id="pill-suppressed" onclick="applyFilter('SUPPRESSED')">🛡️ Triaged (${suppressedCount})</button>
         <button class="pill" id="pill-warn" onclick="applyFilter('WARN')">⚠️ Hardening (${warnCount})</button>
         <button class="pill" id="pill-fail" onclick="applyFilter('FAIL')">❌ High/Critical (${failCount})</button>
+        <button class="pill" id="pill-inconclusive" onclick="applyFilter('INCONCLUSIVE')">❓ Inconclusive (${inconclusiveCount})</button>
       </div>
       <button class="btn-toggle-all" onclick="toggleAllCards()">Expand / Collapse All Details</button>
     </div>
@@ -221,8 +342,15 @@ class SecurityReporter {
             </div>
             ${r.status === 'SUPPRESSED' ? `
             <div class="proof-box" style="margin-bottom: 14px; border-left: 3px solid var(--suppressed);">
-              <div class="p-label" style="color: var(--suppressed);">🛡️ Triaged & Accepted Risk Justification (Approved by: ${r.suppressionApprovedBy || 'SecOps'})</div>
+              <div class="p-label" style="color: var(--suppressed);">🛡️ Triaged & Accepted Risk (Approved by: ${r.suppressionApprovedBy}, expires ${r.suppressionExpiresAt})</div>
               <div class="p-val">${r.suppressionReason}</div>
+              <div class="p-val" style="margin-top: 6px; color: var(--muted);">Underlying status without this suppression: <strong>${r.originalStatus}</strong></div>
+            </div>` : ''}
+            ${r.suppressionExpired ? `
+            <div class="proof-box" style="margin-bottom: 14px; border-left: 3px solid var(--fail);">
+              <div class="p-label" style="color: var(--fail);">⏰ Suppression EXPIRED on ${r.suppressionExpiresAt} (was approved by ${r.suppressionApprovedBy})</div>
+              <div class="p-val">Original justification: ${r.suppressionReason}</div>
+              <div class="p-val" style="margin-top: 6px;">The accepted-risk window has closed, so this finding is reported at its real severity and blocks CI.</div>
             </div>` : ''}
             <div class="proof-box">
               <div class="p-label">Raw Trace & Verification Proof</div>

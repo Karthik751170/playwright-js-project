@@ -1,6 +1,38 @@
 const HerculesHomePage = require('../../pages/hercules/HerculesHomePage');
 const HerculesSignupPage = require('../../pages/hercules/HerculesSignupPage');
 const MailosaurUtility = require('../../pages/utils/MailosaurUtility');
+const TEST_CREDS = require('../../config/testCredentials');
+
+/**
+ * Credentials come from the environment. They were previously hardcoded in this
+ * file, which committed a live Mailosaur password to git history -- rotate that
+ * password if it has not been rotated already.
+ *
+ * Required: MAILOSAUR_UI_EMAIL, MAILOSAUR_UI_PASSWORD, MAILOSAUR_SERVER_ID
+ */
+function requireMailosaurCredentials() {
+    const email = process.env.MAILOSAUR_UI_EMAIL;
+    const password = process.env.MAILOSAUR_UI_PASSWORD;
+    const serverId = process.env.MAILOSAUR_SERVER_ID;
+    const missing = [
+        !email && 'MAILOSAUR_UI_EMAIL',
+        !password && 'MAILOSAUR_UI_PASSWORD',
+        !serverId && 'MAILOSAUR_SERVER_ID',
+    ].filter(Boolean);
+
+    if (missing.length > 0) {
+        throw new Error(
+            `[MailosaurSetup] Missing required environment variable(s): ${missing.join(', ')}.\n` +
+            `Set them in your shell or a .env file (which is git-ignored) before running account-provisioning tests.`
+        );
+    }
+    return { email, password, serverId };
+}
+
+/** True when account provisioning can run at all; lets specs skip cleanly instead of failing opaquely. */
+function hasMailosaurCredentials() {
+    return Boolean(process.env.MAILOSAUR_UI_EMAIL && process.env.MAILOSAUR_UI_PASSWORD && process.env.MAILOSAUR_SERVER_ID);
+}
 
 async function setupMailosaurAccount(browser) {
     // 1. Set up Mailosaur context with clipboard permissions
@@ -9,9 +41,10 @@ async function setupMailosaurAccount(browser) {
     const mailPage = await mailContext.newPage();
     
     // Log into Mailosaur FIRST
-    const serverId = 'kzdzyaot';
+    const credentials = requireMailosaurCredentials();
+    const serverId = credentials.serverId;
     const mailosaurUtility = new MailosaurUtility(mailPage, mailContext);
-    await mailosaurUtility.login('ferad73521@neowd.com', 'Karthik@8342', serverId);
+    await mailosaurUtility.login(credentials.email, credentials.password, serverId);
     
     // Extract exact domain/email from Mailosaur Dashboard
     console.log('[MailosaurSetup] Clicking copy domain button...');
@@ -43,11 +76,17 @@ async function setupMailosaurAccount(browser) {
 
     console.log('[MailosaurSetup] Navigating to Hercules Homepage...');
     await homePage.navigate();
+
+    // Snapshot cookies BEFORE authentication so callers can verify the session
+    // identifier is rotated across the auth boundary (session fixation).
+    const preAuthCookies = await herculesContext.cookies();
+    console.log(`[MailosaurSetup] Captured ${preAuthCookies.length} pre-authentication cookie(s).`);
+
     await homePage.clickSignUp();
     
     console.log(`[MailosaurSetup] Signing up with email: ${tempEmail}`);
     await signupPage.signUpWithEmail(tempEmail);
-    await signupPage.createPassword('TestPassword@2026!');
+    await signupPage.createPassword(TEST_CREDS.signupPassword);
 
     // 3. Wait for Verification Email on Mailosaur UI
     console.log('[MailosaurSetup] Opening Mailosaur to check for verification email...');
@@ -105,7 +144,7 @@ async function setupMailosaurAccount(browser) {
     
     console.log('[MailosaurSetup] Account creation complete and dashboard loaded! Closing mail context to save memory.');
     await mailContext.close().catch(() => {});
-    return { page, herculesContext };
+    return { page, herculesContext, preAuthCookies, email: tempEmail };
 }
 
-module.exports = { setupMailosaurAccount };
+module.exports = { setupMailosaurAccount, hasMailosaurCredentials, requireMailosaurCredentials };

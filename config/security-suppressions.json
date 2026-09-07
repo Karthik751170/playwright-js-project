@@ -1,11 +1,21 @@
 {
-  "version": "1.0",
-  "description": "Security findings triage and accepted risk suppression configuration for CI/CD gates.",
+  "version": "2.0",
+  "description": "Accepted-risk suppressions for the security CI gate. Every field below is REQUIRED and enforced by utils/security/SecurityReporter.js: an entry missing code, target, expiresAt or approvedBy is discarded with a warning and the finding is NOT suppressed. Matching is per-code AND per-target (use \"*\" to accept a risk on every origin), and an entry past its expiresAt stops suppressing and becomes a BLOCKING finding so stale exceptions cannot hide a regression.",
+  "fields": {
+    "code": "Finding code to suppress, e.g. A05-TRACE.",
+    "target": "Exact origin the acceptance applies to, or \"*\" for all origins.",
+    "reason": "Why the risk is accepted. Shown verbatim in the HTML report.",
+    "severity": "Severity of the underlying finding.",
+    "status": "ACCEPTED_RISK.",
+    "approvedBy": "Who accepted it.",
+    "reviewDate": "When it was last reviewed (YYYY-MM-DD).",
+    "expiresAt": "When the acceptance lapses (YYYY-MM-DD). After this date the finding blocks CI."
+  },
   "suppressions": [
     {
       "code": "A05-TRACE",
       "target": "https://dev.hercules.works",
-      "reason": "Next.js / GCP edge gateway returns HTTP 500 on TRACE verb instead of 405. Request is rejected and does not reflect headers (no Cross-Site Tracing risk).",
+      "reason": "Next.js / GCP edge gateway returns HTTP 500 on the TRACE verb instead of 405. The request is rejected and the response does not reflect request headers, so there is no Cross-Site Tracing risk.",
       "severity": "Low",
       "status": "ACCEPTED_RISK",
       "approvedBy": "SecOps-Team",

@@ -1,49 +1,212 @@
-name: 🛡️ Enterprise AppSec & Security Quality Gate
+name: Security Quality Gate
 
 on:
   push:
-    branches: [ main, feature/** ]
+    branches: [ main, 'feature/**', 'fix/**' ]
   pull_request:
     branches: [ main ]
   schedule:
-    - cron: '0 2 * * 1' # Weekly security audit on Mondays at 2:00 AM UTC
+    - cron: '0 2 * * 1' # Weekly audit, Mondays 02:00 UTC
+  workflow_dispatch:      # Manual trigger, also gates the intrusive ZAP active scan
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TARGET_URL: ${{ secrets.TARGET_URL || 'https://dev.hercules.works' }}
+  CORE_API_URL: ${{ secrets.CORE_API_URL || 'https://devapi.hercules.works' }}
+  AI_API_URL: ${{ secrets.AI_API_URL || 'https://devapi-ai.hercules.works' }}
 
 jobs:
-  security-audit:
-    name: 🔒 OWASP Top 10 & Multi-Vector Security Scan
+  # ---------------------------------------------------------------------------
+  # Fast, always-on gate. Blocks on FAIL findings and on expired suppressions.
+  # ---------------------------------------------------------------------------
+  dast-audit:
+    name: DAST audit & strict API gates
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
+    env:
+      # `secrets` cannot be referenced from a step-level `if`, so expose it as
+      # env here and branch on env.HAS_STORAGE_STATE below.
+      HAS_STORAGE_STATE: ${{ secrets.SECURITY_STORAGE_STATE_JSON != '' }}
 
     steps:
-      - name: 📥 Checkout Code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: 🟢 Setup Node.js v24
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: 'npm'
 
-      - name: 📦 Install Dependencies
+      - name: Install dependencies
         run: npm ci
 
-      - name: 🎭 Install Playwright Browsers
+      - name: Install Playwright Chromium
         run: npx playwright install chromium --with-deps
 
-      - name: 🚀 Run 16-Engine Master Security Audit (DAST + Transport + SQLi)
+      # Restores an authenticated storage state when the secret is configured.
+      # Without it the authenticated controls report INCONCLUSIVE rather than
+      # PASS, so a missing secret degrades coverage visibly instead of silently.
+      - name: Restore authenticated session (optional)
+        if: env.HAS_STORAGE_STATE == 'true'
+        run: |
+          mkdir -p .auth
+          printf '%s' "$STORAGE_STATE_JSON" > .auth/apple-user.json
+          echo "SECURITY_STORAGE_STATE=$PWD/.auth/apple-user.json" >> "$GITHUB_ENV"
+          echo "Authenticated storage state restored."
+        env:
+          STORAGE_STATE_JSON: ${{ secrets.SECURITY_STORAGE_STATE_JSON }}
+
+      - name: Warn when running unauthenticated
+        if: env.HAS_STORAGE_STATE != 'true'
+        run: |
+          echo "::warning title=Reduced scan coverage::No SECURITY_STORAGE_STATE_JSON secret is configured, so authenticated authorization, BOLA, injection and business-logic controls cannot reach authenticated code paths. They will be reported INCONCLUSIVE, not PASS."
+
+      # This step now fails the build on any blocking finding. Previously the
+      # script always returned normally, so a FAIL printed an X and went green.
+      - name: Multi-engine DAST audit (gates the build)
         run: node scripts/fullSecuritySuite.js
-        env:
-          TARGET_URL: ${{ secrets.TARGET_URL || 'https://dev.hercules.works' }}
 
-      - name: 🛡️ Run Advanced API Security & Strict Gate Assertions
-        run: npx playwright test tests/security/AdvancedAppSecAudit.spec.js
-        env:
-          TARGET_URL: ${{ secrets.TARGET_URL || 'https://dev.hercules.works' }}
+      - name: Strict API security gates
+        if: always()
+        run: npx playwright test tests/security/AdvancedAppSecAudit.spec.js --reporter=list
 
-      - name: 📊 Upload Interactive Security HTML Report
+      - name: Browser security posture audit
+        if: always()
+        run: npx playwright test tests/security/PlaywrightSecurityAudit.spec.js --reporter=list
+
+      - name: Upload security reports
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: owasp-enterprise-security-report
-          path: test-results/security/owasp-enterprise-10-10-report.html
+          name: security-reports
+          path: |
+            reports/security/
+            playwright-report/
           retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  # Stateful two-tenant tests. Need throwaway-account provisioning, so they run
+  # only when Mailosaur credentials are configured; otherwise they skip visibly.
+  # ---------------------------------------------------------------------------
+  stateful-session-tests:
+    name: Two-tenant BOLA & session lifecycle
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: ${{ github.event_name == 'schedule' || github.event_name == 'pull_request' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium --with-deps
+
+      - name: Two-tenant BOLA & session lifecycle
+        run: npx playwright test tests/security/StatefulSessionSecurity.spec.js --reporter=list
+        env:
+          MAILOSAUR_UI_EMAIL: ${{ secrets.MAILOSAUR_UI_EMAIL }}
+          MAILOSAUR_UI_PASSWORD: ${{ secrets.MAILOSAUR_UI_PASSWORD }}
+          MAILOSAUR_SERVER_ID: ${{ secrets.MAILOSAUR_SERVER_ID }}
+          HERCULES_SIGNUP_PASSWORD: ${{ secrets.HERCULES_SIGNUP_PASSWORD }}
+
+      - name: Upload traces
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stateful-session-traces
+          path: test-results/
+          retention-days: 14
+
+  # ---------------------------------------------------------------------------
+  # OWASP ZAP DAST. Previously defined in npm scripts but never wired into CI,
+  # so the strongest tests in the suite never ran automatically.
+  # ---------------------------------------------------------------------------
+  zap-dast:
+    name: OWASP ZAP passive & active scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    # Active scanning is intrusive: keep it off every push.
+    if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium --with-deps
+
+      - name: Start OWASP ZAP daemon
+        run: |
+          docker run -d --name zap -p 8080:8080 ghcr.io/zaproxy/zaproxy:stable \
+            zap.sh -daemon -host 0.0.0.0 -port 8080 \
+            -config api.disablekey=true \
+            -config api.addrs.addr.name=.* \
+            -config api.addrs.addr.regex=true
+
+      - name: Wait for ZAP to become ready
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fsS "http://127.0.0.1:8080/JSON/core/view/version/" >/dev/null 2>&1; then
+              echo "ZAP is ready: $(curl -fsS http://127.0.0.1:8080/JSON/core/view/version/)"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "ZAP daemon did not become ready in 300s"
+          docker logs zap | tail -50
+          exit 1
+
+      - name: Passive scan
+        run: npx playwright test tests/security/ZapPassiveScan.spec.js --config=playwright.zap.config.js --reporter=list
+        env:
+          ZAP_URL: http://127.0.0.1:8080
+
+      - name: Targeted SQLi & SSRF active scan
+        if: always()
+        run: npx playwright test tests/security/ZapSqlInjectionAndSsrf.spec.js --config=playwright.zap.config.js --reporter=list
+        env:
+          ZAP_URL: http://127.0.0.1:8080
+
+      - name: Full active scan
+        if: always()
+        run: npx playwright test tests/security/ZapActiveScan.spec.js --config=playwright.zap.config.js --reporter=list
+        env:
+          ZAP_URL: http://127.0.0.1:8080
+
+      - name: Collect ZAP daemon logs
+        if: failure()
+        run: docker logs zap | tail -100
+
+      - name: Upload ZAP reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zap-reports
+          path: test-results/security/
+          retention-days: 30
+
+      - name: Stop ZAP
+        if: always()
+        run: docker rm -f zap || true

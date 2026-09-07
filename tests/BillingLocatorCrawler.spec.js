@@ -3,6 +3,7 @@ const fs = require('fs');
 const HerculesHomePage = require('../pages/hercules/HerculesHomePage');
 const HerculesSignupPage = require('../pages/hercules/HerculesSignupPage');
 const MailosaurUtility = require('../pages/utils/MailosaurUtility');
+const TEST_CREDS = require('../config/testCredentials');
 
 const results = {};
 
@@ -85,14 +86,14 @@ test.describe('Wallet and Billing Locator Crawler', () => {
     
     console.log(`Signing up with email: ${tempEmail}`);
     await signupPage.signUpWithEmail(tempEmail);
-    await signupPage.createPassword('TestPassword@2026!');
+    await signupPage.createPassword(TEST_CREDS.signupPassword);
 
     // 2. Wait for Verification Email on Mailosaur UI
     console.log('Opening Mailosaur to check for verification email...');
     await mailPage.bringToFront();
     
     const mailosaurUtility = new MailosaurUtility(mailPage, mailContext);
-    await mailosaurUtility.login('ferad73521@neowd.com', 'Karthik@8342', serverId);
+    await mailosaurUtility.login(TEST_CREDS.mailosaur.email, TEST_CREDS.mailosaur.password, serverId);
     let newPage = await mailosaurUtility.fetchVerificationLink();
     
     // Replace the main page variable

@@ -2,6 +2,7 @@ const { test } = require('@playwright/test');
 const { setupMailosaurAccount } = require('./utils/MailosaurSetup');
 const HerculesCampaignManager = require('../pages/hercules/HerculesCampaignManager');
 const HerculesPaymentModal = require('../pages/hercules/HerculesPaymentModal');
+const TEST_CREDS = require('../config/testCredentials');
 
 test.use({ storageState: { cookies: [], origins: [] } });
 test.setTimeout(120000);
@@ -17,7 +18,7 @@ test('Quick Verify Locators', async ({ page }) => {
     
     const passwordInput = page.locator('input[type="password"], input[name="password"]').first();
     if (await passwordInput.isVisible()) {
-        await passwordInput.fill('TestPassword@2026!');
+        await passwordInput.fill(TEST_CREDS.existingAccountPassword);
     }
     
     await page.locator('button:has-text("Continue"), button:has-text("Log in"), button[type="submit"]').first().click();
@@ -26,7 +27,7 @@ test('Quick Verify Locators', async ({ page }) => {
     try {
         const pass2 = page.locator('input[type="password"], input[placeholder="Password"]').first();
         await pass2.waitFor({ state: 'visible', timeout: 5000 });
-        await pass2.fill('TestPassword@2026!');
+        await pass2.fill(TEST_CREDS.existingAccountPassword);
         await page.locator('button:has-text("Log in"), button[type="submit"], button:has-text("Continue")').first().click();
     } catch (e) {}
 

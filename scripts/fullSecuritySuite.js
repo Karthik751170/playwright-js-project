@@ -8,6 +8,8 @@ const herculesConfig = require('../config/hercules.config');
 const ScopeGuard = require('../utils/security/ScopeGuard');
 const SecurityReporter = require('../utils/security/SecurityReporter');
 const HERCULES_ENDPOINTS = require('../config/herculesEndpoints');
+const TARGETS = require('../config/securityTargets');
+const { resolveUrl, originLabel } = TARGETS;
 
 const TARGET_URL = process.env.TARGET_URL || herculesConfig.baseUrl || 'https://dev.hercules.works';
 
@@ -186,13 +188,264 @@ async function scanJsBundlesForLeakedSecrets(baseUrl, htmlBody) {
   };
 }
 
-async function runEnterprise10OutOf10Audit() {
-  // Step 0: Validate target scope & authorization
-  ScopeGuard.validateScope(TARGET_URL);
+
+/**
+ * Loads a Cookie header for TARGET_URL from a Playwright storage state, when one
+ * exists. Without it every probe below is stopped at the auth boundary and can
+ * only ever report INCONCLUSIVE -- an unauthenticated scan cannot reach the
+ * authorated code paths where injection and authorization bugs actually live.
+ */
+function loadAuthCookieHeader(targetUrl) {
+  const candidates = [
+    process.env.SECURITY_STORAGE_STATE,
+    path.join(process.cwd(), '.auth', 'apple-user.json'),
+    path.join(process.cwd(), '.auth', 'google-user.json'),
+  ].filter(Boolean);
+
+  for (const authPath of candidates) {
+    try {
+      if (!fs.existsSync(authPath)) continue;
+      const state = JSON.parse(fs.readFileSync(authPath, 'utf-8'));
+      const host = new URL(targetUrl).hostname;
+      const scoped = (state.cookies || []).filter((c) => {
+        const domain = (c.domain || '').replace(/^\./, '');
+        return host === domain || host.endsWith(`.${domain}`);
+      });
+      if (scoped.length > 0) {
+        // The Hercules APIs authenticate with a bearer token; the browser keeps
+        // it in the dragonAccessToken cookie. Send both so the probes work
+        // whether the endpoint reads the cookie or the Authorization header.
+        const accessToken = (scoped.find((c) => c.name === 'dragonAccessToken') || {}).value;
+        return {
+          header: scoped.map((c) => `${c.name}=${c.value}`).join('; '),
+          bearer: accessToken || null,
+          source: path.relative(process.cwd(), authPath),
+          count: scoped.length,
+        };
+      }
+    } catch (e) {
+      console.warn(`[Auth] Could not read storage state ${authPath}: ${e.message}`);
+    }
+  }
+  return null;
+}
+
+const AUTH = loadAuthCookieHeader(TARGET_URL);
+const AUTH_HEADERS = AUTH
+  ? { Cookie: AUTH.header, ...(AUTH.bearer ? { Authorization: `Bearer ${AUTH.bearer}` } : {}) }
+  : {};
+const HAS_AUTH = Boolean(AUTH);
+
+/**
+ * Confirms up front whether the supplied session is actually live. A stale
+ * storage state produces a scan where every authenticated control is
+ * INCONCLUSIVE, and that needs to be stated loudly rather than discovered by
+ * reading 40 findings.
+ */
+async function verifySessionIsLive() {
+  if (!HAS_AUTH) return { live: false, reason: 'no storage state supplied' };
+  const res = await requestUrl(resolveUrl(HERCULES_ENDPOINTS.ACCOUNT.GET_DETAILS), {
+    headers: { ...AUTH_HEADERS, Accept: 'application/json' },
+  });
+  if (res.statusCode === 200) return { live: true, reason: 'account details returned HTTP 200' };
+  return { live: false, reason: `account details returned HTTP ${res.statusCode || 'no response'} - the stored session is expired or invalid` };
+}
+
+/**
+ * High-confidence indicators of private data in a response body. Deliberately
+ * narrow: a false FAIL destroys trust in the gate faster than a missed finding.
+ */
+const PRIVATE_DATA_PATTERNS = [
+  { name: 'JWT / bearer token', regex: /eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]+/ },
+  { name: 'Credential field', regex: /"(?:access_?token|refresh_?token|id_?token|password|passwd|secret|api_?key|private_?key)"\s*:\s*"[^"]+"/i },
+  { name: 'Session cookie value', regex: /"(?:dragonAccessToken|dragonRefreshToken)"\s*:\s*"[^"]+"/i },
+];
+
+const PII_PATTERNS = [
+  { name: 'Email address', regex: /"[^"]*(?:email|mail)[^"]*"\s*:\s*"[^"@]+@[^"]+"/i },
+  { name: 'Phone number', regex: /"(?:phone|mobile|contact_?number)"\s*:\s*"\+?\d[\d\s-]{6,}"/i },
+];
+
+/**
+ * @param {string} body
+ * @param {boolean} includePii - only enable for structured (JSON) bodies; marketing
+ *   HTML legitimately contains contact addresses and would false-positive.
+ */
+function findPrivateData(body, includePii = false) {
+  const patterns = includePii ? [...PRIVATE_DATA_PATTERNS, ...PII_PATTERNS] : PRIVATE_DATA_PATTERNS;
+  return patterns.filter((p) => p.regex.test(body || '')).map((p) => p.name);
+}
+
+function isJsonResponse(res) {
+  return ((res.headers && res.headers['content-type']) || '').toLowerCase().includes('application/json');
+}
+
+function isHtmlResponse(res) {
+  return ((res.headers && res.headers['content-type']) || '').toLowerCase().includes('text/html');
+}
+
+/**
+ * Did the payload actually reach code that could act on it?
+ *
+ * This is the single most important function in this file. The previous version
+ * of this suite fired injection payloads at the marketing root and reported PASS
+ * when nothing happened -- but nothing could ever have happened, because no
+ * backend read the parameter. Anything that did not demonstrably reach an
+ * exercisable sink is UNREACHABLE and must be reported INCONCLUSIVE, never PASS.
+ */
+function classifyProbe(res) {
+  if (!res.statusCode) return 'TRANSPORT_ERROR';
+  if (res.statusCode === 401 || res.statusCode === 403) return 'UNREACHABLE_AUTH';
+  if (res.statusCode === 404 || res.statusCode === 405) return 'UNREACHABLE_ROUTE';
+  // An API path answering with the SPA HTML shell means no API handler ran.
+  if (res.statusCode === 200 && isHtmlResponse(res)) return 'UNREACHABLE_SHELL';
+  return 'EXERCISED';
+}
+
+const PROBE_STATE_LABEL = {
+  TRANSPORT_ERROR: 'transport error - no response',
+  UNREACHABLE_AUTH: 'blocked at auth boundary (401/403) - payload never parsed',
+  UNREACHABLE_ROUTE: 'route/resource absent (404/405) - payload never parsed',
+  UNREACHABLE_SHELL: 'served static SPA shell - no API handler ran',
+  EXERCISED: 'reached application code - payload evaluated',
+};
+
+/**
+ * Real parameterized API endpoints. Injection probes target these rather than
+ * the marketing root, because these are the ones that carry an identifier into
+ * a backend query.
+ */
+const INJECTION_TARGETS = [
+  { label: 'Survey details (?surveyId)', build: (p) => `${HERCULES_ENDPOINTS.SURVEY.GET_SURVEY_DETAILS}?surveyId=${encodeURIComponent(p)}` },
+  { label: 'Survey search (?query)', build: (p) => `${HERCULES_ENDPOINTS.SURVEY.SEARCH_SURVEY}?query=${encodeURIComponent(p)}` },
+  { label: 'Audience template (?id)', build: (p) => `${HERCULES_ENDPOINTS.AUDIENCE.GET_USER_TEMPLATE}?id=${encodeURIComponent(p)}` },
+  { label: 'Survey questions (?surveyId)', build: (p) => HERCULES_ENDPOINTS.DRAGON_QUESTIONS.GET_ALL_QUESTIONS(encodeURIComponent(p)) },
+  { label: 'Survey audience (?surveyId)', build: (p) => HERCULES_ENDPOINTS.AUDIENCE.GET_SURVEY_AUDIENCE(encodeURIComponent(p)) },
+  { label: 'Campaign chat (path id)', build: (p) => HERCULES_ENDPOINTS.CAMPAIGNS.GET_CHAT_BY_ID(encodeURIComponent(p)) },
+  { label: 'Audience report (path surveyId)', build: (p) => HERCULES_ENDPOINTS.ANALYTICS.AUDIENCE_INSIGHTS(encodeURIComponent(p)) },
+  { label: 'Payment history (path surveyId)', build: (p) => HERCULES_ENDPOINTS.BILLING.SURVEY_PAYMENT_HISTORY(encodeURIComponent(p)) },
+];
+
+/**
+ * Fires one payload at every injection target and folds the per-target outcomes
+ * into a single finding:
+ *   any target shows the vulnerability signal -> FAIL
+ *   at least one target was exercised, none vulnerable -> PASS
+ *   nothing was exercised -> INCONCLUSIVE (proves nothing)
+ */
+async function runInjectionProbe({ code, principle, name, payload, rationale, expected, detect, method = 'GET', extraHeaders = {} }) {
+  const results = [];
+
+  for (const target of INJECTION_TARGETS) {
+    const url = resolveUrl(target.build(payload));
+    const res = await requestUrl(url, { method, headers: { ...AUTH_HEADERS, ...extraHeaders } });
+    const state = classifyProbe(res);
+    const signal = state === 'EXERCISED' ? detect(res) : null;
+    results.push({ label: target.label, url, res, state, signal });
+  }
+
+  const exercised = results.filter((r) => r.state === 'EXERCISED');
+  const vulnerable = results.filter((r) => r.signal && r.signal.vulnerable);
+
+  let status;
+  if (vulnerable.length > 0) status = 'FAIL';
+  else if (exercised.length > 0) status = 'PASS';
+  else status = 'INCONCLUSIVE';
+
+  const evidence = results
+    .map((r) => {
+      const detail = r.signal ? ` | detector: ${r.signal.detail}` : '';
+      return `[${r.state}] ${r.label}\n  HTTP ${r.res.statusCode || 'ERR'} ${r.res.statusMessage || r.res.error || ''} ` +
+             `(${r.res.latencyMs}ms, ${r.res.body ? r.res.body.length : 0} bytes)${detail}`;
+    })
+    .join('\n');
+
+  let actual;
+  if (status === 'FAIL') {
+    actual = `VULNERABLE on ${vulnerable.length}/${results.length} endpoint(s): ` +
+      vulnerable.map((v) => `${v.label} (${v.signal.detail})`).join('; ');
+  } else if (status === 'PASS') {
+    actual = `Payload evaluated by application code on ${exercised.length}/${results.length} endpoint(s); ` +
+      `no vulnerability signal on any of them.`;
+  } else {
+    actual = `INCONCLUSIVE: none of the ${results.length} endpoints reached an exercisable sink ` +
+      `(${Array.from(new Set(results.map((r) => PROBE_STATE_LABEL[r.state]))).join('; ')}). ` +
+      `${HAS_AUTH ? 'An authenticated session was supplied.' : 'No authenticated session was supplied -- set SECURITY_STORAGE_STATE or populate .auth/.'}`;
+  }
+
+  return {
+    code,
+    principle,
+    name,
+    status,
+    severity: status === 'FAIL' ? 'Critical' : status === 'INCONCLUSIVE' ? 'Info' : 'High',
+    action: `Sent payload [${payload}] to ${results.length} parameterized API endpoint(s) ` +
+            `${HAS_AUTH ? 'with an authenticated session' : 'unauthenticated'}.`,
+    rationale,
+    expected,
+    actual,
+    evidence,
+    analysis: status === 'FAIL'
+      ? `Confirmed ${name}: the payload changed backend behaviour on a live endpoint. Remediate before release.`
+      : status === 'PASS'
+        ? `Payload was evaluated by real application code on ${exercised.length} endpoint(s) without triggering the vulnerability signal.`
+        : 'No conclusion is possible from this run: the payload never reached code that could act on it. This is NOT evidence that the application is safe.',
+  };
+}
+
+/**
+ * Evaluates whether a request carrying a bogus/forged credential was actually
+ * rejected. Replaces the old `status === 200 && !body.includes('victim')` test,
+ * which passed whenever the leaked data happened not to use the invented field
+ * name the probe was grepping for.
+ */
+function evaluateAuthRejection(res) {
+  const state = classifyProbe(res);
+
+  if (state === 'UNREACHABLE_AUTH') {
+    return { status: 'PASS', detail: `credential rejected with HTTP ${res.statusCode}` };
+  }
+  if (state === 'TRANSPORT_ERROR') {
+    return { status: 'INCONCLUSIVE', detail: `no response (${res.error || 'transport error'})` };
+  }
+  if (state === 'UNREACHABLE_ROUTE') {
+    return { status: 'INCONCLUSIVE', detail: `HTTP ${res.statusCode}: route/resource absent, so no authorization decision was exercised` };
+  }
+  if (state === 'UNREACHABLE_SHELL') {
+    return { status: 'INCONCLUSIVE', detail: 'static SPA shell returned; no API authorization decision was exercised' };
+  }
+  if (res.statusCode >= 500) {
+    return { status: 'WARN', detail: `HTTP ${res.statusCode}: forged credential reached code that crashed rather than being rejected` };
+  }
+
+  const leaks = findPrivateData(res.body, isJsonResponse(res));
+  if (leaks.length > 0) {
+    return { status: 'FAIL', detail: `HTTP ${res.statusCode} returned private data to a forged credential (${leaks.join(', ')})` };
+  }
+  return {
+    status: 'WARN',
+    detail: `HTTP ${res.statusCode} accepted the request instead of rejecting it, though no private data was detected in the ${res.body ? res.body.length : 0}-byte body`,
+  };
+}
+
+/** Worst-first ordering so an aggregate finding takes its status from its worst probe. */
+const STATUS_RANK = { FAIL: 4, WARN: 3, INCONCLUSIVE: 2, PASS: 1 };
+function worstStatus(statuses) {
+  return statuses.sort((a, b) => (STATUS_RANK[b] || 0) - (STATUS_RANK[a] || 0))[0] || 'INCONCLUSIVE';
+}
+
+async function runSecurityAudit() {
+  // Step 0: Validate scope & authorization for EVERY origin we will probe,
+  // not just the web front end.
+  for (const origin of TARGETS.ALL_ORIGINS) {
+    ScopeGuard.validateScope(origin);
+  }
 
   console.log(`\n======================================================================`);
   console.log(`🛡️  AUTOMATED DAST & SECURITY REGRESSION AUDIT`);
-  console.log(`🎯  Target: ${TARGET_URL}`);
+  console.log(`🎯  Web front end: ${TARGETS.WEB_BASE}`);
+  console.log(`🎯  Core API:      ${TARGETS.CORE_API_BASE}`);
+  console.log(`🎯  AI API:        ${TARGETS.AI_API_BASE}`);
   console.log(`🕒  Audit Execution Time: ${new Date().toISOString()}`);
   console.log(`======================================================================\n`);
 
@@ -204,6 +457,27 @@ async function runEnterprise10OutOf10Audit() {
   // -------------------------------------------------------------------------
   // 1. TLS / SSL Certificate & Protocol Deep Inspection
   // -------------------------------------------------------------------------
+  // Step 0b: is the supplied session usable at all?
+  const session = await verifySessionIsLive();
+  console.log(`\n▶ [ENGINE 0] Session Liveness: ${session.live ? 'LIVE' : 'NOT USABLE'} - ${session.reason}`);
+  logFinding({
+    code: 'SESSION-00',
+    principle: 'Scan Coverage',
+    name: 'Authenticated Session Liveness (scan coverage precondition)',
+    status: session.live ? 'PASS' : 'WARN',
+    severity: session.live ? 'Info' : 'Medium',
+    action: `Read ${resolveUrl(HERCULES_ENDPOINTS.ACCOUNT.GET_DETAILS)} using the supplied storage state${HAS_AUTH ? ` (${AUTH.source})` : ''}.`,
+    rationale: 'Authorization, BOLA, injection and business-logic controls can only reach authenticated code paths with a live session. Without one the scan covers the public surface only, and every authenticated control is inconclusive.',
+    expected: 'HTTP 200 from the account endpoint, proving the session is usable.',
+    actual: session.live
+      ? 'Session is live; authenticated controls below exercised real code paths.'
+      : `Session is NOT usable (${session.reason}). Authenticated controls below are reported INCONCLUSIVE and this scan covers only the unauthenticated surface.`,
+    evidence: `Storage state: ${HAS_AUTH ? AUTH.source : 'none'}\nCookies scoped to target: ${HAS_AUTH ? AUTH.count : 0}\nBearer token present: ${HAS_AUTH ? Boolean(AUTH.bearer) : false}\nLiveness probe: ${session.reason}`,
+    analysis: session.live
+      ? 'Scan coverage includes authenticated paths.'
+      : 'Refresh the storage state (re-run tests/auth.setup.js or set SECURITY_STORAGE_STATE) before treating this run as a full audit.',
+  });
+
   console.log(`\n▶ [ENGINE 1] Inspecting TLS / SSL Certificate & Ciphers...`);
   const tlsInfo = await inspectTlsCertificate(parsedTarget.hostname);
   if (tlsInfo.valid) {
@@ -216,9 +490,11 @@ async function runEnterprise10OutOf10Audit() {
       action: `Performed TLS handshake with ${parsedTarget.hostname}:443`,
       rationale: 'Ensure deprecated SSLv3, TLS 1.0, and TLS 1.1 are disabled and modern ciphers are negotiated.',
       expected: 'Negotiated protocol must be TLSv1.2 or TLSv1.3 with secure cipher.',
-      actual: `Negotiated Protocol: ${tlsInfo.protocol}, Cipher: ${tlsInfo.cipherName}`,
+      actual: `Negotiated protocol ${tlsInfo.protocol} with cipher ${tlsInfo.cipherName}.`,
       evidence: `Protocol: ${tlsInfo.protocol}\nCipher: ${tlsInfo.cipherName}\nSNI: ${parsedTarget.hostname}`,
-      analysis: 'Modern TLS protocol negotiated successfully. Legacy insecure ciphers are rejected.',
+      analysis: (tlsInfo.protocol === 'TLSv1.2' || tlsInfo.protocol === 'TLSv1.3')
+        ? `Negotiated ${tlsInfo.protocol}, which is current. Scope: this records what the server chose for a modern client; it does not prove TLS 1.0/1.1 or weak ciphers are refused. Use the ZAP scan or testssl.sh to enumerate the accepted suites.`
+        : `Negotiated ${tlsInfo.protocol}, which is deprecated. Disable TLS versions below 1.2.`,
     });
 
     logFinding({
@@ -232,7 +508,9 @@ async function runEnterprise10OutOf10Audit() {
       expected: 'Certificate is valid with > 15 days remaining before expiration.',
       actual: `Valid certificate issued by "${tlsInfo.issuer}". Expires in ${tlsInfo.daysRemaining} days (${tlsInfo.validTo}).`,
       evidence: `Subject: ${tlsInfo.subject}\nIssuer: ${tlsInfo.issuer}\nValid Until: ${tlsInfo.validTo}\nDays Remaining: ${tlsInfo.daysRemaining}\nSAN: ${tlsInfo.san.slice(0, 100)}...`,
-      analysis: 'Certificate is valid, properly signed by a trusted CA, and healthy.',
+      analysis: tlsInfo.daysRemaining > 15
+        ? `Certificate chain validated and expires in ${tlsInfo.daysRemaining} days.`
+        : `Certificate expires in ${tlsInfo.daysRemaining} days: renew now to avoid an outage.`,
     });
   } else {
     logFinding({
@@ -274,108 +552,153 @@ async function runEnterprise10OutOf10Audit() {
   });
 
   // -------------------------------------------------------------------------
-  // 3. Multi-Vector Fuzzing (Time-Based Blind SQLi, NoSQL Injection, CRLF)
+  // 3. Multi-Vector Fuzzing against real parameterized API endpoints
+  //    (Blind/Boolean/UNION SQLi, NoSQL operators, CRLF)
   // -------------------------------------------------------------------------
-  console.log(`\n▶ [ENGINE 3] Executing Multi-Vector Advanced Fuzzing...`);
-  
-  // ----------------------------------------------------
-  // A. Time-based Blind SQL Injection
-  // ----------------------------------------------------
-  const baselineStart = Date.now();
-  await requestUrl(`${TARGET_URL}/?id=1`);
-  const baselineLatency = Date.now() - baselineStart;
+  console.log(`\n▶ [ENGINE 3] Multi-Vector Injection Fuzzing on parameterized API endpoints...`);
+  console.log(`   Session: ${HAS_AUTH ? `authenticated (${AUTH.count} cookies from ${AUTH.source})` : 'UNAUTHENTICATED - results will likely be INCONCLUSIVE'}`);
 
-  const timeSqlStart = Date.now();
-  const timeSqlRes = await requestUrl(`${TARGET_URL}/?id=1%27%20OR%20SLEEP(3)%20OR%20pg_sleep(3)--`);
-  const timeSqlLatency = Date.now() - timeSqlStart;
-  const isTimeDelayed = (timeSqlLatency - baselineLatency) > 2500;
+  // A. Boolean / syntax-error SQL injection
+  logFinding(await runInjectionProbe({
+    code: 'A03-SQLI-BOOL',
+    principle: 'Injection',
+    name: 'Boolean & Syntax-Error SQL Injection',
+    payload: "1' OR '1'='1",
+    rationale: 'Backend identifier lookups must be parameterized so quoted input cannot alter query logic or surface database syntax errors.',
+    expected: 'Identifier treated as an opaque string; no SQL error text and no widened result set.',
+    detect: (res) => {
+      const keywords = ['syntax error', 'unclosed quotation mark', 'sqlstate', 'pg_query', 'mysql_fetch',
+                        'ora-0', 'sqlite3', 'psycopg', 'unterminated quoted string', 'sequelize'];
+      const hit = keywords.find((k) => (res.body || '').toLowerCase().includes(k));
+      return hit
+        ? { vulnerable: true, detail: `SQL error disclosed in body ("${hit}")` }
+        : { vulnerable: false, detail: 'no SQL error signature in body' };
+    },
+  }));
+
+  // B. UNION-based SQL injection
+  logFinding(await runInjectionProbe({
+    code: 'A03-SQLI-UNION',
+    principle: 'Injection',
+    name: 'UNION SELECT SQL Injection',
+    payload: "1' UNION SELECT null,username,password FROM users--",
+    rationale: 'Verify queries cannot be chained with UNION to append rows from unrelated tables.',
+    expected: 'Payload rejected or treated as a literal; no credential-shaped rows appended to the response.',
+    detect: (res) => {
+      const leaks = findPrivateData(res.body, isJsonResponse(res));
+      if (leaks.length > 0) return { vulnerable: true, detail: `credential/PII shaped data returned (${leaks.join(', ')})` };
+      if (/"(?:username|user_name)"\s*:\s*"[^"]+"\s*,\s*"(?:password|passwd|hash)"/i.test(res.body || '')) {
+        return { vulnerable: true, detail: 'username/password column pair returned' };
+      }
+      return { vulnerable: false, detail: 'no appended credential rows' };
+    },
+  }));
+
+  // C. Time-based blind SQL injection.
+  //    Needs a per-endpoint baseline, so it does not use runInjectionProbe.
+  const SLEEP_SECONDS = 5;
+  const timePayload = `1' OR SLEEP(${SLEEP_SECONDS}) OR pg_sleep(${SLEEP_SECONDS})--`;
+  const timeResults = [];
+
+  for (const target of INJECTION_TARGETS) {
+    // Two baseline samples, keep the slower one, so ordinary jitter does not read as a delay.
+    const b1 = await requestUrl(resolveUrl(target.build('baseline_probe_id')), { headers: AUTH_HEADERS });
+    const b2 = await requestUrl(resolveUrl(target.build('baseline_probe_id')), { headers: AUTH_HEADERS });
+    const baseline = Math.max(b1.latencyMs, b2.latencyMs);
+
+    const probe = await requestUrl(resolveUrl(target.build(timePayload)), { headers: AUTH_HEADERS });
+    const state = classifyProbe(probe);
+    // Require most of the injected sleep to show up, and confirm with a repeat.
+    let delayed = state === 'EXERCISED' && (probe.latencyMs - baseline) > (SLEEP_SECONDS * 1000 * 0.8);
+    if (delayed) {
+      const confirm = await requestUrl(resolveUrl(target.build(timePayload)), { headers: AUTH_HEADERS });
+      delayed = (confirm.latencyMs - baseline) > (SLEEP_SECONDS * 1000 * 0.8);
+    }
+    timeResults.push({ label: target.label, baseline, probeLatency: probe.latencyMs, state, delayed, status: probe.statusCode });
+  }
+
+  const timeExercised = timeResults.filter((r) => r.state === 'EXERCISED');
+  const timeVulnerable = timeResults.filter((r) => r.delayed);
 
   logFinding({
     code: 'A03-SQLI-BLIND',
     principle: 'Injection',
-    name: 'Time-Based Blind SQL Injection Fuzzing',
-    status: isTimeDelayed ? 'FAIL' : 'PASS',
-    severity: isTimeDelayed ? 'Critical' : 'High',
-    action: `Sent time-delay SQL payload [?id=1' OR SLEEP(3) OR pg_sleep(3)--] vs baseline request.`,
-    rationale: 'Time-based blind SQL injection tests if database sleep commands are executed blindly in backend queries.',
-    expected: 'Server response time remains normal (< 2000ms) without execution of time delay.',
-    actual: `Baseline latency: ${baselineLatency}ms | Probe latency: ${timeSqlLatency}ms (Delay triggered: ${isTimeDelayed ? 'YES' : 'NO'}).`,
-    evidence: `Baseline Latency: ${baselineLatency}ms\nProbe Latency: ${timeSqlLatency}ms\nHTTP Status: ${timeSqlRes.statusCode}`,
-    analysis: isTimeDelayed ? 'Critical vulnerability: Backend executed blind sleep command.' : 'Time delay payloads safely discarded or parameterized.',
+    name: 'Time-Based Blind SQL Injection',
+    status: timeVulnerable.length > 0 ? 'FAIL' : timeExercised.length > 0 ? 'PASS' : 'INCONCLUSIVE',
+    severity: timeVulnerable.length > 0 ? 'Critical' : timeExercised.length > 0 ? 'High' : 'Info',
+    action: `Sent [SLEEP(${SLEEP_SECONDS})/pg_sleep(${SLEEP_SECONDS})] against ${INJECTION_TARGETS.length} parameterized endpoints, each with a two-sample latency baseline and a confirmation request on any hit.`,
+    rationale: 'A blind injection point executes an injected sleep even when it returns no data, so a reproducible latency delta is the signal.',
+    expected: `No endpoint shows a reproducible delay approaching ${SLEEP_SECONDS}s over its own baseline.`,
+    actual: timeVulnerable.length > 0
+      ? `VULNERABLE: reproducible sleep executed on ${timeVulnerable.map((r) => r.label).join('; ')}`
+      : timeExercised.length > 0
+        ? `Payload evaluated on ${timeExercised.length}/${timeResults.length} endpoint(s); no reproducible delay observed.`
+        : `INCONCLUSIVE: no endpoint reached an exercisable sink. ${HAS_AUTH ? '' : 'No authenticated session was supplied.'}`,
+    evidence: timeResults
+      .map((r) => `[${r.state}] ${r.label}\n  baseline ${r.baseline}ms -> probe ${r.probeLatency}ms (HTTP ${r.status || 'ERR'}) delayed=${r.delayed ? 'YES' : 'no'}`)
+      .join('\n'),
+    analysis: timeVulnerable.length > 0
+      ? 'Backend executed an injected sleep: a blind SQL injection sink is reachable.'
+      : timeExercised.length > 0
+        ? 'No timing side channel observed on the endpoints that evaluated the payload.'
+        : 'No conclusion possible: the payload never reached code that could act on it.',
   });
 
-  // ----------------------------------------------------
-  // B. Boolean & Syntax SQL Injection
-  // ----------------------------------------------------
-  const boolSqlRes = await requestUrl(`${TARGET_URL}/?id=1%27%20OR%20%271%27=%271`);
-  const sqlErrorKeywords = ['syntax error', 'unclosed quotation mark', 'sqlstate', 'pg_query', 'mysql_fetch', 'ora-'];
-  const hasSqlSyntaxLeak = sqlErrorKeywords.some(k => boolSqlRes.body.toLowerCase().includes(k));
-
-  logFinding({
-    code: 'A03-SQLI-BOOL',
-    principle: 'Injection',
-    name: 'Boolean-Based SQL Injection Probe',
-    status: hasSqlSyntaxLeak ? 'FAIL' : 'PASS',
-    severity: hasSqlSyntaxLeak ? 'Critical' : 'High',
-    action: `Sent boolean logic SQL injection probe [?id=1' OR '1'='1'] to ${TARGET_URL}`,
-    rationale: 'Verify backend queries do not evaluate boolean logic tautologies or leak SQL syntax errors.',
-    expected: 'Payload safely parameterized without altering query logic or leaking SQL syntax.',
-    actual: hasSqlSyntaxLeak ? 'CRITICAL: Leaked SQL syntax error in response body!' : 'Safe: Handled cleanly with HTTP 200 without leaking SQL syntax.',
-    evidence: `HTTP Status: ${boolSqlRes.statusCode}\nSQL Error Check: Zero SQL keywords found\nLatency: ${boolSqlRes.latencyMs}ms`,
-    analysis: hasSqlSyntaxLeak ? 'SQL syntax error disclosure vulnerability detected!' : 'Input safely sanitized; no boolean bypass or syntax error occurred.',
-  });
-
-  // ----------------------------------------------------
-  // C. UNION-Based SQL Injection
-  // ----------------------------------------------------
-  const unionSqlRes = await requestUrl(`${TARGET_URL}/?id=1%27%20UNION%20SELECT%20null,username,password%20FROM%20users--`);
-  const hasUnionLeak = unionSqlRes.body.includes('admin') && unionSqlRes.body.includes('password');
-
-  logFinding({
-    code: 'A03-SQLI-UNION',
-    principle: 'Injection',
-    name: 'UNION SELECT SQL Injection Probe',
-    status: hasUnionLeak ? 'FAIL' : 'PASS',
-    severity: hasUnionLeak ? 'Critical' : 'High',
-    action: `Sent UNION SELECT injection probe [?id=1' UNION SELECT null,username,password FROM users--]`,
-    rationale: 'Ensure backend queries cannot be chained with UNION statements to exfiltrate private database tables.',
-    expected: 'UNION payload rejected or parameterized without appending table data.',
-    actual: hasUnionLeak ? 'CRITICAL: Database table records leaked via UNION SELECT!' : 'Safe: Payload discarded safely with no table data exfiltration.',
-    evidence: `HTTP Status: ${unionSqlRes.statusCode}\nPayload: UNION SELECT null,username,password FROM users--\nLatency: ${unionSqlRes.latencyMs}ms`,
-    analysis: hasUnionLeak ? 'Critical UNION SQL Injection vulnerability!' : 'UNION injection safely mitigated.',
-  });
-
-  // B. NoSQL Injection Probe
-  const noSqlRes = await requestUrl(`${TARGET_URL}/?user[$ne]=null&filter[$gt]=`);
-  logFinding({
+  // D. NoSQL operator injection
+  logFinding(await runInjectionProbe({
     code: 'A03-NOSQL',
     principle: 'Injection',
-    name: 'NoSQL Operator Injection Probe',
-    status: (noSqlRes.statusCode === 200 || noSqlRes.statusCode === 400 || noSqlRes.statusCode === 404) ? 'PASS' : 'WARN',
-    severity: 'High',
-    action: `Sent NoSQL query operator payload [?user[$ne]=null&filter[$gt]=] to ${TARGET_URL}`,
-    rationale: 'Verify MongoDB/DocumentDB query operators are not parsed into dynamic database filter expressions.',
-    expected: 'Handled without 500 server crashes or authentication bypass.',
-    actual: `Handled cleanly with HTTP ${noSqlRes.statusCode} ${noSqlRes.statusMessage}.`,
-    evidence: `HTTP Status: ${noSqlRes.statusCode}\nContent-Length: ${noSqlRes.body.length} bytes`,
-    analysis: 'NoSQL injection payload safely handled.',
-  });
+    name: 'NoSQL Operator Injection',
+    payload: '{"$ne":null}',
+    rationale: 'Document-store operators ($ne/$gt/$regex) must not be interpolated into filter expressions, which would widen a scoped query to every document.',
+    expected: 'Operator object rejected or treated as a literal id; no unscoped result set and no 5xx.',
+    detect: (res) => {
+      if (res.statusCode >= 500) return { vulnerable: true, detail: `operator reached the query layer and crashed it (HTTP ${res.statusCode})` };
+      const leaks = findPrivateData(res.body, isJsonResponse(res));
+      if (leaks.length > 0) return { vulnerable: true, detail: `unscoped data returned (${leaks.join(', ')})` };
+      // A large JSON array back from an id lookup suggests the filter was widened.
+      if (isJsonResponse(res) && /^\s*\[/.test(res.body || '') && (res.body || '').length > 5000) {
+        return { vulnerable: true, detail: `id lookup returned a ${res.body.length}-byte collection` };
+      }
+      return { vulnerable: false, detail: 'operator not interpreted' };
+    },
+  }));
 
-  // C. CRLF / HTTP Response Header Injection
-  const crlfRes = await requestUrl(`${TARGET_URL}/?lang=en%0d%0aSet-Cookie:%20injected_cookie=malicious_token`);
-  const crlfLeaked = (crlfRes.headers['set-cookie'] || []).some((c) => c.includes('injected_cookie'));
+  // E. CRLF / HTTP response header injection
+  const crlfPayload = 'en\r\nSet-Cookie: injected_probe=malicious_token';
+  const crlfResults = [];
+  for (const target of INJECTION_TARGETS) {
+    const url = resolveUrl(target.build(crlfPayload));
+    const res = await requestUrl(url, { headers: AUTH_HEADERS });
+    const raw = res.headers['set-cookie'] || [];
+    const cookies = Array.isArray(raw) ? raw : [raw];
+    crlfResults.push({
+      label: target.label,
+      state: classifyProbe(res),
+      injected: cookies.some((c) => (c || '').includes('injected_probe')),
+      status: res.statusCode,
+      setCookie: JSON.stringify(cookies),
+    });
+  }
+  const crlfInjected = crlfResults.filter((r) => r.injected);
+  // A CRLF payload is reflected into headers by the edge before any handler runs,
+  // so a clean result here is meaningful regardless of the body's reachability.
   logFinding({
     code: 'A03-CRLF',
     principle: 'Injection',
     name: 'CRLF / HTTP Response Header Injection',
-    status: crlfLeaked ? 'FAIL' : 'PASS',
-    severity: crlfLeaked ? 'Critical' : 'High',
-    action: `Sent CRLF injection payload in query param: [?lang=en%0d%0aSet-Cookie: injected_cookie=malicious_token]`,
-    rationale: 'CRLF injection occurs when carriage return / line feed characters allow attackers to inject arbitrary HTTP headers (like cookies or fake response bodies).',
-    expected: 'Server escapes %0d%0a and does NOT set injected Set-Cookie header.',
-    actual: crlfLeaked ? 'CRITICAL: Arbitrary Set-Cookie header was injected!' : 'Safe: CRLF characters stripped/escaped. No injected header returned.',
-    evidence: `Set-Cookie Header: ${JSON.stringify(crlfRes.headers['set-cookie'] || 'None')}`,
-    analysis: crlfLeaked ? 'CRLF Header injection vulnerability detected!' : 'CRLF injection safely mitigated by web server.',
+    status: crlfInjected.length > 0 ? 'FAIL' : 'PASS',
+    severity: crlfInjected.length > 0 ? 'Critical' : 'High',
+    action: `Sent a CR/LF-bearing value into ${INJECTION_TARGETS.length} endpoint parameters and inspected the response headers for an attacker-controlled Set-Cookie.`,
+    rationale: 'Unescaped CR/LF in a reflected value lets an attacker append arbitrary response headers, including session cookies.',
+    expected: 'CR/LF escaped or stripped; no injected_probe cookie in any response.',
+    actual: crlfInjected.length > 0
+      ? `VULNERABLE: attacker-controlled Set-Cookie injected via ${crlfInjected.map((r) => r.label).join('; ')}`
+      : `No injected header returned by any of the ${crlfResults.length} endpoints probed.`,
+    evidence: crlfResults.map((r) => `[${r.state}] ${r.label}\n  HTTP ${r.status || 'ERR'} | Set-Cookie: ${r.setCookie}`).join('\n'),
+    analysis: crlfInjected.length > 0
+      ? 'Response splitting is possible: an attacker can set cookies and forge headers on this origin.'
+      : 'CR/LF sequences are neutralized before reaching the response headers.',
   });
 
   // -------------------------------------------------------------------------
@@ -386,57 +709,121 @@ async function runEnterprise10OutOf10Audit() {
     { path: '/ai', label: 'AI Workspace (/ai)' },
     { path: '/dashboard', label: 'Dashboard (/dashboard)' },
     { path: '/settings', label: 'Settings (/settings)' },
-    { path: '/admin', label: 'Admin Panel (/admin)' },
-    { path: '/api/user', label: 'Private User API (/api/user)' },
+    // Real API endpoints, resolved to the origin that actually serves them.
+    { path: HERCULES_ENDPOINTS.ACCOUNT.GET_DETAILS, label: 'Account details API' },
+    { path: HERCULES_ENDPOINTS.CAMPAIGNS.GET_HISTORY, label: 'Chat history API' },
+    { path: HERCULES_ENDPOINTS.AUDIENCE.GET_MY_TEMPLATES, label: 'My audience templates API' },
+    { path: HERCULES_ENDPOINTS.BILLING.ACCOUNT_CREDITS, label: 'Account credits API' },
+    { path: HERCULES_ENDPOINTS.ADMIN.GET_ADMIN_SURVEYS, label: 'Admin surveys API' },
   ];
 
   for (const route of protectedRoutes) {
-    const target = `${TARGET_URL}${route.path}`;
+    const target = resolveUrl(route.path);
     const res = await requestUrl(target);
+    const denied = [401, 403, 302, 307, 308].includes(res.statusCode);
 
-    if (res.statusCode === 401 || res.statusCode === 403 || res.statusCode === 302 || res.statusCode === 307 || res.statusCode === 308) {
+    if (denied) {
       logFinding({
         code: 'A01',
         principle: 'Broken Access Control',
         name: `Restricted Access: ${route.label}`,
         status: 'PASS',
         severity: 'High',
-        action: `Sent unauthenticated GET request to protected endpoint: ${target}`,
-        rationale: 'Unauthenticated users should never be able to access private user dashboards or APIs.',
-        expected: 'HTTP 401 (Unauthorized), 403 (Forbidden), or 302/307 Redirect to Login.',
-        actual: `Received HTTP ${res.statusCode} ${res.statusMessage} (Redirect Location: ${res.headers['location'] || 'None'}).`,
-        evidence: `HTTP/${res.statusCode}\nLocation: ${res.headers['location'] || 'N/A'}\nResponse Latency: ${res.latencyMs}ms`,
-        analysis: 'Endpoint correctly denies direct unauthorized data access.',
+        action: `Sent unauthenticated GET to protected endpoint: ${target} [${originLabel(route.path)}]`,
+        rationale: 'Unauthenticated callers must not reach private dashboards or APIs.',
+        expected: 'HTTP 401, 403, or a 30x redirect to login.',
+        actual: `Received HTTP ${res.statusCode} ${res.statusMessage} (Location: ${res.headers['location'] || 'none'}).`,
+        evidence: `HTTP/${res.statusCode}\nLocation: ${res.headers['location'] || 'N/A'}\nLatency: ${res.latencyMs}ms`,
+        analysis: 'Endpoint denies unauthenticated access at the server.',
       });
-    } else if (res.statusCode === 404) {
-      logFinding({
-        code: 'A01',
-        principle: 'Broken Access Control',
-        name: `Hidden Endpoint: ${route.label}`,
-        status: 'PASS',
-        severity: 'Medium',
-        action: `Sent unauthenticated GET request to internal route: ${target}`,
-        rationale: 'Sensitive administrative or internal API routes should not be exposed or discoverable.',
-        expected: 'HTTP 404 (Not Found) or 403 (Forbidden).',
-        actual: `Received HTTP 404 Not Found.`,
-        evidence: `HTTP/404 Not Found\nResponse Latency: ${res.latencyMs}ms`,
-        analysis: 'Route does not expose internal endpoints to unauthorized public scanners.',
-      });
-    } else if (res.statusCode === 200) {
-      logFinding({
-        code: 'A01',
-        principle: 'Broken Access Control',
-        name: `Client-Side Route Guard: ${route.label}`,
-        status: 'PASS',
-        severity: 'High',
-        action: `Sent unauthenticated GET request to ${target}`,
-        rationale: 'Verify that protected views serve the client-side SPA application shell, allowing the React router/middleware to intercept unauthenticated visitors and redirect to login.',
-        expected: 'HTTP 200 SPA App Shell served without any embedded private user data.',
-        actual: `Received HTTP 200 OK (Clean SPA Shell served; client-side router handles login prompt).`,
-        evidence: `HTTP/200 OK\nContent-Type: ${res.headers['content-type']}\nHTML Length: ${res.body.length} bytes\nLatency: ${res.latencyMs}ms`,
-        analysis: 'Compliant SPA Architecture: The generic frontend bundle is served for high-speed CDN caching, while all user data is strictly secured behind authentication prompts and authenticated API endpoints.',
-      });
+      continue;
     }
+
+    if (res.statusCode === 404) {
+      logFinding({
+        code: 'A01',
+        principle: 'Broken Access Control',
+        name: `Absent Route: ${route.label}`,
+        status: 'INCONCLUSIVE',
+        severity: 'Info',
+        action: `Sent unauthenticated GET to: ${target}`,
+        rationale: 'A 404 means the route does not exist on this deployment, so its authorization behaviour was not tested.',
+        expected: 'A deployed protected route returning 401/403/30x.',
+        actual: `Received HTTP 404 Not Found - route absent, nothing to authorize.`,
+        evidence: `HTTP/404 Not Found\nLatency: ${res.latencyMs}ms`,
+        analysis: 'Not a finding either way: absence of a route is not evidence of working access control. Remove it from the probe list or point it at the real path.',
+      });
+      continue;
+    }
+
+    if (res.statusCode === 200) {
+      // The decisive question: did the server hand private data to an
+      // unauthenticated caller, or just the generic client-side app shell?
+      const json = isJsonResponse(res);
+      const leaks = findPrivateData(res.body, json);
+
+      if (leaks.length > 0) {
+        logFinding({
+          code: 'A01',
+          principle: 'Broken Access Control',
+          name: `Unauthenticated Data Exposure: ${route.label}`,
+          status: 'FAIL',
+          severity: 'Critical',
+          action: `Sent unauthenticated GET to: ${target}`,
+          rationale: 'A protected endpoint must never return user or credential data without a session.',
+          expected: 'No private data in an unauthenticated response.',
+          actual: `HTTP 200 returned private data to an unauthenticated caller: ${leaks.join(', ')}.`,
+          evidence: `HTTP/200\nContent-Type: ${res.headers['content-type']}\nIndicators: ${leaks.join(', ')}\nBody preview: ${(res.body || '').slice(0, 300).replace(/\s+/g, ' ')}`,
+          analysis: 'Broken access control confirmed: private data is served without authentication.',
+        });
+      } else if (json) {
+        logFinding({
+          code: 'A01',
+          principle: 'Broken Access Control',
+          name: `Unauthenticated JSON Response: ${route.label}`,
+          status: 'WARN',
+          severity: 'Medium',
+          action: `Sent unauthenticated GET to: ${target}`,
+          rationale: 'An API answering 200 with JSON to an unauthenticated caller should be returning an error, not a payload.',
+          expected: 'HTTP 401/403 rather than a 200 JSON body.',
+          actual: `HTTP 200 with a ${res.body.length}-byte JSON body and no private-data indicators. Verify manually that this response is genuinely public.`,
+          evidence: `HTTP/200\nContent-Type: ${res.headers['content-type']}\nBody preview: ${(res.body || '').slice(0, 300).replace(/\s+/g, ' ')}`,
+          analysis: 'No leak detected by pattern matching, but a 200 JSON response on a protected route warrants manual review.',
+        });
+      } else {
+        logFinding({
+          code: 'A01',
+          principle: 'Broken Access Control',
+          name: `Client-Side Route Guard: ${route.label}`,
+          status: 'PASS',
+          severity: 'Medium',
+          action: `Sent unauthenticated GET to: ${target} and scanned the returned shell for embedded user data.`,
+          rationale: 'An SPA may serve a generic cacheable shell to everyone and gate data at the API. That is acceptable only if the shell itself carries no private data.',
+          expected: 'Generic app shell with no embedded user data, tokens, or PII.',
+          actual: `HTTP 200 served a ${res.body.length}-byte ${res.headers['content-type'] || 'unknown'} shell with no private-data indicators.`,
+          evidence: `HTTP/200\nContent-Type: ${res.headers['content-type']}\nHTML length: ${res.body.length} bytes\nPrivate-data indicators: none\nLatency: ${res.latencyMs}ms`,
+          analysis: 'Scope of this PASS: it proves the unauthenticated shell leaks no data. It does NOT prove the API enforces authorization - that is covered by the A01 API checks and the BOLA engine.',
+        });
+      }
+      continue;
+    }
+
+    // Anything else (5xx, 429, odd codes) previously fell through and logged nothing.
+    logFinding({
+      code: 'A01',
+      principle: 'Broken Access Control',
+      name: `Unexpected Response: ${route.label}`,
+      status: res.statusCode >= 500 ? 'FAIL' : 'WARN',
+      severity: res.statusCode >= 500 ? 'High' : 'Low',
+      action: `Sent unauthenticated GET to: ${target}`,
+      rationale: 'Protected routes should deny cleanly; a server error on an unauthenticated request suggests the handler ran before the auth check.',
+      expected: 'HTTP 401, 403, or a 30x redirect.',
+      actual: `Received unexpected HTTP ${res.statusCode} ${res.statusMessage || res.error || ''}.`,
+      evidence: `HTTP/${res.statusCode}\nLatency: ${res.latencyMs}ms\nBody preview: ${(res.body || '').slice(0, 200).replace(/\s+/g, ' ')}`,
+      analysis: res.statusCode >= 500
+        ? 'Unauthenticated request reached code that crashed: review the ordering of the auth middleware.'
+        : 'Unexpected status on a protected route; confirm the intended behaviour.',
+    });
   }
 
   // -------------------------------------------------------------------------
@@ -447,18 +834,42 @@ async function runEnterprise10OutOf10Audit() {
   const httpRes = await requestUrl(httpUrl);
   const hsts = baseRes.headers['strict-transport-security'];
 
+  const MIN_HSTS_MAX_AGE = 31536000; // 1 year, per the stated expectation
+  const hstsMaxAgeMatch = /max-age\s*=\s*(\d+)/i.exec(hsts || '');
+  const hstsMaxAge = hstsMaxAgeMatch ? parseInt(hstsMaxAgeMatch[1], 10) : null;
+  const hstsSubdomains = /includeSubDomains/i.test(hsts || '');
+  const hstsPreload = /preload/i.test(hsts || '');
+  const hstsIssues = [];
+  if (!hsts) hstsIssues.push('header absent');
+  else {
+    if (hstsMaxAge === null) hstsIssues.push('no max-age directive');
+    else if (hstsMaxAge < MIN_HSTS_MAX_AGE) hstsIssues.push(`max-age ${hstsMaxAge} is below the required ${MIN_HSTS_MAX_AGE}`);
+    if (!hstsSubdomains) hstsIssues.push('missing includeSubDomains');
+  }
+  // Absent header or an ineffective max-age is a real failure; a valid year-plus
+  // policy that merely omits includeSubDomains is a hardening warning.
+  const hstsStatus = (!hsts || hstsMaxAge === null || hstsMaxAge < MIN_HSTS_MAX_AGE)
+    ? 'FAIL'
+    : hstsIssues.length > 0 ? 'WARN' : 'PASS';
+
   logFinding({
     code: 'A02-HSTS',
     principle: 'Cryptographic Failures',
     name: 'HSTS (HTTP Strict Transport Security)',
-    status: (hsts && hsts.includes('max-age')) ? 'PASS' : 'FAIL',
+    status: hstsStatus,
     severity: 'High',
-    action: `Inspected Strict-Transport-Security header on: ${TARGET_URL}`,
-    rationale: 'HSTS instructs browsers to strictly communicate only over HTTPS, preventing SSL-stripping attacks.',
-    expected: 'Strict-Transport-Security header with max-age >= 31536000 and includeSubDomains.',
-    actual: `Header found: "${hsts || 'Missing'}"`,
-    evidence: `strict-transport-security: ${hsts || 'None'}`,
-    analysis: 'HSTS is fully compliant with modern browser security standards (2-year max-age with preload enabled).',
+    action: `Inspected and parsed the Strict-Transport-Security header on: ${TARGET_URL}`,
+    rationale: 'HSTS instructs browsers to communicate only over HTTPS, preventing SSL-stripping attacks. A max-age shorter than a year leaves a wide downgrade window.',
+    expected: `Strict-Transport-Security with max-age >= ${MIN_HSTS_MAX_AGE} and includeSubDomains.`,
+    actual: hstsIssues.length === 0
+      ? `Compliant: max-age=${hstsMaxAge}${hstsSubdomains ? ', includeSubDomains' : ''}${hstsPreload ? ', preload' : ''}.`
+      : `Non-compliant (${hstsIssues.join('; ')}). Raw header: "${hsts || 'Missing'}".`,
+    evidence: `strict-transport-security: ${hsts || 'None'}\nParsed max-age: ${hstsMaxAge === null ? 'none' : hstsMaxAge}\nincludeSubDomains: ${hstsSubdomains}\npreload: ${hstsPreload}\nHTTP->HTTPS probe status: ${httpRes.statusCode || 'no response'}`,
+    analysis: hstsStatus === 'PASS'
+      ? `HSTS enforced with max-age=${hstsMaxAge}s and includeSubDomains.`
+      : hstsStatus === 'WARN'
+        ? `HSTS is active with max-age=${hstsMaxAge}s but incomplete: ${hstsIssues.join('; ')}.`
+        : `HSTS does not meet the minimum policy: ${hstsIssues.join('; ')}. Browsers remain exposed to protocol downgrade.`,
   });
 
   // -------------------------------------------------------------------------
@@ -473,14 +884,22 @@ async function runEnterprise10OutOf10Audit() {
     code: 'A05-CSP',
     principle: 'Security Misconfiguration',
     name: 'Content-Security-Policy (CSP)',
-    status: csp ? 'PASS' : 'WARN',
+    status: !csp ? 'WARN' : /unsafe-inline|unsafe-eval|script-src[^;]*\*/i.test(csp) ? 'WARN' : 'PASS',
     severity: 'High',
-    action: `Inspected HTTP response headers for Content-Security-Policy on: ${TARGET_URL}`,
-    rationale: 'CSP restricts where scripts, images, and styles can be loaded from, mitigating XSS and data exfiltration.',
-    expected: 'Content-Security-Policy header present with restrictive directives.',
-    actual: csp ? `CSP Header present: "${csp.slice(0, 100)}..."` : 'CSP Header is missing.',
+    action: `Inspected and parsed the Content-Security-Policy header on: ${TARGET_URL}`,
+    rationale: 'CSP restricts where scripts, images and styles may load from. A policy containing unsafe-inline, unsafe-eval or a wildcard script-src does not meaningfully constrain XSS.',
+    expected: 'Content-Security-Policy present, without unsafe-inline/unsafe-eval and without a wildcard script-src.',
+    actual: !csp
+      ? 'CSP header is missing.'
+      : /unsafe-inline|unsafe-eval|script-src[^;]*\*/i.test(csp)
+        ? `CSP present but permissive: contains ${[/unsafe-inline/i.test(csp) && 'unsafe-inline', /unsafe-eval/i.test(csp) && 'unsafe-eval', /script-src[^;]*\*/i.test(csp) && 'wildcard script-src'].filter(Boolean).join(', ')}.`
+        : 'CSP present with no unsafe-inline, unsafe-eval, or wildcard script-src.',
     evidence: `content-security-policy: ${csp || 'None'}`,
-    analysis: csp ? 'CSP is active and protects client-side script execution.' : 'Recommended to add CSP header.',
+    analysis: !csp
+      ? 'Add a Content-Security-Policy header.'
+      : /unsafe-inline|unsafe-eval|script-src[^;]*\*/i.test(csp)
+        ? 'The header is present but its directives permit inline/eval or arbitrary script origins, so it should not be counted as XSS mitigation.'
+        : 'CSP constrains script sources.',
   });
 
   // XFO
@@ -495,9 +914,13 @@ async function runEnterprise10OutOf10Audit() {
     action: `Checked for X-Frame-Options and CSP frame-ancestors headers.`,
     rationale: 'Clickjacking attacks embed transparent iframes of your application to trick users into unauthorized clicks.',
     expected: 'X-Frame-Options: DENY or SAMEORIGIN.',
-    actual: `Header found: "${xfo || 'frame-ancestors in CSP'}"`,
+    actual: (xfo || hasFrameAncestors)
+      ? `Framing controlled by: ${xfo ? `X-Frame-Options: ${xfo}` : 'CSP frame-ancestors'}.`
+      : 'Neither X-Frame-Options nor a CSP frame-ancestors directive is present.',
     evidence: `x-frame-options: ${xfo || 'N/A'}\nCSP frame-ancestors: ${hasFrameAncestors ? 'Present' : 'N/A'}`,
-    analysis: 'The application cannot be framed by unauthorized third-party websites.',
+    analysis: (xfo || hasFrameAncestors)
+      ? 'A framing policy is declared, so the app cannot be silently embedded by third-party sites.'
+      : 'No framing policy declared: the application can be embedded in a third-party iframe for clickjacking.',
   });
 
   // MIME Sniffing
@@ -511,9 +934,13 @@ async function runEnterprise10OutOf10Audit() {
     action: `Checked for X-Content-Type-Options header on: ${TARGET_URL}`,
     rationale: 'Prevents browsers from MIME-sniffing a response away from the declared content-type.',
     expected: 'X-Content-Type-Options: nosniff',
-    actual: `Header found: "${xcto || 'Missing'}"`,
+    actual: (xcto && xcto.toLowerCase().includes('nosniff'))
+      ? `nosniff is set (header: "${xcto}").`
+      : `Header ${xcto ? `present but not nosniff ("${xcto}")` : 'missing'}.`,
     evidence: `x-content-type-options: ${xcto || 'undefined'}`,
-    analysis: 'nosniff prevents malicious MIME confusion attacks.',
+    analysis: (xcto && xcto.toLowerCase().includes('nosniff'))
+      ? 'nosniff prevents the browser from reinterpreting a response away from its declared content-type.'
+      : 'Add X-Content-Type-Options: nosniff to prevent MIME confusion.',
   });
 
   // HTTP TRACE Method Tampering
@@ -594,18 +1021,21 @@ async function runEnterprise10OutOf10Audit() {
       analysis: highCrit === 0 ? 'No high or critical CVE vulnerabilities found in dependencies.' : 'Run `npm audit fix` to patch high/critical dependency CVEs.',
     });
   } catch (e) {
+    // An audit that could not run tells us nothing about the dependency tree.
+    // Reporting PASS here previously turned every scanner malfunction into a
+    // clean bill of health.
     logFinding({
       code: 'A06-SCA',
       principle: 'Vulnerable Components',
-      name: 'Dependency Vulnerability Audit',
-      status: 'PASS',
-      severity: 'Medium',
-      action: `Executed npm audit scan across project dependencies.`,
-      rationale: 'Verify third-party packages do not contain unpatched vulnerabilities.',
-      expected: 'Zero unpatched critical packages.',
-      actual: 'Audit scanned cleanly without fatal vulnerability alerts.',
-      evidence: 'npm audit completed.',
-      analysis: 'Dependencies meet security compliance.',
+      name: 'Dependency Vulnerability Audit (CVE Scan)',
+      status: 'FAIL',
+      severity: 'High',
+      action: `Attempted npm audit against package.json and package-lock.json.`,
+      rationale: 'Third-party npm packages can contain known CVEs. If the audit cannot run, the dependency tree is unverified and must not be treated as clean.',
+      expected: 'npm audit completes and reports 0 High/Critical vulnerabilities.',
+      actual: `Audit could not be completed: ${e.message}. Dependency risk is UNVERIFIED.`,
+      evidence: `npm audit failure: ${e.message}\nStdout/stderr: ${(e.stdout || e.stderr || 'none').toString().slice(0, 500)}`,
+      analysis: 'Fix the audit invocation (lockfile present? registry reachable?) and re-run. This is reported as a failure because an unverified dependency tree cannot be certified.',
     });
   }
 
@@ -745,38 +1175,106 @@ async function runEnterprise10OutOf10Audit() {
   // 12. Broken Object-Level Authorization (BOLA / IDOR) & Multi-Tenant Isolation
   // -------------------------------------------------------------------------
   console.log(`\n▶ [ENGINE 12] Broken Object-Level Authorization (BOLA / IDOR)...`);
-  const bolaEndpoints = [
-    { name: 'Cross-Tenant Survey Access', path: `${HERCULES_ENDPOINTS.SURVEY.GET_SURVEY_DETAILS}?surveyId=srv_victim_tenant_99812`, method: 'GET' },
-    { name: 'Cross-Tenant Audience Report Access', path: HERCULES_ENDPOINTS.ANALYTICS.AUDIENCE_INSIGHTS('srv_victim_tenant_99812'), method: 'GET' },
-    { name: 'Cross-Tenant Campaign Chat Access', path: HERCULES_ENDPOINTS.CAMPAIGNS.GET_CHAT_BY_ID('cmp_victim_org_772'), method: 'GET' },
-  ];
 
-  for (const b of bolaEndpoints) {
-    const bUrl = `${TARGET_URL}${b.path}`;
-    const forgedToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhdHRhY2tlciIsInRlbmFudElkIjoidW5hdXRob3JpemVkX29yZyJ9.invalid_signature_probe';
-    const bRes = await requestUrl(bUrl, {
-      method: b.method,
-      headers: {
-        'Authorization': `Bearer ${forgedToken}`,
-        'X-Tenant-ID': 'unauthorized_tenant_probe',
-        'Content-Type': 'application/json',
-      },
-      body: b.body,
-    });
+  // Probing a randomly-invented id only ever proves "404 on a nonexistent row".
+  // Instead: use the authenticated session to find a REAL object, confirm the
+  // owner can read it (positive control), then try to reach that same real
+  // object with broken credentials.
+  let realObjectId = null;
+  let ownerCanRead = false;
 
-    const isSecureBola = bRes.statusCode === 401 || bRes.statusCode === 403 || bRes.statusCode === 404 || (bRes.statusCode === 200 && !bRes.body.includes('victim'));
+  if (HAS_AUTH) {
+    const listRes = await requestUrl(resolveUrl(HERCULES_ENDPOINTS.CAMPAIGNS.GET_HISTORY), { headers: AUTH_HEADERS });
+    if (listRes.statusCode === 200 && isJsonResponse(listRes)) {
+      try {
+        const parsed = JSON.parse(listRes.body);
+        const rows = Array.isArray(parsed) ? parsed : (parsed.chats || parsed.data || parsed.results || []);
+        const first = rows.find((r) => r && (r.id || r.chatId || r._id));
+        if (first) realObjectId = first.id || first.chatId || first._id;
+      } catch (e) {
+        console.warn(`[Engine 12] Could not parse chat list: ${e.message}`);
+      }
+    }
+
+    if (realObjectId) {
+      const ownerRes = await requestUrl(resolveUrl(HERCULES_ENDPOINTS.CAMPAIGNS.GET_CHAT_BY_ID(realObjectId)), { headers: AUTH_HEADERS });
+      ownerCanRead = ownerRes.statusCode === 200;
+      logFinding({
+        code: 'BOLA-00',
+        principle: 'Broken Object Level Auth (IDOR)',
+        name: 'Positive Control: Owner Can Read Their Own Object',
+        status: ownerCanRead ? 'PASS' : 'INCONCLUSIVE',
+        severity: 'Info',
+        action: `Read the authenticated user's own object: ${HERCULES_ENDPOINTS.CAMPAIGNS.GET_CHAT_BY_ID(realObjectId)}`,
+        rationale: 'The cross-tenant checks below are only meaningful if the object id is real and the endpoint serves it to its owner. Without this control, a 404 to an attacker is indistinguishable from a 404 to everyone.',
+        expected: 'HTTP 200 for the legitimate owner.',
+        actual: ownerCanRead
+          ? `Owner read their own object successfully (HTTP 200). Cross-tenant probes below are therefore meaningful.`
+          : `Owner received HTTP ${ownerRes.statusCode}; the object id could not be confirmed as live, so the probes below prove little.`,
+        evidence: `Object id: ${realObjectId}\nOwner request status: HTTP ${ownerRes.statusCode}\nLatency: ${ownerRes.latencyMs}ms`,
+        analysis: ownerCanRead ? 'Positive control established.' : 'Positive control failed: treat the BOLA results below as unverified.',
+      });
+    }
+  }
+
+  const forgedToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhdHRhY2tlciIsInRlbmFudElkIjoidW5hdXRob3JpemVkX29yZyJ9.invalid_signature_probe';
+
+  if (realObjectId && ownerCanRead) {
+    // The real test: same real object, broken credentials.
+    const attackVectors = [
+      { name: 'No credentials at all', headers: {} },
+      { name: 'Forged/unsigned bearer token', headers: { Authorization: `Bearer ${forgedToken}` } },
+      { name: 'Valid session + tampered tenant header', headers: { ...AUTH_HEADERS, 'X-Tenant-ID': 'unauthorized_tenant_probe' } },
+    ];
+
+    for (const vector of attackVectors) {
+      const url = resolveUrl(HERCULES_ENDPOINTS.CAMPAIGNS.GET_CHAT_BY_ID(realObjectId));
+      const res = await requestUrl(url, { headers: { ...vector.headers, Accept: 'application/json' } });
+      const verdict = evaluateAuthRejection(res);
+      // A tampered tenant header on an otherwise valid session is expected to
+      // succeed for the session's own object; the header must simply be ignored.
+      const isOwnSessionVector = vector.name.startsWith('Valid session');
+      const status = isOwnSessionVector && res.statusCode === 200 ? 'PASS' : verdict.status;
+
+      logFinding({
+        code: 'BOLA-01',
+        principle: 'Broken Object Level Auth (IDOR)',
+        name: `Object Authorization: ${vector.name}`,
+        status,
+        severity: status === 'FAIL' ? 'Critical' : status === 'WARN' ? 'High' : 'Info',
+        action: `Requested the real object ${realObjectId} (owned by the authenticated test user) using: ${vector.name}.`,
+        rationale: 'Object-level authorization must be re-checked on every request against the caller identity, not inferred from a client-supplied tenant hint (OWASP API #1).',
+        expected: isOwnSessionVector
+          ? 'HTTP 200 for the true owner, with the client-supplied X-Tenant-ID hint ignored.'
+          : 'HTTP 401 or 403; the object must not be returned.',
+        actual: isOwnSessionVector && res.statusCode === 200
+          ? 'Owner served their own object; the tampered tenant header did not change the outcome.'
+          : verdict.detail,
+        evidence: `Object id: ${realObjectId} (confirmed live via positive control)\nVector: ${vector.name}\nStatus: HTTP ${res.statusCode}\nContent-Type: ${res.headers['content-type'] || 'none'}\nBody bytes: ${res.body ? res.body.length : 0}\nLatency: ${res.latencyMs}ms`,
+        analysis: status === 'FAIL'
+          ? 'BOLA/IDOR confirmed against a real object: authorization is not enforced per request.'
+          : status === 'PASS'
+            ? 'Object access was correctly denied to a broken credential (verified against a real, live object).'
+            : verdict.detail,
+      });
+    }
+  } else {
     logFinding({
       code: 'BOLA-01',
       principle: 'Broken Object Level Auth (IDOR)',
-      name: `Multi-Tenant Isolation: ${b.name}`,
-      status: isSecureBola ? 'PASS' : 'FAIL',
-      severity: isSecureBola ? 'High' : 'Critical',
-      action: `Sent unauthorized ${b.method} request with forged cross-tenant credentials to: ${bUrl}`,
-      rationale: 'Verify that cross-tenant resources cannot be read, modified, or exfiltrated by unauthorized tenant identifiers or tampered tokens (OWASP API #1).',
-      expected: 'HTTP 401 (Unauthorized), 403 (Forbidden), 404 (Not Found), or clean SPA guard without data exposure.',
-      actual: `Received HTTP ${bRes.statusCode} ${bRes.statusMessage}. Cross-tenant data exposed: NO.`,
-      evidence: `Method: ${b.method}\nEndpoint: ${b.path}\nStatus: HTTP ${bRes.statusCode}\nLatency: ${bRes.latencyMs}ms`,
-      analysis: isSecureBola ? 'Cross-tenant resource boundaries are strictly enforced.' : 'CRITICAL: BOLA/IDOR vulnerability detected on cross-tenant resource!',
+      name: 'Cross-Tenant Object Isolation',
+      status: 'INCONCLUSIVE',
+      severity: 'Info',
+      action: HAS_AUTH
+        ? `Attempted to enumerate a real object via ${HERCULES_ENDPOINTS.CAMPAIGNS.GET_HISTORY} to probe against.`
+        : 'No authenticated session available, so no real object could be identified.',
+      rationale: 'A BOLA test requires a real object owned by a known principal. Firing at invented ids only measures 404 behaviour.',
+      expected: 'A live object id plus a confirmed owner read, then denial for broken credentials.',
+      actual: HAS_AUTH
+        ? `Could not identify a real object id${realObjectId ? ` (id ${realObjectId} found but the owner read returned non-200)` : ' from the chat history endpoint'}. No cross-tenant conclusion drawn.`
+        : 'No authenticated session: supply SECURITY_STORAGE_STATE or .auth/apple-user.json, or run tests/security/StatefulSessionSecurity.spec.js which provisions two real tenants.',
+      evidence: `HAS_AUTH: ${HAS_AUTH}\nReal object id: ${realObjectId || 'none'}\nOwner could read: ${ownerCanRead}`,
+      analysis: 'Reported as inconclusive rather than passing. For a true two-tenant test see SEC-AUTH-01 in tests/security/StatefulSessionSecurity.spec.js.',
     });
   }
 
@@ -807,7 +1305,7 @@ async function runEnterprise10OutOf10Audit() {
 
   for (const r of rateLimitTargets) {
     const burstCount = 15;
-    const rUrl = `${TARGET_URL}${r.path}`;
+    const rUrl = resolveUrl(r.path);
     const burstPromises = Array.from({ length: burstCount }, () =>
       requestUrl(rUrl, {
         method: r.method,
@@ -824,21 +1322,45 @@ async function runEnterprise10OutOf10Audit() {
     const avgLatency = Math.round(burstResults.reduce((acc, c) => acc + c.latencyMs, 0) / burstCount);
 
     const has500 = burstResults.some((res) => res.statusCode >= 500);
-    const allBlockedOrHandled = burstResults.every((res) => [200, 400, 401, 403, 404, 429].includes(res.statusCode));
-    const rateStatus = (!has500 && allBlockedOrHandled) ? 'PASS' : 'FAIL';
+    const codes = Array.from(new Set(burstResults.map((b) => b.statusCode)));
+    const acceptedCount = burstResults.filter((res) => res.statusCode === 200).length;
+    const throttled = has429 || hasRateHeaders;
+    // Endpoints that reject every request (401/404) never exercised a limiter.
+    const everyRequestRejected = burstResults.every((res) => [401, 403, 404, 405].includes(res.statusCode));
+
+    let rateStatus;
+    let rateDetail;
+    if (has500) {
+      rateStatus = 'FAIL';
+      rateDetail = `Burst caused server errors (${codes.join(', ')}): the endpoint degrades under concurrency instead of shedding load.`;
+    } else if (throttled) {
+      rateStatus = 'PASS';
+      rateDetail = `Throttling observed: ${has429 ? 'HTTP 429 returned' : 'no 429'}${hasRateHeaders ? ', rate-limit/retry-after headers present' : ''}.`;
+    } else if (everyRequestRejected) {
+      rateStatus = 'INCONCLUSIVE';
+      rateDetail = `Every request was rejected upfront (${codes.join(', ')}), so no rate limiter was exercised. This measures nothing about abuse control.`;
+    } else {
+      // The important correction: absorbing the burst is the ABSENCE of a limit.
+      rateStatus = 'WARN';
+      rateDetail = `No throttling signal: ${acceptedCount}/${burstCount} concurrent requests were accepted (statuses ${codes.join(', ')}) with no 429 and no rate-limit headers. Either the threshold exceeds ${burstCount} concurrent requests or no limit is enforced.`;
+    }
 
     logFinding({
       code: 'RATE-01',
       principle: 'Rate Limiting & Anti-Automation',
       name: `Abuse Prevention: ${r.name}`,
       status: rateStatus,
-      severity: 'High',
-      action: `Dispatched burst of ${burstCount} concurrent requests in parallel to: ${rUrl}`,
-      rationale: 'Verify that authentication and submission APIs are fortified against high-frequency brute-force, credential stuffing, and bot spam.',
-      expected: 'Server absorbs high-concurrency burst cleanly without 500 crashes, enforces rate limits (429 / CDN throttling), or securely rejects with 401/404.',
-      actual: `Handled ${burstCount} concurrent requests cleanly. Avg Latency: ${avgLatency}ms (429 Triggered: ${has429 ? 'YES' : 'NO'}, Rate Headers: ${hasRateHeaders ? 'Present' : 'Managed at CDN/Gateway'}).`,
-      evidence: `Burst Requests: ${burstCount}\nAvg Latency: ${avgLatency}ms\nStatusCodes: ${Array.from(new Set(burstResults.map(b => b.statusCode))).join(', ')}`,
-      analysis: 'Server demonstrated robust resilience against concurrent request spikes without unhandled backend degradation.',
+      severity: rateStatus === 'FAIL' ? 'High' : rateStatus === 'WARN' ? 'Medium' : 'Info',
+      action: `Dispatched a burst of ${burstCount} concurrent ${r.method} requests to: ${rUrl}`,
+      rationale: 'Authentication and submission APIs need enforced rate limits against brute force, credential stuffing and bot spam. Absorbing a burst without complaint is evidence of a missing limit, not of resilience.',
+      expected: `HTTP 429 or rate-limit/retry-after headers once the burst exceeds the threshold, and no 5xx.`,
+      actual: rateDetail,
+      evidence: `Burst size: ${burstCount}\nStatus codes: ${codes.join(', ')}\n200 responses: ${acceptedCount}\n429 observed: ${has429}\nRate-limit headers: ${hasRateHeaders}\nAvg latency: ${avgLatency}ms`,
+      analysis: rateStatus === 'PASS'
+        ? 'Rate limiting is enforced and observable on this endpoint.'
+        : rateStatus === 'WARN'
+          ? `Raise the burst size to locate the threshold, or add a limiter. ${acceptedCount} accepted requests in one burst is an abuse path for OTP/email endpoints.`
+          : rateDetail,
     });
   }
 
@@ -852,44 +1374,65 @@ async function runEnterprise10OutOf10Audit() {
   
   // A. alg: none signature bypass token
   const algNoneToken = `${b64Url({ alg: 'none', typ: 'JWT' })}.${b64Url({ sub: 'admin', role: 'superuser', exp: Math.floor(Date.now() / 1000) + 3600 })}.`;
-  const algNoneRes = await requestUrl(`${TARGET_URL}${HERCULES_ENDPOINTS.ACCOUNT.GET_DETAILS}`, {
+  const algNoneRes = await requestUrl(resolveUrl(HERCULES_ENDPOINTS.ACCOUNT.GET_DETAILS), {
     headers: { 'Authorization': `Bearer ${algNoneToken}` },
   });
-  const algNoneBlocked = algNoneRes.statusCode === 401 || algNoneRes.statusCode === 403 || algNoneRes.statusCode === 404 || (algNoneRes.statusCode === 200 && !algNoneRes.body.includes('superuser'));
+  const algNoneVerdict = evaluateAuthRejection(algNoneRes);
+  // An unsigned token must never elevate: also check the claimed role is not echoed back.
+  const algNoneEcho = /"(?:role|isAdmin|is_admin|superuser)"\s*:\s*(?:"superuser"|true)/i.test(algNoneRes.body || '');
+  const algNoneStatus = algNoneEcho ? 'FAIL' : algNoneVerdict.status;
 
   logFinding({
     code: 'JWT-01',
     principle: 'Cryptographic Session Security',
-    name: 'JWT Algorithm Confusion (alg: none) Bypass Probe',
-    status: algNoneBlocked ? 'PASS' : 'FAIL',
-    severity: algNoneBlocked ? 'High' : 'Critical',
-    action: `Sent unsigned JWT with header {"alg":"none"} claiming superuser role to: ${TARGET_URL}${HERCULES_ENDPOINTS.ACCOUNT.GET_DETAILS}`,
-    rationale: 'Verify that backend JWT verification strictly enforces HMAC/RSA signature validation and rejects unsigned tokens configured with "alg": "none".',
-    expected: 'HTTP 401 (Unauthorized) or 403 (Forbidden). "alg: none" tokens must be rejected.',
-    actual: algNoneBlocked ? `Safe: Received HTTP ${algNoneRes.statusCode} ${algNoneRes.statusMessage}. Unsigned token rejected.` : 'CRITICAL: alg: none signature bypass accepted!',
-    evidence: `Token Header: {"alg":"none","typ":"JWT"}\nStatus: HTTP ${algNoneRes.statusCode}\nLatency: ${algNoneRes.latencyMs}ms`,
-    analysis: algNoneBlocked ? 'JWT signature validation strictly enforces cryptographic algorithm integrity.' : 'CRITICAL JWT vulnerability: Server accepted unsigned token!',
+    name: 'JWT Algorithm Confusion (alg: none) Bypass',
+    status: algNoneStatus,
+    severity: algNoneStatus === 'FAIL' ? 'Critical' : algNoneStatus === 'WARN' ? 'High' : 'Info',
+    action: `Sent an unsigned JWT (alg:none, role=superuser) to: ${resolveUrl(HERCULES_ENDPOINTS.ACCOUNT.GET_DETAILS)}`,
+    rationale: 'JWT verification must enforce the expected signing algorithm and reject unsigned tokens, rather than trusting the header supplied by the caller.',
+    expected: 'HTTP 401 or 403, with no account data and no elevated claims echoed back.',
+    actual: algNoneEcho
+      ? 'CRITICAL: the forged superuser/admin claim was reflected in the response body.'
+      : algNoneVerdict.detail,
+    evidence: `Token header: {"alg":"none","typ":"JWT"}\nStatus: HTTP ${algNoneRes.statusCode}\nContent-Type: ${algNoneRes.headers['content-type'] || 'none'}\nElevated claim echoed: ${algNoneEcho}\nPrivate-data indicators: ${findPrivateData(algNoneRes.body, isJsonResponse(algNoneRes)).join(', ') || 'none'}\nLatency: ${algNoneRes.latencyMs}ms`,
+    analysis: algNoneStatus === 'PASS'
+      ? 'Unsigned tokens are rejected at the auth boundary.'
+      : algNoneStatus === 'FAIL'
+        ? 'Signature verification is not enforced: an attacker can mint arbitrary identities.'
+        : algNoneVerdict.detail,
   });
 
   // B. Expired Token Validation
   const expiredToken = `${b64Url({ alg: 'HS256', typ: 'JWT' })}.${b64Url({ sub: 'user_test', exp: Math.floor(Date.now() / 1000) - 7200 })}.tampered_signature_payload`;
-  const expRes = await requestUrl(`${TARGET_URL}${HERCULES_ENDPOINTS.AUTH.SYNC}`, {
-    headers: { 'Authorization': `Bearer ${expiredToken}` },
+  // /api/auth/sync is POST-only; a GET returns 405 and the probe would never
+  // reach the expiry check.
+  const expRes = await requestUrl(resolveUrl(HERCULES_ENDPOINTS.AUTH.SYNC), {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${expiredToken}`, 'Content-Type': 'application/json' },
+    body: '{}',
   });
-  const expBlocked = expRes.statusCode === 401 || expRes.statusCode === 403 || expRes.statusCode === 404 || (expRes.statusCode === 200 && !expRes.body.includes('user_test'));
+  const expVerdict = evaluateAuthRejection(expRes);
+  const expLoggedIn = /"(?:isLoggedIn|authenticated|isAuthenticated)"\s*:\s*true/i.test(expRes.body || '');
+  const expStatus = expLoggedIn ? 'FAIL' : expVerdict.status;
 
   logFinding({
     code: 'JWT-02',
     principle: 'Cryptographic Session Security',
-    name: 'Expired Session Token Rejection & Expiration Enforcement',
-    status: expBlocked ? 'PASS' : 'FAIL',
-    severity: expBlocked ? 'High' : 'Critical',
-    action: `Sent expired JWT token (exp: -7200s in the past) to: ${TARGET_URL}${HERCULES_ENDPOINTS.AUTH.SYNC}`,
-    rationale: 'Verify that expired tokens are strictly rejected and cannot be reused beyond their cryptographic expiration time.',
-    expected: 'HTTP 401 Unauthorized or clean rejection.',
-    actual: `Received HTTP ${expRes.statusCode} ${expRes.statusMessage}. Expired session rejected properly.`,
-    evidence: `Token Exp: -7200s (Past)\nHTTP Status: ${expRes.statusCode}\nLatency: ${expRes.latencyMs}ms`,
-    analysis: 'Session expiration lifecycle is correctly enforced.',
+    name: 'Expired Session Token Rejection',
+    status: expStatus,
+    severity: expStatus === 'FAIL' ? 'Critical' : expStatus === 'WARN' ? 'High' : 'Info',
+    action: `Sent an expired JWT (exp 7200s in the past) to: ${resolveUrl(HERCULES_ENDPOINTS.AUTH.SYNC)}`,
+    rationale: 'Expired tokens must be rejected on every request; accepting them makes session revocation impossible.',
+    expected: 'HTTP 401/403 and no authenticated session state in the body.',
+    actual: expLoggedIn
+      ? 'CRITICAL: the response reports an authenticated session for an expired token.'
+      : expVerdict.detail,
+    evidence: `Token exp: -7200s (past)\nStatus: HTTP ${expRes.statusCode}\nContent-Type: ${expRes.headers['content-type'] || 'none'}\nSession asserted in body: ${expLoggedIn}\nLatency: ${expRes.latencyMs}ms`,
+    analysis: expStatus === 'PASS'
+      ? 'Token expiry is enforced at the auth boundary.'
+      : expStatus === 'FAIL'
+        ? 'Expired tokens are honoured: sessions cannot be reliably expired or revoked.'
+        : expVerdict.detail,
   });
 
   // -------------------------------------------------------------------------
@@ -897,42 +1440,111 @@ async function runEnterprise10OutOf10Audit() {
   // -------------------------------------------------------------------------
   console.log(`\n▶ [ENGINE 15] Business Logic & State Manipulation Integrity...`);
   
-  // A. Mass Assignment & Parameter Pollution
-  const massAssignUrl = `${TARGET_URL}/?isAdmin=true&role=superuser&plan=enterprise_unlimited&quota=999999`;
-  const massAssignRes = await requestUrl(massAssignUrl);
-  const massAssignSafe = massAssignRes.statusCode === 200 || massAssignRes.statusCode === 400;
+  // A. Mass Assignment & Parameter Pollution.
+  //    Probing the marketing root with ?isAdmin=true proves nothing: no backend
+  //    reads it. This compares the authenticated account state returned with and
+  //    without injected privilege parameters, which is a read-only test that can
+  //    actually fail. Nothing here mutates account state.
+  if (HAS_AUTH) {
+    const accountUrl = resolveUrl(HERCULES_ENDPOINTS.ACCOUNT.GET_DETAILS);
+    const baselineRes = await requestUrl(accountUrl, { headers: { ...AUTH_HEADERS, Accept: 'application/json' } });
+    const pollutedRes = await requestUrl(
+      `${accountUrl}?isAdmin=true&role=superuser&plan=enterprise_unlimited&quota=999999&credits=999999`,
+      { headers: { ...AUTH_HEADERS, Accept: 'application/json' } }
+    );
 
-  logFinding({
-    code: 'BIZ-01',
-    principle: 'Business Logic Security',
-    name: 'Mass Assignment & Parameter Pollution Probe',
-    status: massAssignSafe ? 'PASS' : 'WARN',
-    severity: 'High',
-    action: `Injected administrative privilege parameters [?isAdmin=true&role=superuser&plan=enterprise_unlimited] to: ${massAssignUrl}`,
-    rationale: 'Ensure arbitrary query parameters cannot override account role, subscription plan, or administrative permissions.',
-    expected: 'Server ignores or sanitizes unauthorized parameters without privilege escalation or crashes.',
-    actual: `Handled safely with HTTP ${massAssignRes.statusCode} ${massAssignRes.statusMessage}. No unauthorized privilege state modified.`,
-    evidence: `Injected Params: isAdmin=true, role=superuser, plan=enterprise_unlimited\nStatus: ${massAssignRes.statusCode}`,
-    analysis: 'Parameter pollution safely neutralized by application model boundaries.',
+    const baselineState = classifyProbe(baselineRes);
+    const pollutedElevated = /"(?:role|isAdmin|is_admin)"\s*:\s*(?:"superuser"|true)/i.test(pollutedRes.body || '')
+      && !/"(?:role|isAdmin|is_admin)"\s*:\s*(?:"superuser"|true)/i.test(baselineRes.body || '');
+    const bodiesDiffer = (baselineRes.body || '') !== (pollutedRes.body || '');
+
+    let bizStatus;
+    let bizDetail;
+    if (baselineState !== 'EXERCISED') {
+      bizStatus = 'INCONCLUSIVE';
+      bizDetail = `Baseline account read did not reach the API (${PROBE_STATE_LABEL[baselineState]}); the stored session may be expired. No conclusion drawn.`;
+    } else if (pollutedElevated) {
+      bizStatus = 'FAIL';
+      bizDetail = 'Injected privilege parameters changed the returned account role/admin flag: mass assignment is possible via the query string.';
+    } else if (bodiesDiffer) {
+      bizStatus = 'WARN';
+      bizDetail = 'Injected parameters altered the response body without granting an obvious privilege. Review which fields the query string can influence.';
+    } else {
+      bizStatus = 'PASS';
+      bizDetail = 'Account state was byte-identical with and without the injected privilege parameters: the query string does not bind to the account model.';
+    }
+
+    logFinding({
+      code: 'BIZ-01',
+      principle: 'Business Logic Security',
+      name: 'Mass Assignment & Parameter Pollution (authenticated read-back)',
+      status: bizStatus,
+      severity: bizStatus === 'FAIL' ? 'Critical' : bizStatus === 'WARN' ? 'Medium' : 'Info',
+      action: `Read ${HERCULES_ENDPOINTS.ACCOUNT.GET_DETAILS} with an authenticated session, then re-read it with [?isAdmin=true&role=superuser&plan=enterprise_unlimited] and compared the two responses.`,
+      rationale: 'Request parameters must not bind to privileged model fields such as role, admin flags, plan tier, or credit balance.',
+      expected: 'Identical account state regardless of injected privilege parameters.',
+      actual: bizDetail,
+      evidence: `Baseline: HTTP ${baselineRes.statusCode} (${baselineRes.body ? baselineRes.body.length : 0} bytes)\nPolluted: HTTP ${pollutedRes.statusCode} (${pollutedRes.body ? pollutedRes.body.length : 0} bytes)\nBodies differ: ${bodiesDiffer}\nElevated claim appeared: ${pollutedElevated}`,
+      analysis: bizStatus === 'PASS'
+        ? 'No parameter-to-model binding observed on the account read path.'
+        : bizDetail,
+    });
+  } else {
+    logFinding({
+      code: 'BIZ-01',
+      principle: 'Business Logic Security',
+      name: 'Mass Assignment & Parameter Pollution',
+      status: 'INCONCLUSIVE',
+      severity: 'Info',
+      action: 'Mass-assignment probe requires an authenticated session to read account state back.',
+      rationale: 'Privilege escalation via parameter binding can only be observed against real account state.',
+      expected: 'An authenticated baseline read to compare against.',
+      actual: 'No authenticated session supplied, so no read-back comparison was possible. Set SECURITY_STORAGE_STATE or populate .auth/.',
+      evidence: 'HAS_AUTH: false',
+      analysis: 'Reported inconclusive rather than passing: sending privilege parameters to an unauthenticated static page tests nothing.',
+    });
+  }
+
+  // B. Negative / out-of-bounds numeric integrity against the real cost estimator.
+  //    Read-only: this asks for an estimate and never deducts credits.
+  const estimateBody = JSON.stringify({ sampleSize: -100, reward: -5000, credits: 'NaN', price: -99.99 });
+  const estimateRes = await requestUrl(resolveUrl(HERCULES_ENDPOINTS.BILLING.ESTIMATE_COST), {
+    method: 'POST',
+    headers: { ...AUTH_HEADERS, 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: estimateBody,
   });
+  const estimateState = classifyProbe(estimateRes);
+  const negativeCost = /"(?:cost|total|amount|credits|price)"\s*:\s*-\d/i.test(estimateRes.body || '');
+  const nanCost = /"(?:cost|total|amount|credits|price)"\s*:\s*(?:"?NaN"?|null)/i.test(estimateRes.body || '');
 
-  // B. Out-of-bounds & Negative Value Injection
-  const outOfBoundsUrl = `${TARGET_URL}/?reward=-5000&credits=NaN&sampleSize=-100&price=-99.99`;
-  const oobRes = await requestUrl(outOfBoundsUrl);
-  const oobSafe = oobRes.statusCode === 200 || oobRes.statusCode === 400 || oobRes.statusCode === 422;
+  let oobStatus;
+  let oobDetail;
+  if (estimateState !== 'EXERCISED') {
+    oobStatus = 'INCONCLUSIVE';
+    oobDetail = `Estimator did not evaluate the payload (${PROBE_STATE_LABEL[estimateState]}).`;
+  } else if (negativeCost || nanCost) {
+    oobStatus = 'FAIL';
+    oobDetail = `Estimator returned a ${negativeCost ? 'negative' : 'NaN/null'} monetary value for negative inputs: pricing logic accepts out-of-bounds values.`;
+  } else if (estimateRes.statusCode >= 500) {
+    oobStatus = 'WARN';
+    oobDetail = `Estimator returned HTTP ${estimateRes.statusCode} instead of validating the input and rejecting it with 400/422.`;
+  } else {
+    oobStatus = 'PASS';
+    oobDetail = `Estimator handled negative/NaN inputs with HTTP ${estimateRes.statusCode} and produced no negative or NaN monetary value.`;
+  }
 
   logFinding({
     code: 'BIZ-02',
     principle: 'Business Logic Security',
-    name: 'Out-of-Bounds & Negative Numeric Parameter Integrity',
-    status: oobSafe ? 'PASS' : 'WARN',
-    severity: 'Medium',
-    action: `Sent negative and non-numeric value injection [?reward=-5000&credits=NaN&sampleSize=-100] to ${TARGET_URL}`,
-    rationale: 'Verify mathematical calculations (pricing, rewards, audience sample sizes) prevent negative or NaN value corruption.',
-    expected: 'Payload handled cleanly without numerical error disclosure or negative credit state.',
-    actual: `Handled cleanly with HTTP ${oobRes.statusCode} ${oobRes.statusMessage}.`,
-    evidence: `Payload: reward=-5000&credits=NaN&sampleSize=-100\nHTTP Status: ${oobRes.statusCode}`,
-    analysis: 'Numeric business logic parameters safely validated.',
+    name: 'Negative & Out-of-Bounds Numeric Integrity (cost estimator)',
+    status: oobStatus,
+    severity: oobStatus === 'FAIL' ? 'High' : oobStatus === 'WARN' ? 'Low' : 'Info',
+    action: `POSTed [sampleSize=-100, reward=-5000, credits=NaN, price=-99.99] to the read-only estimator ${resolveUrl(HERCULES_ENDPOINTS.BILLING.ESTIMATE_COST)}.`,
+    rationale: 'Pricing and reward maths must reject negative and non-numeric inputs; a negative cost can invert a charge into a credit.',
+    expected: 'HTTP 400/422 rejection, or a non-negative numeric result. Never a negative or NaN monetary value.',
+    actual: oobDetail,
+    evidence: `Payload: ${estimateBody}\nStatus: HTTP ${estimateRes.statusCode}\nProbe state: ${estimateState}\nNegative value returned: ${negativeCost}\nNaN/null value returned: ${nanCost}\nBody preview: ${(estimateRes.body || '').slice(0, 250).replace(/\s+/g, ' ')}`,
+    analysis: oobStatus === 'PASS' ? 'Numeric validation holds on the cost estimation path.' : oobDetail,
   });
 
   // -------------------------------------------------------------------------
@@ -940,63 +1552,126 @@ async function runEnterprise10OutOf10Audit() {
   // -------------------------------------------------------------------------
   console.log(`\n▶ [ENGINE 16] File Upload & Media Payload Validation Defenses...`);
   
-  // A. Oversized Payload Protection (DoS / Memory Exhaustion Defense)
+  // A. Oversized payload protection. A 404/405 here means there is no upload
+  //    endpoint at this path, so no body-size limit was exercised.
   const oversizedData = 'X'.repeat(5 * 1024 * 1024); // 5 MB payload
-  const oversizeRes = await requestUrl(`${TARGET_URL}/api/upload`, {
+  const oversizeRes = await requestUrl(resolveUrl('/api/upload'), {
     method: 'POST',
-    headers: { 'Content-Type': 'application/octet-stream' },
+    headers: { ...AUTH_HEADERS, 'Content-Type': 'application/octet-stream' },
     body: oversizedData,
   });
-  const oversizeProtected = [413, 400, 404, 405, 403].includes(oversizeRes.statusCode);
+  const oversizeBounded = [413, 400, 422, 429].includes(oversizeRes.statusCode);
+  const oversizeAbsent = [404, 405].includes(oversizeRes.statusCode);
 
   logFinding({
     code: 'FILE-01',
     principle: 'Input Validation & DoS Defense',
-    name: 'Oversized Payload Memory Exhaustion (DoS) Guard',
-    status: oversizeProtected ? 'PASS' : 'WARN',
-    severity: 'High',
-    action: `Sent 5MB oversized binary payload to: ${TARGET_URL}/api/upload`,
-    rationale: 'Verify the web server and load balancer enforce max body size limits (e.g., HTTP 413 Payload Too Large) to prevent server memory exhaustion.',
-    expected: 'HTTP 413 (Payload Too Large), 400 (Bad Request), 404/405, or controlled gateway limit.',
-    actual: `Server responded with HTTP ${oversizeRes.statusCode} ${oversizeRes.statusMessage}.`,
-    evidence: `Payload Size: 5MB (5,242,880 bytes)\nStatus: HTTP ${oversizeRes.statusCode}\nLatency: ${oversizeRes.latencyMs}ms`,
-    analysis: oversizeProtected ? 'Web gateway/server strictly bounds request entity size to protect backend memory.' : 'Review reverse proxy client_max_body_size setting.',
+    name: 'Oversized Payload Body-Size Limit',
+    status: oversizeBounded ? 'PASS' : oversizeAbsent ? 'INCONCLUSIVE' : oversizeRes.statusCode >= 500 ? 'FAIL' : 'WARN',
+    severity: oversizeRes.statusCode >= 500 ? 'High' : oversizeAbsent ? 'Info' : 'Medium',
+    action: `POSTed a 5MB body to ${resolveUrl('/api/upload')}.`,
+    rationale: 'The gateway should bound request entity size (HTTP 413) so a large body cannot exhaust backend memory.',
+    expected: 'HTTP 413 Payload Too Large, or another explicit rejection (400/422/429).',
+    actual: oversizeBounded
+      ? `Gateway bounded the request with HTTP ${oversizeRes.statusCode}.`
+      : oversizeAbsent
+        ? `HTTP ${oversizeRes.statusCode}: no upload handler at this path, so no body-size limit was exercised. Point this probe at the real upload endpoint to test it.`
+        : oversizeRes.statusCode >= 500
+          ? `HTTP ${oversizeRes.statusCode}: the oversized body reached code that failed instead of being rejected at the edge.`
+          : `HTTP ${oversizeRes.statusCode}: the 5MB body was accepted without an explicit size rejection.`,
+    evidence: `Payload size: 5,242,880 bytes\nStatus: HTTP ${oversizeRes.statusCode}\nProbe state: ${classifyProbe(oversizeRes)}\nLatency: ${oversizeRes.latencyMs}ms`,
+    analysis: oversizeBounded
+      ? 'Request entity size is bounded before reaching application code.'
+      : oversizeAbsent
+        ? 'Not a finding: nothing was tested because the endpoint does not exist on this deployment.'
+        : 'Review the reverse-proxy client_max_body_size / gateway request limit.',
   });
 
-  // B. Malicious SVG / Script Injection Payload Defense
+  // B. Reflected SVG/script payload. Checked across the real parameterized
+  //    endpoints; a payload that is never reflected anywhere is inconclusive,
+  //    not a pass. Stored-SVG XSS needs the authenticated upload endpoint and
+  //    is out of scope for this HTTP-only engine.
   const maliciousSvg = '<svg xmlns="http://www.w3.org/2000/svg" onload="alert(\'XSS\')"><script>alert(1)</script></svg>';
-  const svgRes = await requestUrl(`${TARGET_URL}/?avatar_url=${encodeURIComponent('data:image/svg+xml;utf8,' + maliciousSvg)}`);
-  const svgLeaked = svgRes.body.includes('<script>alert(1)</script>');
-
-  logFinding({
+  logFinding(await runInjectionProbe({
     code: 'FILE-02',
-    principle: 'Input Validation & Stored XSS',
-    name: 'Malicious SVG Script Injection Defense',
-    status: svgLeaked ? 'FAIL' : 'PASS',
-    severity: svgLeaked ? 'Critical' : 'High',
-    action: `Injected SVG containing embedded script vector [<svg onload=...><script>alert(1)</script></svg>]`,
-    rationale: 'Verify that SVG media uploads or parameter reflections do not execute inline scripts or trigger Stored/Reflected XSS.',
-    expected: 'SVG payload sanitized, stripped, or properly Content-Type escaped without script execution.',
-    actual: svgLeaked ? 'CRITICAL: Raw executable script tag reflected in response!' : 'Safe: Script tags safely neutralized. No executable payload reflected.',
-    evidence: `Script Reflected: ${svgLeaked ? 'YES' : 'NO'}\nHTTP Status: ${svgRes.statusCode}\nLatency: ${svgRes.latencyMs}ms`,
-    analysis: svgLeaked ? 'Critical XSS vulnerability in media handling!' : 'Media and SVG injection vectors safely neutralized.',
-  });
+    principle: 'Input Validation & Reflected XSS',
+    name: 'Reflected SVG / Script Payload Sanitisation',
+    payload: maliciousSvg,
+    rationale: 'A reflected value containing markup must be escaped; unescaped <script> or an svg onload handler in an HTML response is executable XSS.',
+    expected: 'Payload escaped or dropped; no executable markup echoed into an HTML response.',
+    detect: (res) => {
+      const body = res.body || '';
+      if (!isHtmlResponse(res)) {
+        // Reflected inside JSON is not directly executable.
+        return { vulnerable: false, detail: 'payload not reflected into an HTML context' };
+      }
+      if (body.includes('<script>alert(1)</script>')) {
+        return { vulnerable: true, detail: 'raw <script> tag reflected unescaped into HTML' };
+      }
+      if (/<svg[^>]+onload\s*=/i.test(body)) {
+        return { vulnerable: true, detail: 'svg onload handler reflected unescaped into HTML' };
+      }
+      return { vulnerable: false, detail: 'markup escaped or dropped' };
+    },
+  }));
 
   // -------------------------------------------------------------------------
-  // Generate & Export Standardized Report
+  // Generate & Export Standardized Report, then gate the build
   // -------------------------------------------------------------------------
-  const reportPath = reporter.generateHtmlReport('owasp-enterprise-10-10-report.html');
+  const reportPath = reporter.generateHtmlReport('dast-security-audit-report.html');
   const metrics = reporter.getMetrics();
+  const blocking = reporter.getBlockingFindings();
 
   console.log(`\n======================================================================`);
-  console.log(`🎉  SECURITY AUDIT COMPLETED`);
-  console.log(`   Compliance Score: ${metrics.complianceScore}%`);
-  console.log(`   Verified Controls: ${metrics.passCount}/${metrics.totalCount}`);
-  console.log(`   Triaged / Suppressed: ${metrics.suppressedCount}`);
-  console.log(`   Hardening Warnings: ${metrics.warnCount}`);
-  console.log(`   Critical Vulnerabilities: ${metrics.failCount}`);
-  console.log(`📄 Dashboard exported at: ${reportPath}`);
-  console.log(`======================================================================\n`);
+  console.log(`  SECURITY AUDIT COMPLETED`);
+  console.log(`   Web / Core API / AI API: ${TARGETS.WEB_BASE} | ${TARGETS.CORE_API_BASE} | ${TARGETS.AI_API_BASE}`);
+  console.log(`   Session:                ${HAS_AUTH ? `authenticated (${AUTH.source})` : 'UNAUTHENTICATED'}`);
+  console.log(`   Controls executed:      ${metrics.totalCount}`);
+  console.log(`   Reached a verdict:      ${metrics.assessedCount}`);
+  console.log(`   Pass rate (assessed):   ${metrics.complianceScore}%  (${metrics.passCount}/${metrics.assessedCount})`);
+  console.log(`   Hardening warnings:     ${metrics.warnCount}`);
+  console.log(`   Inconclusive (no sink): ${metrics.inconclusiveCount}`);
+  console.log(`   Triaged / suppressed:   ${metrics.suppressedCount}`);
+  console.log(`   Expired suppressions:   ${metrics.expiredSuppressionCount}`);
+  console.log(`   FAILURES:               ${metrics.failCount}`);
+  console.log(`   Report:                 ${reportPath}`);
+  console.log(`======================================================================`);
+
+  if (!session.live) {
+    console.log(
+      `\n  COVERAGE WARNING: ${session.reason}.\n` +
+      `  Authenticated authorization, BOLA, injection and business-logic controls could\n` +
+      `  not reach authenticated code paths and are reported INCONCLUSIVE, not PASS.\n` +
+      `  Refresh the session (npx playwright test tests/auth.setup.js) or set\n` +
+      `  SECURITY_STORAGE_STATE=/path/to/storage-state.json, then re-run.`
+    );
+  }
+
+  if (blocking.length > 0) {
+    console.error(`\n  BLOCKING FINDINGS (${blocking.length}) — failing the build:`);
+    for (const f of blocking) {
+      const why = f.suppressionExpired ? `${f.status}, suppression expired ${f.suppressionExpiresAt}` : f.status;
+      console.error(`   • [${why}] ${f.code} — ${f.name}`);
+      console.error(`     ${f.actual}`);
+    }
+    console.error('');
+  }
+
+  // The gate. Previously this function returned normally no matter what was
+  // found, so a FAIL finding printed an X and the CI step still went green.
+  const exitCode = reporter.getExitCode();
+  console.log(exitCode === 0 ? '  Gate: PASSED (no blocking findings)\n' : `  Gate: FAILED (exit ${exitCode})\n`);
+  return exitCode;
 }
 
-runEnterprise10OutOf10Audit();
+// Run, and propagate the gate result to the process exit code so CI can block.
+runSecurityAudit()
+  .then((exitCode) => {
+    process.exitCode = exitCode;
+  })
+  .catch((err) => {
+    // A crashed audit is not a passing audit.
+    console.error('\n  SECURITY AUDIT CRASHED — failing closed.');
+    console.error(err && err.stack ? err.stack : err);
+    process.exitCode = 1;
+  });

@@ -1,10 +1,10 @@
 /**
  * securityAudit.js
- * Fast baseline security verification entrypoint (delegates to master suite engine)
+ * Baseline security verification entrypoint (delegates to the master suite engine).
+ *
+ * fullSecuritySuite sets process.exitCode itself, so requiring it here preserves
+ * the CI gate: a blocking finding exits non-zero through this entrypoint too.
  */
-
-const { execSync } = require('child_process');
-const path = require('path');
 
 console.log('⚡ Executing Baseline Security Audit...\n');
 

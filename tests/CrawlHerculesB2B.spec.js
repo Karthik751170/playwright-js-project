@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const fs = require('fs');
 const path = require('path');
+const TEST_CREDS = require('../config/testCredentials');
 
 const authFile = path.join(__dirname, '../.auth/google-karthik.json');
 const storageState = fs.existsSync(authFile) ? authFile : undefined;
@@ -55,7 +56,7 @@ test('Crawl Hercules B2B and Explore Sections', async ({ context, page }) => {
         console.log(`OAuth Popup URL: ${popup.url()}`);
         
         const GOOGLE_EMAIL = 'karthik@jupitermeta.io';
-        const GOOGLE_PASSWORD = 'Karthik@8342';
+        const GOOGLE_PASSWORD = TEST_CREDS.google.password;
         
         console.log(`Filling Google Email: ${GOOGLE_EMAIL}...`);
         const emailInput = popup.getByRole('textbox', { name: 'Email or phone' });

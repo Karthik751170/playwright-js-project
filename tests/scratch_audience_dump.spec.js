@@ -1,6 +1,7 @@
 const { test } = require('@playwright/test');
 const { setupMailosaurAccount } = require('./utils/MailosaurSetup');
 const HerculesCampaignManager = require('../pages/hercules/HerculesCampaignManager');
+const TEST_CREDS = require('../config/testCredentials');
 
 test.use({ storageState: { cookies: [], origins: [] } });
 
@@ -13,7 +14,7 @@ test('Navigate past Premium Audience Modal', async ({ browser }) => {
     // Login with the previous account
     await page.goto('https://dev.hercules.works/login');
     await page.locator('input[type="email"]').fill('middle-happily@kzdzyaot.mailosaur.net');
-    await page.locator('input[type="password"]').fill('TestPassword@2026!');
+    await page.locator('input[type="password"]').fill(TEST_CREDS.existingAccountPassword);
     await page.getByRole('button', { name: 'Sign in', exact: true }).click();
     
     await page.waitForTimeout(5000);

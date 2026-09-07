@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const HerculesHomePage = require('../pages/hercules/HerculesHomePage');
 const HerculesLoginPage = require('../pages/hercules/HerculesLoginPage');
+const TEST_CREDS = require('../config/testCredentials');
 
 // Configure Playwright to use the real Chrome browser to bypass Google Bot Detection
 test.use({ 
@@ -41,7 +42,7 @@ test.describe('Hercules Google OAuth Authentication', () => {
     console.log(`OAuth Popup URL: ${popup.url()}`);
     
     const GOOGLE_EMAIL = process.env.GOOGLE_EMAIL || 'jupiterkarthik132@gmail.com';
-    const GOOGLE_PASSWORD = process.env.GOOGLE_PASSWORD || 'Karthik@8342';
+    const GOOGLE_PASSWORD = process.env.GOOGLE_PASSWORD || TEST_CREDS.google.password;
     
     console.log(`Filling Google Email: ${GOOGLE_EMAIL}...`);
     const emailInput = popup.getByRole('textbox', { name: 'Email or phone' });

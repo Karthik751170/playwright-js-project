@@ -1,159 +1,321 @@
 const { test, expect } = require('@playwright/test');
-const { setupMailosaurAccount } = require('../utils/MailosaurSetup');
-const HerculesSurveyGenerator = require('../../pages/hercules/HerculesSurveyGenerator');
-const herculesConfig = require('../../config/hercules.config');
+const { setupMailosaurAccount, hasMailosaurCredentials } = require('../utils/MailosaurSetup');
+const HERCULES_ENDPOINTS = require('../../config/herculesEndpoints');
+const TARGETS = require('../../config/securityTargets');
+const ScopeGuard = require('../../utils/security/ScopeGuard');
+const { findPrivateData, isJson } = require('../../utils/security/probeHelpers');
 
-const TARGET_URL = process.env.TARGET_URL || herculesConfig.baseUrl || 'https://dev.hercules.works';
+/**
+ * Stateful session security: real tenants, real objects, real credentials.
+ *
+ * What the previous version did and why it proved nothing:
+ *   SEC-AUTH-01 spent five minutes provisioning a real user and creating a real
+ *     survey, then attacked `/api/surveys/srv_victim_<random>` -- an id that
+ *     never existed -- with a syntactically invalid token, and asserted 404.
+ *     It measured "404 on a nonexistent row", not tenant isolation.
+ *   SEC-AUTH-02 was named "post-logout invalidation" but never logged in or out;
+ *     it replayed the literal string "stale_revoked_token_after_logout_12345".
+ *   SEC-AUTH-03 was named "session fixation" but never compared a pre-auth
+ *     session id with a post-auth one, and only console.logged cookie flags.
+ *
+ * This version provisions TWO real tenants, has tenant B attack tenant A's real
+ * object with B's own VALID session (which is what actually tests authorization,
+ * as opposed to testing the signature verifier), and re-checks afterwards that
+ * A's object survived.
+ */
 
-test.describe('🛡️ Stateful Session Security & Multi-Tenant BOLA Tests', () => {
+const PROVISION_TIMEOUT = 420000;
 
+/** Builds API auth headers from a browser context's cookies. */
+async function sessionFromContext(context) {
+  const cookies = await context.cookies();
+  const scoped = cookies.filter((c) => (c.domain || '').includes('hercules.works'));
+  const bearer = (scoped.find((c) => c.name === 'dragonAccessToken') || {}).value || null;
+  return {
+    cookies: scoped,
+    headers: {
+      Cookie: scoped.map((c) => `${c.name}=${c.value}`).join('; '),
+      ...(bearer ? { Authorization: `Bearer ${bearer}` } : {}),
+      Accept: 'application/json',
+    },
+    bearer,
+  };
+}
+
+/** Submits a prompt so the account owns at least one server-side object. */
+async function createOwnedObject(page) {
+  if (!page.url().includes('/ai')) {
+    await page.goto(`${TARGETS.WEB_BASE}/ai`, { waitUntil: 'domcontentloaded' }).catch(() => {});
+    await page.waitForTimeout(3000);
+  }
+
+  const textarea = page.locator("textarea[aria-label='Ask Hercules a question'], textarea").first();
+  await textarea.waitFor({ state: 'visible', timeout: 30000 });
+  await textarea.fill(`Create a 3-question beverage feedback survey ${Math.random().toString(36).slice(2, 7)}.`);
+
+  const submitBtn = page
+    .locator('button[aria-label="submit button"]')
+    .or(page.getByRole('button', { name: 'Send' }))
+    .or(page.locator('button[type="submit"]'))
+    .first();
+
+  if (await submitBtn.isVisible().catch(() => false)) {
+    await submitBtn.click({ force: true });
+  } else {
+    await textarea.press('Enter');
+  }
+  // Submitting the prompt creates the chat server-side; no need to walk the
+  // whole questionnaire, which is what made the old test slow and brittle.
+  await page.waitForTimeout(6000);
+}
+
+/** Polls the API for a real object id owned by this session. */
+async function findOwnedObjectId(request, session, attempts = 10) {
+  for (let i = 0; i < attempts; i++) {
+    const res = await request.get(TARGETS.resolveUrl(HERCULES_ENDPOINTS.CAMPAIGNS.GET_HISTORY), {
+      headers: session.headers,
+      failOnStatusCode: false,
+    });
+    if (res.status() === 200) {
+      const body = await res.text();
+      try {
+        const parsed = JSON.parse(body);
+        const rows = Array.isArray(parsed) ? parsed : parsed.chats || parsed.data || parsed.results || [];
+        const row = rows.find((r) => r && (r.id || r.chatId || r._id));
+        if (row) return row.id || row.chatId || row._id;
+      } catch (e) {
+        // fall through and retry
+      }
+    }
+    await new Promise((r) => setTimeout(r, 3000));
+  }
+  return null;
+}
+
+test.describe.serial('Stateful Session Security & Multi-Tenant BOLA', () => {
   test.use({ storageState: { cookies: [], origins: [] } });
+  test.skip(
+    !hasMailosaurCredentials(),
+    'Account provisioning needs MAILOSAUR_UI_EMAIL, MAILOSAUR_UI_PASSWORD and MAILOSAUR_SERVER_ID. ' +
+      'Skipping is deliberate: these tests cannot be faked without real tenants.'
+  );
 
-  test('SEC-AUTH-01: Survey Creation & Cross-Tenant BOLA Deletion Shield', async ({ browser }) => {
-    test.setTimeout(300000); // 5 minutes
+  /** @type {{page: any, context: any, session: any, objectId: string|null, preAuthCookies: any[]}} */
+  let tenantA;
 
-    console.log('\n======================================================');
-    console.log(' [TEST 1] PROVISIONING AUTHENTICATED USER A VIA MAILOSAUR');
-    console.log('======================================================');
-    const { page, herculesContext } = await setupMailosaurAccount(browser);
-
-    // 1. Fast Survey Creation in /ai
-    console.log('[Step 1] Navigating to /ai for fast survey creation...');
-    if (!page.url().includes('/ai')) {
-      await page.goto(`${TARGET_URL}/ai`, { waitUntil: 'domcontentloaded' }).catch(() => {});
-      await page.waitForTimeout(3000);
+  test.beforeAll(async () => {
+    for (const origin of TARGETS.ALL_ORIGINS) {
+      ScopeGuard.validateScope(origin);
     }
+  });
 
-    const textarea = page.locator("textarea[aria-label='Ask Hercules a question'], textarea").first();
-    await textarea.waitFor({ state: 'visible', timeout: 20000 });
+  test('SEC-AUTH-01: tenant B must not read or delete tenant A objects', async ({ browser, request }) => {
+    test.setTimeout(PROVISION_TIMEOUT * 2);
 
-    const surveyTitle = `Security Audit Survey ${Math.random().toString(36).substring(2, 7)}`;
-    const promptText = `Create a 3-question survey titled "${surveyTitle}" for beverage feedback.`;
-    console.log(`[Step 2] Submitting prompt: "${promptText}"`);
-    await textarea.fill(promptText);
+    // ---- Provision tenant A and give it a real object ----
+    console.log('[SEC-AUTH-01] Provisioning tenant A...');
+    const a = await setupMailosaurAccount(browser);
+    const sessionA = await sessionFromContext(a.herculesContext);
+    tenantA = {
+      page: a.page,
+      context: a.herculesContext,
+      session: sessionA,
+      objectId: null,
+      preAuthCookies: a.preAuthCookies,
+      email: a.email,
+    };
 
-    const submitBtn = page.locator('button[aria-label="submit button"]').or(page.getByRole('button', { name: 'Send' })).or(page.locator('button[type="submit"]')).first();
-    if (await submitBtn.isVisible().catch(() => false)) {
-      await submitBtn.click({ force: true });
-    } else {
-      await textarea.press('Enter');
-    }
+    expect(sessionA.cookies.length, 'Tenant A did not receive any session cookies').toBeGreaterThan(0);
+    expect(sessionA.bearer, 'Tenant A has no dragonAccessToken; provisioning did not complete').toBeTruthy();
 
-    // 2. Answer questionnaire options quickly to trigger survey card creation
-    const surveyGenerator = new HerculesSurveyGenerator(page);
-    const questionnaireGenerateBtn = page.locator("button").filter({ hasText: /^Generate$|^Generate Survey$|^Generate Brief$|Generate/i }).first();
+    await createOwnedObject(a.page);
+    const objectIdA = await findOwnedObjectId(request, sessionA);
+    tenantA.objectId = objectIdA;
 
-    let loopCount = 0;
-    while (loopCount < 25) {
-      await page.waitForTimeout(1500);
-      loopCount++;
+    expect(
+      objectIdA,
+      'Could not obtain a real object id for tenant A, so there is nothing to test isolation against. ' +
+        'This is a test-setup failure, not a security pass.'
+    ).toBeTruthy();
+    console.log(`[SEC-AUTH-01] Tenant A owns object ${objectIdA}`);
 
-      if (await questionnaireGenerateBtn.isVisible().catch(() => false)) {
-        console.log('[Step 3] Questionnaire complete! Survey card is generated in sidebar/chat.');
-        break;
-      }
-      if (await page.locator("//button[@aria-label='Open sidebar']").isVisible().catch(() => false) && loopCount > 10) {
-        console.log('[Step 3] Sidebar available. Survey card created.');
-        break;
-      }
-      if (await surveyGenerator.handleSelectAndRunItThisWay().catch(() => false)) continue;
-      if (await surveyGenerator.selectAllThatApplyHeader.count() > 0 && await surveyGenerator.selectAllThatApplyHeader.first().isVisible()) {
-        if (await surveyGenerator.handleSelectAllThatApply()) continue;
-      }
-      if (await surveyGenerator.handleSingleSelect()) continue;
-      if (await surveyGenerator.handleTextInputFallback()) continue;
-      if (await surveyGenerator.clickSkip()) continue;
-    }
+    // ---- Positive control: the owner CAN read it ----
+    const objectUrl = TARGETS.resolveUrl(HERCULES_ENDPOINTS.CAMPAIGNS.GET_CHAT_BY_ID(objectIdA));
+    const ownerRead = await request.get(objectUrl, { headers: sessionA.headers, failOnStatusCode: false });
+    expect(
+      ownerRead.status(),
+      `Positive control failed: tenant A could not read its own object (HTTP ${ownerRead.status()}). ` +
+        'Without this, a 404 to an attacker is indistinguishable from a 404 to everyone.'
+    ).toBe(200);
+    const ownerBody = await ownerRead.text();
+    console.log('[SEC-AUTH-01] Positive control OK: owner reads their own object.');
 
-    // 3. Open Sidebar and verify Survey Card exists for User A
-    console.log('[Step 4] Opening sidebar to verify survey card presence...');
-    const openSidebarBtn = page.locator("//button[@aria-label='Open sidebar']").or(page.getByRole('button', { name: 'Open sidebar' })).first();
-    const closeSidebarBtn = page.locator("//button[@aria-label='Close sidebar']").or(page.getByRole('button', { name: 'Close sidebar' })).first();
+    // ---- Provision tenant B: a DIFFERENT real tenant with a VALID session ----
+    console.log('[SEC-AUTH-01] Provisioning tenant B...');
+    const b = await setupMailosaurAccount(browser);
+    const sessionB = await sessionFromContext(b.herculesContext);
+    expect(sessionB.bearer, 'Tenant B has no access token; provisioning did not complete').toBeTruthy();
+    expect(sessionB.bearer, 'Tenants A and B share a session token - provisioning reused one account').not.toBe(
+      sessionA.bearer
+    );
 
-    if (!(await closeSidebarBtn.isVisible().catch(() => false))) {
-      await openSidebarBtn.click({ force: true }).catch(() => {});
-      await page.waitForTimeout(2000);
-    }
-
-    // Capture User A's session cookies & state
-    const userAState = await page.context().storageState();
-    const userACookies = userAState.cookies;
-    console.log(`[Step 5] Captured User A authenticated session (${userACookies.length} cookies).`);
-    expect(userACookies.length).toBeGreaterThan(0);
-
-    // 4. Test Cross-Tenant BOLA Isolation: Attacker (User B Context) attempts unauthorized deletion
-    console.log('[Step 6] Launching isolated Attacker Context (User B) to test BOLA/IDOR...');
-    const attackerContext = await browser.newContext();
-    const attackerPage = await attackerContext.newPage();
-
-    // Attacker sends unauthorized delete/mutation against User A's survey route
-    const dummySurveyId = `srv_victim_${Math.random().toString(36).substring(2, 8)}`;
-    const unauthorizedResponse = await attackerPage.request.delete(`${TARGET_URL}/api/surveys/${dummySurveyId}`, {
-      headers: {
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.attacker_tampered_token.sig',
-        'X-Tenant-ID': 'unauthorized_attacker_org'
-      }
+    // Confirm B's session is genuinely valid, so a denial below is authorization
+    // working rather than B simply being unauthenticated.
+    const bOwnHistory = await request.get(TARGETS.resolveUrl(HERCULES_ENDPOINTS.CAMPAIGNS.GET_HISTORY), {
+      headers: sessionB.headers,
+      failOnStatusCode: false,
     });
+    expect(
+      bOwnHistory.status(),
+      `Tenant B's own session is not valid (HTTP ${bOwnHistory.status()}), so a denial on A's object would ` +
+        'prove nothing about authorization.'
+    ).toBe(200);
+    console.log("[SEC-AUTH-01] Tenant B's session is valid.");
 
-    const bolaStatus = unauthorizedResponse.status();
-    console.log(`[BOLA Assertion] Attacker DELETE response status: ${bolaStatus}`);
-    // Strict Gate: Must strictly be 401 Unauthorized, 403 Forbidden, or 404 Not Found
-    expect([401, 403, 404, 405]).toContain(bolaStatus);
+    // ---- The actual BOLA test: B reads A's real object with B's valid session ----
+    const crossRead = await request.get(objectUrl, { headers: sessionB.headers, failOnStatusCode: false });
+    const crossBody = await crossRead.text();
 
-    await attackerContext.close();
+    expect(
+      crossRead.status(),
+      `BOLA: tenant B read tenant A's object ${objectIdA} with its own valid session (HTTP 200). ` +
+        `Object-level authorization is not enforced. Body: ${crossBody.slice(0, 300)}`
+    ).not.toBe(200);
+    expect([401, 403, 404]).toContain(crossRead.status());
+    expect(
+      findPrivateData(crossBody, isJson(crossRead.headers())),
+      "Tenant A's private data leaked to tenant B"
+    ).toEqual([]);
+    console.log(`[SEC-AUTH-01] Cross-tenant read correctly denied with HTTP ${crossRead.status()}.`);
+
+    // ---- B attempts to DELETE A's object ----
+    const crossDelete = await request.delete(objectUrl, { headers: sessionB.headers, failOnStatusCode: false });
+    expect(
+      [401, 403, 404],
+      `BOLA: tenant B's DELETE on tenant A's object returned HTTP ${crossDelete.status()} instead of being denied.`
+    ).toContain(crossDelete.status());
+    console.log(`[SEC-AUTH-01] Cross-tenant delete correctly denied with HTTP ${crossDelete.status()}.`);
+
+    // ---- Integrity re-check: A's object must still exist ----
+    const afterAttack = await request.get(objectUrl, { headers: sessionA.headers, failOnStatusCode: false });
+    expect(
+      afterAttack.status(),
+      `Tenant A's object no longer readable (HTTP ${afterAttack.status()}) after tenant B's delete attempt: ` +
+        'the unauthorized delete took effect.'
+    ).toBe(200);
+    const afterBody = await afterAttack.text();
+    expect(afterBody.length, "Tenant A's object was emptied by tenant B's delete attempt").toBeGreaterThan(0);
+    console.log("[SEC-AUTH-01] Integrity confirmed: tenant A's object survived intact.");
+
+    void ownerBody;
+    await b.herculesContext.close().catch(() => {});
   });
 
-  test('SEC-AUTH-02: Post-Logout Token Invalidation & Session Termination', async ({ browser }) => {
-    test.setTimeout(180000);
+  test('SEC-AUTH-02: a session must stop working after logout', async ({ request }) => {
+    test.setTimeout(PROVISION_TIMEOUT);
+    expect(tenantA, 'Tenant A was not provisioned by SEC-AUTH-01').toBeTruthy();
 
-    console.log('\n======================================================');
-    console.log(' [TEST 2] TESTING POST-LOGOUT TOKEN REVOCATION       ');
-    console.log('======================================================');
-    
-    const context = await browser.newContext();
-    const page = await context.newPage();
+    const accountUrl = TARGETS.resolveUrl(HERCULES_ENDPOINTS.ACCOUNT.GET_DETAILS);
 
-    // 1. Visit landing page and capture pre-auth session
-    await page.goto(`${TARGET_URL}`, { waitUntil: 'domcontentloaded' });
-    const preAuthCookies = await context.cookies();
+    // 1. Prove the captured session works BEFORE logout. Without this the test
+    //    below passes trivially against any string.
+    const before = await request.get(accountUrl, { headers: tenantA.session.headers, failOnStatusCode: false });
+    expect(
+      before.status(),
+      `Tenant A's session was not usable before logout (HTTP ${before.status()}), so a rejection after ` +
+        'logout would prove nothing.'
+    ).toBe(200);
 
-    // 2. Perform API probe with revoked/stale credentials
-    const staleResponse = await page.request.get(`${TARGET_URL}/api/user`, {
-      headers: {
-        'Authorization': 'Bearer stale_revoked_token_after_logout_12345'
-      }
+    // 2. Log out through the real endpoint, using that same session.
+    const logout = await request.post(TARGETS.resolveUrl(HERCULES_ENDPOINTS.AUTH.LOGOUT), {
+      headers: tenantA.session.headers,
+      data: {},
+      failOnStatusCode: false,
     });
+    console.log(`[SEC-AUTH-02] Logout returned HTTP ${logout.status()}`);
+    expect(logout.status(), `Logout endpoint failed with HTTP ${logout.status()}`).toBeLessThan(500);
 
-    const status = staleResponse.status();
-    console.log(`[Logout Replay Assertion] Status on replaying stale token: ${status}`);
-    
-    // Strict Gate: Server must reject stale tokens with 401 or 403 or 404
-    expect([401, 403, 404]).toContain(status);
-    const body = await staleResponse.text();
-    expect(body.toLowerCase()).not.toContain('password');
-    expect(body.toLowerCase()).not.toContain('secret');
+    // 3. Replay the SAME token that worked in step 1. It must now be rejected.
+    const after = await request.get(accountUrl, { headers: tenantA.session.headers, failOnStatusCode: false });
+    const afterBody = await after.text();
 
-    await context.close();
+    expect(
+      after.status(),
+      `Token replay succeeded after logout (HTTP 200): the session was not invalidated server-side, so a ` +
+        `stolen token remains valid indefinitely. Body: ${afterBody.slice(0, 200)}`
+    ).not.toBe(200);
+    expect(
+      findPrivateData(afterBody, isJson(after.headers())),
+      'Private data returned to a logged-out session token'
+    ).toEqual([]);
+    console.log(`[SEC-AUTH-02] Replay after logout correctly rejected with HTTP ${after.status()}.`);
   });
 
-  test('SEC-AUTH-03: Session Fixation & Cookie Entropy Verification', async ({ browser }) => {
-    console.log('\n======================================================');
-    console.log(' [TEST 3] SESSION FIXATION & ENTROPY AUDIT           ');
-    console.log('======================================================');
-    
-    const context = await browser.newContext();
-    const page = await context.newPage();
+  test('SEC-AUTH-03: session id must rotate on auth and cookies must be hardened', async () => {
+    expect(tenantA, 'Tenant A was not provisioned by SEC-AUTH-01').toBeTruthy();
 
-    await page.goto(`${TARGET_URL}`, { waitUntil: 'domcontentloaded' });
-    const cookies = await context.cookies();
-    
-    for (const c of cookies) {
-      console.log(`Cookie: ${c.name} | Secure: ${c.secure} | HttpOnly: ${c.httpOnly} | SameSite: ${c.sameSite}`);
-      // If session cookie exists, ensure it is not predictable
-      expect(c.value.length).toBeGreaterThanOrEqual(8);
+    const preAuth = tenantA.preAuthCookies || [];
+    const postAuth = tenantA.session.cookies;
+
+    // ---- Session fixation: the authenticated session id must not be a value
+    //      that was already present before authenticating. ----
+    const SESSION_COOKIE_NAMES = ['dragonAccessToken', 'dragonRefreshToken'];
+    const authCookies = postAuth.filter((c) => SESSION_COOKIE_NAMES.includes(c.name));
+
+    expect(
+      authCookies.length,
+      `No session cookies (${SESSION_COOKIE_NAMES.join('/')}) found after authentication. ` +
+        `Cookies present: ${postAuth.map((c) => c.name).join(', ') || 'none'}`
+    ).toBeGreaterThan(0);
+
+    for (const cookie of authCookies) {
+      const preValue = preAuth.find((c) => c.name === cookie.name);
+      expect(
+        preValue && preValue.value === cookie.value,
+        `Session fixation: cookie ${cookie.name} kept the same value across the authentication boundary ` +
+          '(pre-auth value was reused). It must be regenerated on login.'
+      ).toBe(false);
+
+      // ---- Cookie hardening ----
+      expect(cookie.secure, `Session cookie ${cookie.name} is missing the Secure flag: it can be sent over HTTP.`).toBe(
+        true
+      );
+      expect(
+        cookie.httpOnly,
+        `Session cookie ${cookie.name} is missing HttpOnly: JavaScript can read it, so any XSS steals the session.`
+      ).toBe(true);
+      expect(
+        cookie.sameSite,
+        `Session cookie ${cookie.name} has no SameSite attribute.`
+      ).toBeTruthy();
+
+      // SameSite=None is required here because the API is a separate origin
+      // (devapi.hercules.works), so it is recorded rather than failed -- but it
+      // does mean CSRF defence must come from tokens, not the cookie policy.
+      if (cookie.sameSite === 'None') {
+        test.info().annotations.push({
+          type: 'security-note',
+          description:
+            `${cookie.name} uses SameSite=None (required for the cross-origin API). The cookie therefore ` +
+            'provides no CSRF protection; state-changing endpoints must verify an anti-CSRF token or Origin header.',
+        });
+      }
+
+      // Entropy: a guessable session id is as bad as none.
+      expect(
+        cookie.value.length,
+        `Session cookie ${cookie.name} is only ${cookie.value.length} chars: too short to resist guessing.`
+      ).toBeGreaterThanOrEqual(32);
     }
 
-    await context.close();
+    console.log(
+      `[SEC-AUTH-03] Verified ${authCookies.length} session cookie(s): rotated on auth, Secure, HttpOnly, >=32 chars.`
+    );
   });
 
+  test.afterAll(async () => {
+    if (tenantA && tenantA.context) {
+      await tenantA.context.close().catch(() => {});
+    }
+  });
 });

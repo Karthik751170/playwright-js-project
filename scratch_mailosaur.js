@@ -1,5 +1,6 @@
 const { chromium } = require('playwright');
 const fs = require('fs');
+const TEST_CREDS = require('./config/testCredentials');
 
 (async () => {
   console.log('Launching headless browser...');
@@ -12,8 +13,8 @@ const fs = require('fs');
   
   console.log('Filling in credentials...');
   // Find email and password inputs. Mailosaur usually uses name="email" and name="password"
-  await page.fill('input[type="email"]', 'ferad73521@neowd.com');
-  await page.fill('input[type="password"]', 'Karthik@8342');
+  await page.fill('input[type="email"]', TEST_CREDS.mailosaur.email);
+  await page.fill('input[type="password"]', TEST_CREDS.mailosaur.password);
   
   console.log('Submitting login form...');
   await page.click('button[type="submit"]');

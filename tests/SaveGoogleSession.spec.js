@@ -2,6 +2,7 @@ const { test } = require('@playwright/test');
 const HerculesHomePage = require('../pages/hercules/HerculesHomePage');
 const HerculesLoginPage = require('../pages/hercules/HerculesLoginPage');
 const fs = require('fs');
+const TEST_CREDS = require('../config/testCredentials');
 
 test.use({ 
   channel: 'chrome',
@@ -51,7 +52,7 @@ test('Sign-In with Google and Save Session', async ({ context, page }) => {
     await savePopupScreenshot(popup, '1_opened');
     
     const GOOGLE_EMAIL = 'karthik@jupitermeta.io';
-    const GOOGLE_PASSWORD = 'Karthik@8342';
+    const GOOGLE_PASSWORD = TEST_CREDS.google.password;
     
     console.log(`Filling Google Email: ${GOOGLE_EMAIL}...`);
     const emailInput = popup.getByRole('textbox', { name: 'Email or phone' });

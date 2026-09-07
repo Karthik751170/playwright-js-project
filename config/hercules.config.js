@@ -7,21 +7,27 @@
  * - ENV=production
  */
 
+// Admin credentials come from the environment: HERCULES_ADMIN_USER /
+// HERCULES_ADMIN_PASSWORD. They were previously hardcoded here, which committed
+// a live admin password to git history -- rotate it if that has not been done.
+const adminUser = process.env.HERCULES_ADMIN_USER || null;
+const adminPassword = process.env.HERCULES_ADMIN_PASSWORD || null;
+
 const environments = {
   dev: {
     baseUrl: 'https://dev.hercules.works',
-    adminUser: 'admin@hercules.works',
-    adminPassword: 'Password@123'
+    adminUser,
+    adminPassword
   },
   preprod: {
     baseUrl: 'https://prod.hercules.works',
-    adminUser: 'admin@hercules.works',
-    adminPassword: 'Password@123'
+    adminUser,
+    adminPassword
   },
   production: {
     baseUrl: 'https://hercules.works',
-    adminUser: 'admin@hercules.works',
-    adminPassword: 'Password@123'
+    adminUser,
+    adminPassword
   }
 };
 

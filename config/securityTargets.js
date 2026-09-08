@@ -32,19 +32,57 @@ function deriveApiBases(webBase) {
   return {
     core: `${protocol}//${envPrefix ? `${envPrefix}api` : 'api'}.${rootDomain}`,
     ai: `${protocol}//${envPrefix ? `${envPrefix}api-ai` : 'api-ai'}.${rootDomain}`,
+    data: `${protocol}//${envPrefix ? `${envPrefix}api-data` : 'api-data'}.${rootDomain}`,
   };
 }
 
 const derived = deriveApiBases(WEB_BASE);
 const CORE_API_BASE = (process.env.CORE_API_URL || derived.core).replace(/\/$/, '');
 const AI_API_BASE = (process.env.AI_API_URL || derived.ai).replace(/\/$/, '');
+const DATA_API_BASE = (process.env.DATA_API_URL || derived.data).replace(/\/$/, '');
+
+/**
+ * The front end does not call the API origins directly from the browser: it goes
+ * through Next.js proxy routes on its own origin. Discovered 2026-09-08 in the
+ * production bundles and verified live:
+ *   /api/backend/<V2 path>      -> core API
+ *   /api/ai-backend/<api path>  -> AI API
+ *   /api/data-backend/<V2 path> -> data API
+ *
+ * This matters for security testing: the same resource is reachable by two
+ * different paths, and a proxy is a classic place for authorization to diverge
+ * from the origin it fronts (headers added, stripped, or trusted). Both paths
+ * must be probed -- see tests/security/ApiPathParity.spec.js.
+ */
+const PROXY_PREFIXES = {
+  core: '/api/backend',
+  ai: '/api/ai-backend',
+  data: '/api/data-backend',
+};
+
+/** Which backend a path belongs to. */
+function backendFor(pathname) {
+  if (pathname.startsWith('/V2/')) return 'core';
+  if (pathname.startsWith('/api/') || pathname.startsWith('/analysis/')) return 'ai';
+  return 'web';
+}
 
 /** Which origin owns a given path. */
 function originFor(pathname) {
-  if (pathname.startsWith('/V2/')) return CORE_API_BASE;
-  if (pathname.startsWith('/api/')) return AI_API_BASE;
-  if (pathname.startsWith('/analysis/')) return AI_API_BASE;
+  const backend = backendFor(pathname);
+  if (backend === 'core') return CORE_API_BASE;
+  if (backend === 'ai') return AI_API_BASE;
   return WEB_BASE;
+}
+
+/**
+ * The same endpoint addressed through the front end's Next.js proxy instead of
+ * the API origin directly. Returns null for paths that are not proxied.
+ */
+function resolveViaProxy(pathname) {
+  const backend = backendFor(pathname);
+  if (backend === 'web') return null;
+  return `${WEB_BASE}${PROXY_PREFIXES[backend]}${pathname}`;
 }
 
 /** Absolute URL for an endpoint path from config/herculesEndpoints. */
@@ -65,8 +103,12 @@ module.exports = {
   WEB_BASE,
   CORE_API_BASE,
   AI_API_BASE,
-  ALL_ORIGINS: [WEB_BASE, CORE_API_BASE, AI_API_BASE],
+  DATA_API_BASE,
+  PROXY_PREFIXES,
+  ALL_ORIGINS: [WEB_BASE, CORE_API_BASE, AI_API_BASE, DATA_API_BASE],
+  backendFor,
   originFor,
   resolveUrl,
+  resolveViaProxy,
   originLabel,
 };

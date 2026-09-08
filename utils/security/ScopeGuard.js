@@ -46,6 +46,40 @@ class ScopeGuard {
 
     return { inScope: true, hostname: parsed.hostname, origin, overridden: false };
   }
+
+  /**
+   * Production origins that must never receive a state-changing probe.
+   * Read-only scanning is fine anywhere in the allowlist; probes that could
+   * create, mutate or charge are restricted to non-production.
+   */
+  static isProductionOrigin(targetUrl) {
+    try {
+      const { hostname } = new URL(targetUrl);
+      // dev.* / devapi.* / preprod.* / localhost are non-production.
+      if (/^(localhost|127\.0\.0\.1)$/.test(hostname)) return false;
+      if (/^(dev|devapi|devapi-ai|staging|stage|preprod|test)([.-]|$)/.test(hostname)) return false;
+      // Anything else on an allowlisted apex (hercules.works, superj.app) is production.
+      return true;
+    } catch (e) {
+      return true; // Unparseable: assume production and refuse.
+    }
+  }
+
+  /**
+   * Gate for probes that mutate state (payment verification, uploads, writes).
+   * Throws rather than returning false: a mutating probe must never run against
+   * production by accident.
+   */
+  static assertMutationAllowed(targetUrl, probeName = 'state-changing probe') {
+    if (ScopeGuard.isProductionOrigin(targetUrl)) {
+      throw new Error(
+        `[ScopeGuard ABORT] Refusing to run "${probeName}" against what looks like a PRODUCTION origin ` +
+        `(${targetUrl}). State-changing security probes are restricted to dev/staging.\n` +
+        `If this origin is genuinely non-production, add it to the non-production pattern in ScopeGuard.`
+      );
+    }
+    return true;
+  }
 }
 
 module.exports = ScopeGuard;

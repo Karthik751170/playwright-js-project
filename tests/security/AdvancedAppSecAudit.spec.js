@@ -118,6 +118,18 @@ test.describe('Advanced Enterprise AppSec & Strict Security Gates', () => {
     );
 
     const statusCodes = responses.map((r) => r.status());
+
+    // The signup endpoint in the catalog may not exist on this deployment. An
+    // all-404 burst exercised no limiter, so it must skip -- not pass.
+    const allAbsent = responses.every(
+      (r) => classifyProbe({ status: r.status(), headers: r.headers() }) === 'UNREACHABLE_ROUTE'
+    );
+    test.skip(
+      allAbsent,
+      `Every request to ${url} returned 404/405, so no rate limiter was exercised. ` +
+        `config/herculesEndpoints.js AUTH.SIGNUP_OTP appears stale for this deployment.`
+    );
+
     const serverErrors = statusCodes.filter((c) => c >= 500);
     const accepted = statusCodes.filter((c) => c === 200).length;
     const throttled = statusCodes.filter((c) => c === 429).length;

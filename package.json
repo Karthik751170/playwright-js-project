@@ -27,7 +27,11 @@
     "docker:test": "docker compose up --build --exit-code-from playwright-tests",
     "docker:security": "docker compose up --build --exit-code-from playwright-tests",
     "audit:browser": "playwright test tests/security/PlaywrightSecurityAudit.spec.js",
-    "security:all": "node scripts/fullSecuritySuite.js && playwright test tests/security/AdvancedAppSecAudit.spec.js tests/security/PlaywrightSecurityAudit.spec.js"
+    "security:all": "node scripts/fullSecuritySuite.js && playwright test tests/security/ --grep-invert \"LLM Abuse\"",
+    "security:unauth": "playwright test tests/security/PublicSurfaceAndIdor.spec.js tests/security/ApiPathParity.spec.js tests/security/AuthLinkLifecycle.spec.js tests/security/CsrfProtection.spec.js",
+    "security:llm": "playwright test tests/security/LlmAbuseAndPromptInjection.spec.js",
+    "security:privesc": "playwright test tests/security/PrivilegeEscalation.spec.js tests/security/PaymentIntegrity.spec.js tests/security/FileUploadValidation.spec.js tests/security/ShareAndGuestSession.spec.js",
+    "security:baseline:update": "UPDATE_SECURITY_BASELINE=true node scripts/fullSecuritySuite.js"
   },
   "keywords": [],
   "author": "",

@@ -7,6 +7,7 @@ const { execSync } = require('child_process');
 const herculesConfig = require('../config/hercules.config');
 const ScopeGuard = require('../utils/security/ScopeGuard');
 const SecurityReporter = require('../utils/security/SecurityReporter');
+const FindingsBaseline = require('../utils/security/FindingsBaseline');
 const HERCULES_ENDPOINTS = require('../config/herculesEndpoints');
 const TARGETS = require('../config/securityTargets');
 const { resolveUrl, originLabel } = TARGETS;
@@ -1008,13 +1009,13 @@ async function runSecurityAudit() {
     const highCrit = (vulns.high || 0) + (vulns.critical || 0);
 
     logFinding({
-      code: 'A06-SCA',
-      principle: 'Vulnerable Components',
-      name: 'Dependency Vulnerability Audit (CVE Scan)',
+      code: 'HARNESS-SCA',
+      principle: 'Test Harness Hygiene',
+      name: 'Test Harness Dependency Audit (CVE Scan)',
       status: highCrit === 0 ? 'PASS' : 'WARN',
-      severity: 'High',
-      action: `Executed automated npm audit against package.json and package-lock.json.`,
-      rationale: 'Third-party npm packages can contain known security vulnerabilities (CVEs).',
+      severity: 'Medium',
+      action: `Executed npm audit against THIS TEST REPOSITORY's package.json and package-lock.json.`,
+      rationale: 'Scope note: this audits the Playwright harness, NOT the Hercules application. It was previously reported as an A06 finding about the target, which was misleading -- the target\'s dependency risk needs a scan in the application repository. Kept because a compromised test harness runs with credentials and CI access.',
       expected: '0 High and 0 Critical severity vulnerabilities in installed packages.',
       actual: `Found ${total} total vulnerabilities (${vulns.critical || 0} Critical, ${vulns.high || 0} High, ${vulns.moderate || 0} Moderate, ${vulns.low || 0} Low).`,
       evidence: JSON.stringify(vulns, null, 2),
@@ -1025,13 +1026,13 @@ async function runSecurityAudit() {
     // Reporting PASS here previously turned every scanner malfunction into a
     // clean bill of health.
     logFinding({
-      code: 'A06-SCA',
-      principle: 'Vulnerable Components',
-      name: 'Dependency Vulnerability Audit (CVE Scan)',
+      code: 'HARNESS-SCA',
+      principle: 'Test Harness Hygiene',
+      name: 'Test Harness Dependency Audit (CVE Scan)',
       status: 'FAIL',
-      severity: 'High',
-      action: `Attempted npm audit against package.json and package-lock.json.`,
-      rationale: 'Third-party npm packages can contain known CVEs. If the audit cannot run, the dependency tree is unverified and must not be treated as clean.',
+      severity: 'Medium',
+      action: `Attempted npm audit against THIS TEST REPOSITORY's package.json and package-lock.json.`,
+      rationale: 'Scope note: audits the test harness, not the Hercules application. If the audit cannot run, the harness dependency tree is unverified and must not be treated as clean.',
       expected: 'npm audit completes and reports 0 High/Critical vulnerabilities.',
       actual: `Audit could not be completed: ${e.message}. Dependency risk is UNVERIFIED.`,
       evidence: `npm audit failure: ${e.message}\nStdout/stderr: ${(e.stdout || e.stderr || 'none').toString().slice(0, 500)}`,
@@ -1659,9 +1660,42 @@ async function runSecurityAudit() {
 
   // The gate. Previously this function returned normally no matter what was
   // found, so a FAIL finding printed an X and the CI step still went green.
+  // ---- Regression baseline -------------------------------------------------
+  // Without this the suite reports state but not change: a control degrading
+  // from PASS to WARN is invisible unless somebody reads the HTML.
+  const baseline = new FindingsBaseline();
+  const diff = baseline.diff(reporter.records);
+  console.log('\n  BASELINE COMPARISON');
+  console.log(FindingsBaseline.formatDiff(diff));
+
+  const baselineAccepted = process.env.UPDATE_SECURITY_BASELINE === 'true' || diff.isFirstRun;
+  if (baselineAccepted) {
+    const written = baseline.save(reporter.records, {
+      target: TARGETS.WEB_BASE,
+      sessionLive: session.live,
+    });
+    console.log(`  Baseline written to ${written}`);
+  } else if (diff.regressions.length > 0) {
+    console.log(
+      '  Baseline NOT updated: regressions present. Fix them, or re-run with ' +
+      'UPDATE_SECURITY_BASELINE=true to accept the new state deliberately.'
+    );
+  }
+
   const exitCode = reporter.getExitCode();
-  console.log(exitCode === 0 ? '  Gate: PASSED (no blocking findings)\n' : `  Gate: FAILED (exit ${exitCode})\n`);
-  return exitCode;
+  // A control that got worse is a regression even when its new status is not
+  // itself blocking (e.g. PASS -> WARN).
+  // Regressions block, unless the operator explicitly accepted the new state
+  // via UPDATE_SECURITY_BASELINE (or this is the first run establishing it).
+  const blockOnRegression = !baselineAccepted && diff.regressions.length > 0;
+  const finalExit = exitCode === 0 && blockOnRegression ? 1 : exitCode;
+  if (finalExit !== exitCode) {
+    console.error(`  Gate: FAILED on ${diff.regressions.length} baseline regression(s) despite no FAIL findings.`);
+  } else if (baselineAccepted && diff.regressions.length > 0) {
+    console.log(`  ${diff.regressions.length} regression(s) accepted into the baseline by UPDATE_SECURITY_BASELINE.`);
+  }
+  console.log(finalExit === 0 ? '  Gate: PASSED (no blocking findings, no regressions)\n' : `  Gate: FAILED (exit ${finalExit})\n`);
+  return finalExit;
 }
 
 // Run, and propagate the gate result to the process exit code so CI can block.

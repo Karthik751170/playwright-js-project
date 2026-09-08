@@ -3,7 +3,7 @@ const { setupMailosaurAccount, hasMailosaurCredentials } = require('../utils/Mai
 const HERCULES_ENDPOINTS = require('../../config/herculesEndpoints');
 const TARGETS = require('../../config/securityTargets');
 const ScopeGuard = require('../../utils/security/ScopeGuard');
-const { findPrivateData, isJson } = require('../../utils/security/probeHelpers');
+const { findPrivateData, isJson, classifyProbe } = require('../../utils/security/probeHelpers');
 
 /**
  * Stateful session security: real tenants, real objects, real credentials.
@@ -102,6 +102,8 @@ test.describe.serial('Stateful Session Security & Multi-Tenant BOLA', () => {
 
   /** @type {{page: any, context: any, session: any, objectId: string|null, preAuthCookies: any[]}} */
   let tenantA;
+  /** @type {{context: any, session: any}} */
+  let tenantB;
 
   test.beforeAll(async () => {
     for (const origin of TARGETS.ALL_ORIGINS) {
@@ -208,7 +210,72 @@ test.describe.serial('Stateful Session Security & Multi-Tenant BOLA', () => {
     console.log("[SEC-AUTH-01] Integrity confirmed: tenant A's object survived intact.");
 
     void ownerBody;
-    await b.herculesContext.close().catch(() => {});
+    // Keep tenant B for the cross-tenant WRITE tests below.
+    tenantB = { context: b.herculesContext, session: sessionB };
+  });
+
+  test('SEC-AUTH-04: tenant B must not mutate tenant A objects', async ({ request }) => {
+    expect(tenantA && tenantA.objectId, 'SEC-AUTH-01 did not establish tenant A object').toBeTruthy();
+    expect(tenantB, 'SEC-AUTH-01 did not establish tenant B').toBeTruthy();
+    ScopeGuard.assertMutationAllowed(TARGETS.AI_API_BASE, 'cross-tenant write probes');
+
+    const id = tenantA.objectId;
+
+    // Reads and deletes were covered in SEC-AUTH-01. Authorization is most often
+    // missed on the mutation paths, which nothing tested before.
+    const mutations = [
+      { label: 'Rename chat', method: 'post', path: HERCULES_ENDPOINTS.CAMPAIGNS.RENAME_CHAT(id), data: { name: 'pwned-by-tenant-b' } },
+      { label: 'Star chat', method: 'post', path: HERCULES_ENDPOINTS.CAMPAIGNS.STAR_CHAT(id), data: { starred: true } },
+      { label: 'Duplicate chat', method: 'post', path: HERCULES_ENDPOINTS.CAMPAIGNS.DUPLICATE_CHAT(id), data: {} },
+      { label: 'Share chat', method: 'post', path: HERCULES_ENDPOINTS.CAMPAIGNS.SHARE_CHAT(id), data: { shared: true } },
+      { label: 'Mark audience reviewed', method: 'post', path: HERCULES_ENDPOINTS.CAMPAIGNS.MARK_AUDIENCE_REVIEWED(id), data: {} },
+      { label: 'Sync questions', method: 'post', path: HERCULES_ENDPOINTS.LOGICS.REVERSE_QUESTIONS_SYNC(id), data: {} },
+    ];
+
+    let exercised = 0;
+
+    for (const m of mutations) {
+      const url = TARGETS.resolveUrl(m.path);
+      const res = await request[m.method](url, {
+        headers: { ...tenantB.session.headers, 'Content-Type': 'application/json' },
+        data: m.data,
+        failOnStatusCode: false,
+      });
+      const state = classifyProbe({ status: res.status(), headers: res.headers() });
+      if (state === 'UNREACHABLE_ROUTE') {
+        test.info().annotations.push({
+          type: 'probe-coverage',
+          description: `${m.label}: route absent (HTTP ${res.status()}) - no authorization decision exercised`,
+        });
+        continue;
+      }
+      exercised++;
+      const body = await res.text();
+
+      expect(
+        res.status(),
+        `CROSS-TENANT WRITE: tenant B's "${m.label}" on tenant A's object ${id} returned HTTP 200 ` +
+          `(${url}) using B's own valid session. Mutation endpoints must re-check object ownership. ` +
+          `Body: ${body.slice(0, 250)}`
+      ).not.toBe(200);
+    }
+
+    expect(
+      exercised,
+      'No mutation endpoint produced an authorization decision, so nothing was tested. ' +
+        'Check config/herculesEndpoints.js against the live deployment.'
+    ).toBeGreaterThan(0);
+
+    // Integrity: A's object must be unchanged and still readable by its owner.
+    const ownerRead = await request.get(TARGETS.resolveUrl(HERCULES_ENDPOINTS.CAMPAIGNS.GET_CHAT_BY_ID(id)), {
+      headers: tenantA.session.headers,
+      failOnStatusCode: false,
+    });
+    expect(ownerRead.status(), "Tenant A's object became unreadable after tenant B's write attempts").toBe(200);
+    expect(
+      await ownerRead.text(),
+      "Tenant A's object was renamed by tenant B"
+    ).not.toMatch(/pwned-by-tenant-b/i);
   });
 
   test('SEC-AUTH-02: a session must stop working after logout', async ({ request }) => {
@@ -314,8 +381,8 @@ test.describe.serial('Stateful Session Security & Multi-Tenant BOLA', () => {
   });
 
   test.afterAll(async () => {
-    if (tenantA && tenantA.context) {
-      await tenantA.context.close().catch(() => {});
+    for (const tenant of [tenantA, tenantB]) {
+      if (tenant && tenant.context) await tenant.context.close().catch(() => {});
     }
   });
 });

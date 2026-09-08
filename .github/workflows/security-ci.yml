@@ -18,9 +18,53 @@ env:
   CORE_API_URL: ${{ secrets.CORE_API_URL || 'https://devapi.hercules.works' }}
   AI_API_URL: ${{ secrets.AI_API_URL || 'https://devapi-ai.hercules.works' }}
 
+permissions:
+  contents: read
+  security-events: write   # required to upload SARIF to the Security tab
+
 jobs:
   # ---------------------------------------------------------------------------
-  # Fast, always-on gate. Blocks on FAIL findings and on expired suppressions.
+  # Static analysis of this repository. Runs first and blocks: a committed
+  # secret is a finding regardless of how the application behaves.
+  # ---------------------------------------------------------------------------
+  static-analysis:
+    name: Secret scan & SAST
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # gitleaks needs history to scan past commits
+
+      - name: Secret scan (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: 'true'
+
+      - name: Static analysis (Semgrep)
+        uses: semgrep/semgrep-action@v1
+        with:
+          config: >-
+            p/security-audit
+            p/secrets
+            p/javascript
+            p/owasp-top-ten
+          generateSarif: '1'
+        continue-on-error: true   # findings are triaged via SARIF, not a hard stop
+
+      - name: Upload Semgrep SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        if: always() && hashFiles('semgrep.sarif') != ''
+        with:
+          sarif_file: semgrep.sarif
+          category: semgrep
+
+  # ---------------------------------------------------------------------------
+  # Fast, always-on gate. Blocks on FAIL findings, expired suppressions, and
+  # regressions against config/security-baseline.json.
   # ---------------------------------------------------------------------------
   dast-audit:
     name: DAST audit & strict API gates
@@ -78,6 +122,28 @@ jobs:
         if: always()
         run: npx playwright test tests/security/PlaywrightSecurityAudit.spec.js --reporter=list
 
+      # Unauthenticated-surface gates. These need no session, so they are
+      # meaningful on every push.
+      - name: Public surface, IDOR & path parity
+        if: always()
+        run: |
+          npx playwright test \
+            tests/security/PublicSurfaceAndIdor.spec.js \
+            tests/security/ApiPathParity.spec.js \
+            tests/security/AuthLinkLifecycle.spec.js \
+            tests/security/CsrfProtection.spec.js \
+            --reporter=list
+
+      - name: Privilege escalation, payments, uploads & share links
+        if: always()
+        run: |
+          npx playwright test \
+            tests/security/PrivilegeEscalation.spec.js \
+            tests/security/PaymentIntegrity.spec.js \
+            tests/security/FileUploadValidation.spec.js \
+            tests/security/ShareAndGuestSession.spec.js \
+            --reporter=list
+
       - name: Upload security reports
         uses: actions/upload-artifact@v4
         if: always()
@@ -87,6 +153,43 @@ jobs:
             reports/security/
             playwright-report/
           retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  # LLM abuse & prompt injection. Every accepted request bills real model
+  # inference, so this runs on PRs and the schedule rather than every push.
+  # ---------------------------------------------------------------------------
+  llm-security:
+    name: LLM abuse & prompt injection
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    if: ${{ github.event_name != 'push' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium --with-deps
+
+      - name: LLM abuse & prompt injection gates
+        run: npx playwright test tests/security/LlmAbuseAndPromptInjection.spec.js --reporter=list
+
+      - name: Upload traces
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: llm-security-traces
+          path: test-results/
+          retention-days: 14
 
   # ---------------------------------------------------------------------------
   # Stateful two-tenant tests. Need throwaway-account provisioning, so they run

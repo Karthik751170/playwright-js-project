@@ -249,6 +249,11 @@ class SecurityReporter {
   <div class="container">
     <div class="header">
       <h1>🛡️ Automated DAST & Security Regression Audit Report</h1>
+      <div class="scope-note" style="margin:8px 0 0;">
+        This page counts <strong>security controls (findings)</strong>, not Playwright test cases.
+        One test case can log several controls, and some controls are logged by the DAST script rather
+        than by any test. For test pass/fail counts open <code>playwright-report/index.html</code>.
+      </div>
       <div class="meta">
         <span><strong>Target:</strong> ${this.targetUrl}</span>
         <span><strong>Audit Time:</strong> ${new Date().toUTCString()}</span>
@@ -274,11 +279,11 @@ class SecurityReporter {
     <div class="summary-grid">
       <div class="metric-card active" id="card-all" onclick="applyFilter('ALL')">
         <div class="val val-score">${complianceScore}%</div>
-        <div class="label">Pass Rate (${passCount}/${assessedCount} assessed)</div>
+        <div class="label">Controls Passing (${passCount}/${assessedCount} assessed)</div>
       </div>
       <div class="metric-card" id="card-pass" onclick="applyFilter('PASS')">
         <div class="val val-pass">${passCount}</div>
-        <div class="label">Verified Controls</div>
+        <div class="label">Controls Passed</div>
       </div>
       <div class="metric-card" id="card-suppressed" onclick="applyFilter('SUPPRESSED')">
         <div class="val val-suppressed">${suppressedCount}</div>

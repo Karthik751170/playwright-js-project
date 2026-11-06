@@ -1,0 +1,72 @@
+name: Hourly Hercules Survey Monitor
+
+# Every hour: sign in headless with the Mailosaur monitor account, create a survey from a random
+# AI prompt, validate it against config/hourlyMonitorExpectations.js, and alert on any failure.
+# A failed check fails this job, so GitHub's own failure notification fires too.
+on:
+  schedule:
+    - cron: '7 * * * *'   # hh:07 UTC every hour (GitHub may start scheduled runs a few minutes late)
+  workflow_dispatch:
+
+concurrency:
+  group: hourly-survey-monitor
+  cancel-in-progress: false   # never cut a run short; an overlapping run waits
+
+permissions:
+  contents: read
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Google Chrome for Playwright
+        run: npx playwright install --with-deps chrome
+
+      - name: Create survey and validate (headless)
+        env:
+          CI: true
+          HERCULES_URL: https://hercules.works
+          # Mailosaur server from https://mailosaur.com/app/servers/i3nehdds
+          MAILOSAUR_SERVER_ID: i3nehdds
+          MAILOSAUR_API_KEY: ${{ secrets.MAILOSAUR_API_KEY }}
+          HERCULES_MONITOR_EMAIL: ${{ secrets.HERCULES_MONITOR_EMAIL }}       # optional; default hercules-monitor@i3nehdds.mailosaur.net
+          HERCULES_MONITOR_PASSWORD: ${{ secrets.HERCULES_MONITOR_PASSWORD }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GROQ_API_KEY_2: ${{ secrets.GROQ_API_KEY_2 }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # Alerts: Google Chat space incoming webhook
+          GCHAT_WEBHOOK_URL: ${{ secrets.GCHAT_WEBHOOK_URL }}
+          GCHAT_MENTIONS: ${{ secrets.GCHAT_MENTIONS }}
+        run: node scripts/hourlySurveyMonitor.js
+
+      - name: Summary
+        if: always()
+        run: |
+          f=reports/monitor/latest.json
+          if [ -f "$f" ]; then
+            node -e "const r=require('./$f');console.log('## Monitor: '+r.status+'\n\n| Check | Status | Detail |\n|---|---|---|\n'+r.checks.map(c=>'| '+c.name+' | '+c.status+' | '+String(c.detail||'').replace(/\|/g,'/')+' |').join('\n')+'\n\nChat: '+(r.facts.chatUrl||'-')+'  \nSurvey: '+(r.facts.surveyUrl||'-'))" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "## Monitor: no result produced" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload screenshots and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: survey-monitor-${{ github.run_id }}
+          path: |
+            reports/monitor/
+            test-results/monitor/
+          retention-days: 7
+          if-no-files-found: ignore

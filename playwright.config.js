@@ -6,6 +6,8 @@ const storageState = fs.existsSync('.auth/apple-user.json') ? '.auth/apple-user.
 module.exports = defineConfig({
   globalSetup: require.resolve('./utils/security/globalSetup.js'),
   testDir: './tests',
+  // The hourly monitor has its own config (playwright.monitor.config.js) and creates a real survey.
+  testIgnore: ['**/tests/monitor/**'],
   timeout: 3600 * 1000,
   expect: {
     timeout: 5 * 1000,

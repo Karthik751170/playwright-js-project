@@ -65,6 +65,9 @@ jobs:
           MAILOSAUR_API_KEY: ${{ secrets.MAILOSAUR_API_KEY }}
           HERCULES_MONITOR_EMAIL: ${{ secrets.HERCULES_MONITOR_EMAIL }}       # optional; default hercules-monitor@i3nehdds.mailosaur.net
           HERCULES_MONITOR_PASSWORD: ${{ secrets.HERCULES_MONITOR_PASSWORD }}
+          # New Mailosaur account every run (sign-up → confirm → onboarding), so each run has a full
+          # daily AI token limit. Set to 'false' to reuse the fixed account above instead.
+          MONITOR_FRESH_ACCOUNT: 'true'
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GROQ_API_KEY_2: ${{ secrets.GROQ_API_KEY_2 }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}

@@ -21,8 +21,24 @@ const STATE_FILE = path.resolve(__dirname, '..', '.auth', 'monitor-state.json');
 const promptBoxOf = page => page.getByRole('textbox', { name: /Describe the research you/i })
     .or(page.locator("textarea[aria-label='Ask Hercules a question']")).first();
 
+/**
+ * MONITOR_FRESH_ACCOUNT=true → a brand-new account every run (new Mailosaur address, random
+ * password), so each run starts with a full daily AI token limit. Each run then also covers
+ * sign-up → email confirmation → onboarding. Otherwise one fixed account is reused.
+ */
+const FRESH = /^(1|true|yes)$/i.test(process.env.MONITOR_FRESH_ACCOUNT || '');
+let freshAccount = null;
+
 function monitorAccount() {
     const server = process.env.MAILOSAUR_SERVER_ID;
+    if (FRESH) {
+        if (!server) throw new Error('MONITOR_FRESH_ACCOUNT needs MAILOSAUR_SERVER_ID (and MAILOSAUR_API_KEY) to sign up.');
+        freshAccount = freshAccount || {
+            email: `hm-${(process.env.MONITOR_GROUP || 'run').replace(/\W/g, '')}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}@${server}.mailosaur.net`,
+            password: `Mon${Math.random().toString(36).slice(2, 10)}${Math.floor(Math.random() * 90 + 10)}!`,
+        };
+        return freshAccount;
+    }
     const email = process.env.HERCULES_MONITOR_EMAIL || (server && `hercules-monitor@${server}.mailosaur.net`);
     const password = process.env.HERCULES_MONITOR_PASSWORD;
     if (!email) throw new Error('Set HERCULES_MONITOR_EMAIL or MAILOSAUR_SERVER_ID for the monitor account.');
@@ -80,7 +96,8 @@ async function completeOnboarding(page, log = console.log) {
  * 'cached-session' | 'password-login' | 'new-signup'. Throws with a clear message otherwise.
  */
 async function ensureSignedIn(page, { baseUrl = 'https://hercules.works', log = console.log } = {}) {
-    if (await isSignedIn(page, baseUrl)) return { email: '(cached session)', method: 'cached-session' };
+    // A fresh-account run must never reuse a saved session.
+    if (!FRESH && await isSignedIn(page, baseUrl)) return { email: '(cached session)', method: 'cached-session' };
     const { email, password } = monitorAccount();
 
     await page.context().clearCookies();
@@ -100,6 +117,7 @@ async function ensureSignedIn(page, { baseUrl = 'https://hercules.works', log = 
     const isSignup = await signupBtn.isVisible().catch(() => false);
     const submittedAt = new Date(Date.now() - 5_000);
     let method = 'password-login';
+    if (FRESH && !isSignup) throw new Error(`Fresh account ${email} unexpectedly already exists.`);
     if (isSignup) {
         method = 'new-signup';
         log(`[Auth] ${email} has no Hercules account yet — creating it once.`);
@@ -114,9 +132,11 @@ async function ensureSignedIn(page, { baseUrl = 'https://hercules.works', log = 
     if (!(await isSignedIn(page, baseUrl))) {
         throw new Error(`Login with ${email} failed (${method}): dashboard prompt box not visible. Wrong HERCULES_MONITOR_PASSWORD?`);
     }
-    fs.mkdirSync(path.dirname(STATE_FILE), { recursive: true });
-    await page.context().storageState({ path: STATE_FILE });
-    fs.chmodSync(STATE_FILE, 0o600);
+    if (!FRESH) {
+        fs.mkdirSync(path.dirname(STATE_FILE), { recursive: true });
+        await page.context().storageState({ path: STATE_FILE });
+        fs.chmodSync(STATE_FILE, 0o600);
+    }
     return { email, method };
 }
 

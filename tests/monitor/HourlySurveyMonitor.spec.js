@@ -70,8 +70,12 @@ test('Hourly monitor: create survey and validate', async ({ page }) => {
         // 3. Wizard + brief, until "create the survey" appears
         const gen = new HerculesSurveyGenerator(page);
         const createBtn = page.getByRole('button', { name: /create the survey/i }).last();
-        const runVersionBtn = page.getByRole('button', { name: /^Run (your version|it this way)$/i }).last();
+        const runVersionBtn = page.getByRole('button', { name: /^Run (your version|it this way|the self-serve version)$/i }).last();
         const versionCard = page.locator('.bg-white.rounded-\\[12px\\].border').last();
+        // Option cards ("Hard-to-find audience"): "Run the self-serve version … Select" vs "Book a consult".
+        // "Select" isn't always a <button>; prefer the self-serve row and never click "Book a consult".
+        const selectOption = page.locator('div, li').filter({ hasText: /self-serve/i }).getByText('Select', { exact: true }).last()
+            .or(page.getByText('Select', { exact: true }).last());
         const briefDeadline = Math.min(deadline, Date.now() + EXPECT.brief.maxMinutes * 60_000);
         let steps = 0;
         while (Date.now() < briefDeadline) {
@@ -83,6 +87,11 @@ test('Hourly monitor: create survey and validate', async ({ page }) => {
                 acted = true;
             } else if (await gen.clickGenerateBrief()) acted = true;
             else if (await gen.handleSelectAndRunItThisWay().catch(() => false)) acted = true;
+            else if (await selectOption.first().isVisible().catch(() => false)) {
+                await selectOption.first().click({ force: true }).catch(() => {});
+                console.log('[Monitor] Clicked "Select" on the option card (self-serve)');
+                acted = true;
+            }
             else if (await gen.handleSelectAllThatApply(wizardContext).catch(() => false)) acted = true;
             else if (await gen.handleSingleSelect(wizardContext).catch(() => false)) acted = true;
             else if (await gen.handleTextInputFallback(wizardContext).catch(() => false)) acted = true;

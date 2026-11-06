@@ -47,6 +47,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           # Alerts: Google Chat space incoming webhook
           GCHAT_WEBHOOK_URL: ${{ secrets.GCHAT_WEBHOOK_URL }}
+          GCHAT_MENTIONS: ${{ secrets.GCHAT_MENTIONS }}
         run: node scripts/hourlySurveyMonitor.js
 
       - name: Summary

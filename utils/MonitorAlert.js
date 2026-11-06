@@ -2,6 +2,7 @@
  * MonitorAlert.js — posts a monitor alert to:
  *   - Google Chat: incoming webhook of a Chat space, GCHAT_WEBHOOK_URL
  *     (Space → Apps & integrations → Webhooks → Add webhook)
+ *     and GCHAT_MENTIONS (who to @mention)
  *   - macOS notification (local runs on a Mac)
  * Returns [{ channel, ok, error? }]. Never throws.
  */
@@ -31,11 +32,21 @@ async function googleChat(text) {
     }
 }
 
+/**
+ * GCHAT_MENTIONS: comma-separated people to @mention so they get a notification, e.g.
+ * "all" (everyone in the space), a Google user id ("123456789") or an email address.
+ */
+function mentions() {
+    return (process.env.GCHAT_MENTIONS || '').split(',').map(s => s.trim()).filter(Boolean)
+        .map(m => `<users/${m}>`).join(' ');
+}
+
 async function sendAlert({ title, summary, details }) {
     // Google Chat text formatting: *bold*, ```code```.
+    const tag = mentions();
     return Promise.all([
         macNotify(title, summary),
-        googleChat(`*${title}*\n${summary}\n\`\`\`${details}\`\`\``),
+        googleChat(`${tag ? `${tag} ` : ''}*${title}*\n${summary}\n\`\`\`${details}\`\`\``),
     ]);
 }
 

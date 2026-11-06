@@ -48,18 +48,28 @@ async function verifyViaMailosaur(page, email, receivedAfter) {
     } else throw new Error(`Verification email "${message.subject}" had neither a link nor a code`);
 }
 
-/** Name + onboarding questions after a fresh signup. */
-async function completeOnboarding(page) {
-    for (let i = 0; i < 8 && !(await promptBoxOf(page).isVisible().catch(() => false)); i++) {
+/**
+ * "Complete Your Hercules Profile" (/details?step=N) after signup: a name field, then card
+ * questions (role, purpose) that advance as soon as a card is clicked. Also runs after a password
+ * login, because an account can be left half-way through it.
+ */
+async function completeOnboarding(page, log = console.log) {
+    for (let i = 0; i < 10 && !(await promptBoxOf(page).isVisible().catch(() => false)); i++) {
         const fullName = page.locator("[placeholder='Full name']");
+        const cards = page.locator('button.h-\\[95px\\]');
         if (await fullName.isVisible().catch(() => false)) {
             await fullName.fill('QA Monitor');
             await page.keyboard.press('Enter');
+            log('[Auth] onboarding: name');
+        } else if (await cards.first().isVisible().catch(() => false)) {
+            const others = cards.filter({ hasText: /^\s*Others?\s*$/ });
+            const pick = (await others.count()) ? others.first() : cards.first();
+            log(`[Auth] onboarding: ${(await pick.innerText()).trim()}`);
+            await pick.click();
         } else {
-            const option = page.locator("[class*='text-[13px]'][class*='text-center']").first();
-            if (await option.isVisible().catch(() => false)) await option.click().catch(() => {});
-            const next = page.getByRole('button', { name: /^(continue|next|submit|finish|get started)$/i }).first();
+            const next = page.getByRole('button', { name: /^(continue|next|submit|finish|get started|done)$/i }).first();
             if (await next.isVisible().catch(() => false)) await next.click().catch(() => {});
+            else if (!/\/details|\/signup|\/verify/.test(page.url())) await page.goto(new URL('/ai', page.url()).href).catch(() => {});
         }
         await page.waitForTimeout(3000);
     }
@@ -78,7 +88,11 @@ async function ensureSignedIn(page, { baseUrl = 'https://hercules.works', log = 
     await page.getByRole('button', { name: /^log in$/i }).first().click();
     await page.locator('input#guest-email, input[type="email"]').first().fill(email);
     await page.getByRole('button', { name: 'Continue', exact: true }).click();
+    // Existing accounts get "Continue with password" first; new ones go straight to the password box.
     const pw = page.locator('input[type="password"]').first();
+    const withPassword = page.getByRole('button', { name: 'Continue with password' });
+    await pw.or(withPassword).first().waitFor({ state: 'visible', timeout: 30_000 });
+    if (await withPassword.isVisible().catch(() => false)) await withPassword.click();
     await pw.waitFor({ state: 'visible', timeout: 30_000 });
     await pw.fill(password);
 
@@ -91,11 +105,11 @@ async function ensureSignedIn(page, { baseUrl = 'https://hercules.works', log = 
         log(`[Auth] ${email} has no Hercules account yet — creating it once.`);
         await signupBtn.click();
         await verifyViaMailosaur(page, email, submittedAt);
-        await completeOnboarding(page);
     } else {
-        await page.getByRole('button', { name: /^(log ?in|sign ?in|continue)$/i }).last().click();
+        await page.getByRole('button', { name: /^(log ?in|sign ?in)$/i }).last().click();
         await page.waitForTimeout(5000);
     }
+    await completeOnboarding(page, log);
 
     if (!(await isSignedIn(page, baseUrl))) {
         throw new Error(`Login with ${email} failed (${method}): dashboard prompt box not visible. Wrong HERCULES_MONITOR_PASSWORD?`);

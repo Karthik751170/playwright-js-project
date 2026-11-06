@@ -1,6 +1,8 @@
 /**
  * MonitorAlert.js — sends a monitor alert to every channel that is configured:
  *   - macOS notification (always, on darwin)
+ *   - Email via Mailosaur: MAILOSAUR_API_KEY + MAILOSAUR_SERVER_ID, to ALERT_EMAIL_TO (or GMAIL_USER).
+ *     The recipient must be a verified external address in the Mailosaur account.
  *   - Email via Gmail SMTP: GMAIL_USER + GMAIL_PASS (an app password); recipient ALERT_EMAIL_TO
  *     (defaults to GMAIL_USER). Set ALERT_EMAIL=off to disable.
  *   - Slack incoming webhook: SLACK_WEBHOOK_URL
@@ -30,6 +32,22 @@ async function email(subject, text) {
     }
 }
 
+async function mailosaurEmail(subject, text) {
+    const { MAILOSAUR_API_KEY: key, MAILOSAUR_SERVER_ID: server, ALERT_EMAIL_TO, GMAIL_USER, ALERT_EMAIL } = process.env;
+    const to = ALERT_EMAIL_TO || GMAIL_USER;
+    if (ALERT_EMAIL === 'off' || !key || !server || !to) return { channel: 'mailosaur-email', ok: false, error: 'not configured' };
+    try {
+        const res = await fetch(`https://mailosaur.com/api/messages?server=${server}`, {
+            method: 'POST',
+            headers: { Authorization: `Basic ${Buffer.from(`${key}:`).toString('base64')}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ to, send: true, subject, text }),
+        });
+        return { channel: 'mailosaur-email', ok: res.ok, error: res.ok ? undefined : `HTTP ${res.status} ${(await res.text()).slice(0, 200)}` };
+    } catch (e) {
+        return { channel: 'mailosaur-email', ok: false, error: e.message };
+    }
+}
+
 async function slack(text) {
     const url = process.env.SLACK_WEBHOOK_URL;
     if (!url) return { channel: 'slack', ok: false, error: 'not configured' };
@@ -44,6 +62,7 @@ async function slack(text) {
 async function sendAlert({ title, summary, details }) {
     return Promise.all([
         macNotify(title, summary),
+        mailosaurEmail(title, `${summary}\n\n${details}`),
         email(title, `${summary}\n\n${details}`),
         slack(`*${title}*\n${summary}\n\`\`\`${details.slice(0, 3500)}\`\`\``),
     ]);

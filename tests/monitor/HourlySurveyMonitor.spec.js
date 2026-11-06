@@ -63,7 +63,7 @@ test('Hourly monitor: create survey and validate', async ({ page }) => {
         await page.getByRole('textbox', { name: /Describe the research you/i })
             .or(page.locator("textarea[aria-label='Ask Hercules a question']")).first().fill(prompt);
         await page.getByRole('button', { name: 'Send' }).click();
-        const chatOk = await page.waitForURL(/\/ai\/chat\/[^/]+/, { timeout: 120_000 }).then(() => true).catch(() => false);
+        const chatOk = await page.waitForURL(/\/(ai\/)?chat\/[^/]+/, { timeout: 120_000 }).then(() => true).catch(() => false);
         result.facts.chatUrl = page.url();
         if (!check('chat opened', chatOk, page.url())) { await shot('no-chat'); return; }
 

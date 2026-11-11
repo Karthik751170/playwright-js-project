@@ -1,0 +1,129 @@
+name: Dev design payloads (Hercules → Super J)
+
+# Doc 1 design payloads (PR #46) on DEV, headless on GitHub (no Mac needed):
+# each design gets a new Mailosaur dev account, its survey is created from the design's prompt,
+# Hercules' Super J payload is checked, the survey is deployed with the free balance only
+# ("Deploy to N", never Pay) and answered on dev.superj.app with a random phone + OTP 777777.
+on:
+  schedule:
+    # 23:00 IST on 11 Nov = 17:30 UTC. :45 and 18:00 are fallbacks in case GitHub delays or drops
+    # the first slot; the gate job lets only one of them run.
+    - cron: '30 17 11 11 *'
+    - cron: '45 17 11 11 *'
+    - cron: '0 18 11 11 *'
+  workflow_dispatch:
+    inputs:
+      designs:
+        description: 'Comma-separated design ids (e.g. 007,012). Empty = all 20.'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+    outputs:
+      run: ${{ steps.check.outputs.run }}
+    steps:
+      - id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ github.event_name }}" != "schedule" ]; then echo "run=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          recent=$(gh run list -R "${{ github.repository }}" --workflow dev-design-payloads.yml --event schedule --limit 10 \
+            --json databaseId,createdAt --jq "[.[] | select(.databaseId != ${{ github.run_id }}) | select((now - (.createdAt | fromdateiso8601)) < 7200)] | length")
+          if [ "${recent:-0}" -gt 0 ]; then echo "Already ran from an earlier slot; skipping."; echo "run=false" >> "$GITHUB_OUTPUT";
+          else echo "run=true" >> "$GITHUB_OUTPUT"; fi
+
+  designs:
+    needs: gate
+    if: needs.gate.outputs.run == 'true'
+    name: designs ${{ matrix.group }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        group: ['003,004,005,006', '007,009,012,013', '014,015,016,017', '018,019,024,026', '036,037,040,042']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Google Chrome for Playwright
+        run: npx playwright install --with-deps chrome
+
+      - name: Pick designs
+        id: pick
+        run: |
+          want="${{ github.event.inputs.designs }}"
+          group="${{ matrix.group }}"
+          if [ -z "$want" ]; then echo "designs=$group" >> "$GITHUB_OUTPUT"; exit 0; fi
+          # Keep only the requested ids that belong to this job's group.
+          sel=$(node -e 'const w=process.argv[1].split(",").map(s=>s.trim().replace(/^sd/i,""));console.log(process.argv[2].split(",").filter(g=>w.includes(g)).join(","))' "$want" "$group")
+          echo "designs=$sel" >> "$GITHUB_OUTPUT"
+
+      - name: Run designs (headless)
+        if: steps.pick.outputs.designs != ''
+        env:
+          CI: true
+          DESIGNS: ${{ steps.pick.outputs.designs }}
+          DESIGNS_OUT_DIR: reports/dev-design-payloads/run
+          HERCULES_URL: https://dev.hercules.works
+          MAILOSAUR_SERVER_ID: i3nehdds
+          MAILOSAUR_API_KEY: ${{ secrets.MAILOSAUR_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GROQ_API_KEY_2: ${{ secrets.GROQ_API_KEY_2 }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: npx playwright test DesignPayloads -c playwright.devdesigns.config.js
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: designs-${{ strategy.job-index }}
+          path: reports/dev-design-payloads/
+          retention-days: 14
+          if-no-files-found: ignore
+
+  report:
+    needs: designs
+    if: always() && needs.designs.result != 'skipped'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: designs-*
+          path: reports/dev-design-payloads
+          merge-multiple: true
+      - name: Build report
+        run: node scripts/devDesignsReport.js reports/dev-design-payloads && cat reports/dev-design-payloads/summary.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Post summary to Google Chat
+        env:
+          GCHAT_WEBHOOK_URL: ${{ secrets.GCHAT_WEBHOOK_URL }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        if: env.GCHAT_WEBHOOK_URL != ''
+        run: |
+          node -e '
+            const md = require("fs").readFileSync("reports/dev-design-payloads/summary.md", "utf8");
+            const head = md.split("\n| Design")[0].replace(/\*\*/g, "*").slice(0, 3500);
+            fetch(process.env.GCHAT_WEBHOOK_URL, { method: "POST", headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ text: `*Dev design payloads (Hercules → Super J)*\n${head}\nReport (artifact "design-payloads-report"): ${process.env.RUN_URL}` }) })
+              .then(r => console.log("chat", r.status)).catch(e => console.log("chat error", e.message));'
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: design-payloads-report
+          path: reports/dev-design-payloads/
+          retention-days: 30

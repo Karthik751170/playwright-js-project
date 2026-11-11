@@ -1,8 +1,8 @@
 name: Hourly Hercules Survey Monitor
 
-# Every hour: sign in headless with the Mailosaur monitor account, create a survey from a random
-# AI prompt, validate it against config/hourlyMonitorExpectations.js, and alert on any failure.
-# A failed check fails this job, so GitHub's own failure notification fires too.
+# Every hour, headless on GitHub: sign in with the monitor account, run each monitor group in its
+# own parallel job, and post any failure (product defects first) to the Google Chat space.
+# A failed check fails that job, so GitHub's own failure notification fires too.
 on:
   schedule:
     # Two slots an hour: GitHub can delay or skip a scheduled run, so :37 is a fallback for :07.
@@ -10,7 +10,6 @@ on:
     - cron: '7 * * * *'
     - cron: '37 * * * *'
   workflow_dispatch:
-
 
 permissions:
   contents: read
@@ -35,21 +34,21 @@ jobs:
           else echo "run=true" >> "$GITHUB_OUTPUT"; fi
 
   monitor:
-<<<<<<< HEAD
-    name: monitor (${{ matrix.group }})
-=======
     needs: gate
     if: needs.gate.outputs.run == 'true'
->>>>>>> origin/main
+    name: monitor (${{ matrix.group }})
     runs-on: ubuntu-latest
     timeout-minutes: 80
     strategy:
       fail-fast: false
       matrix:
-        group: [core, logic, manage]   # each creates its own survey; they run in parallel
+        # basic  = login → prompt → brief → create survey → checks
+        # quickq = Quick Question: validation, wording checks, step 2 (never launched), rename / duplicate / delete
+        # core, logic, manage are built but stay off until they pass end to end.
+        group: [basic, quickq]
     concurrency:
       group: hourly-survey-monitor-${{ matrix.group }}
-      cancel-in-progress: false        # never cut a run short; an overlapping run waits
+      cancel-in-progress: false   # never cut a run short; an overlapping run waits
     steps:
       - uses: actions/checkout@v4
 
@@ -64,7 +63,7 @@ jobs:
       - name: Install Google Chrome for Playwright
         run: npx playwright install --with-deps chrome
 
-      - name: Create survey and validate (headless)
+      - name: Run monitor group (headless)
         env:
           CI: true
           MONITOR_GROUP: ${{ matrix.group }}
@@ -74,9 +73,9 @@ jobs:
           MAILOSAUR_API_KEY: ${{ secrets.MAILOSAUR_API_KEY }}
           HERCULES_MONITOR_EMAIL: ${{ secrets.HERCULES_MONITOR_EMAIL }}       # optional; default hercules-monitor@i3nehdds.mailosaur.net
           HERCULES_MONITOR_PASSWORD: ${{ secrets.HERCULES_MONITOR_PASSWORD }}
-          # New Mailosaur account every run (sign-up → confirm → onboarding), so each run has a full
-          # daily AI token limit. Set to 'false' to reuse the fixed account above instead.
-          MONITOR_FRESH_ACCOUNT: 'true'
+          # 'false' = reuse the fixed account above. 'true' = new Mailosaur account every run; needs
+          # every confirmation email to reach Mailosaur (failed on 9-10 Nov).
+          MONITOR_FRESH_ACCOUNT: 'false'
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GROQ_API_KEY_2: ${{ secrets.GROQ_API_KEY_2 }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}

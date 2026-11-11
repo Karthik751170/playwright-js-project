@@ -129,6 +129,26 @@ async function ensureSignedIn(page, { baseUrl = 'https://hercules.works', log = 
     }
     await completeOnboarding(page, log);
 
+    // Seen on dev 2026-11-11: after sign-up + email verification the site can land logged out.
+    // The account exists by then, so log in with the same email + password once.
+    if (method === 'new-signup' && !(await isSignedIn(page, baseUrl))) {
+        log(`[Auth] ${email} landed logged out after sign-up — logging in with the new password.`);
+        await page.context().clearCookies();
+        await page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
+        await page.getByRole('button', { name: /^log in$/i }).first().click();
+        await page.locator('input#guest-email, input[type="email"]').first().fill(email);
+        await page.getByRole('button', { name: 'Continue', exact: true }).click();
+        const pw2 = page.locator('input[type="password"]').first();
+        const withPw = page.getByRole('button', { name: 'Continue with password' });
+        await pw2.or(withPw).first().waitFor({ state: 'visible', timeout: 30_000 });
+        if (await withPw.isVisible().catch(() => false)) await withPw.click();
+        await pw2.fill(password);
+        await page.getByRole('button', { name: /^(log ?in|sign ?in)$/i }).last().click();
+        await page.waitForTimeout(5000);
+        await completeOnboarding(page, log);
+        method = 'new-signup+login';
+    }
+
     if (!(await isSignedIn(page, baseUrl))) {
         throw new Error(`Login with ${email} failed (${method}): dashboard prompt box not visible. Wrong HERCULES_MONITOR_PASSWORD?`);
     }

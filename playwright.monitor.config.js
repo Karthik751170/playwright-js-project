@@ -7,7 +7,7 @@ const STATE = '.auth/monitor-state.json';
 
 module.exports = defineConfig({
   testDir: './tests/monitor',
-  timeout: 40 * 60 * 1000,
+  timeout: 66 * 60 * 1000,
   retries: 0,
   workers: 1,
   reporter: [['list']],
@@ -19,5 +19,8 @@ module.exports = defineConfig({
     storageState: fs.existsSync(STATE) ? STATE : undefined,
     video: 'retain-on-failure',
     trace: 'off',
+    // Without these, a click on a covered element waits forever and freezes the whole group.
+    actionTimeout: 30_000,
+    navigationTimeout: 60_000,
   },
 });

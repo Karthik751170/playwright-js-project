@@ -17,7 +17,8 @@ const EXPECT = require('../../config/hourlyMonitorExpectations');
  */
 
 const BASE_URL = process.env.HERCULES_URL || 'https://hercules.works';
-const OUT_DIR = process.env.MONITOR_OUT_DIR || path.resolve('reports/monitor', new Date().toISOString().replace(/[:.]/g, '-'));
+// "basic" group of scripts/hourlySurveyMonitor.js (results go to <MONITOR_OUT_DIR>/basic).
+const OUT_DIR = path.join(process.env.MONITOR_OUT_DIR || path.resolve('reports/monitor', new Date().toISOString().replace(/[:.]/g, '-')), 'basic');
 const RUN_BUDGET = EXPECT.run.maxMinutes * 60_000;
 
 test('Hourly monitor: create survey and validate', async ({ page }) => {
@@ -28,7 +29,7 @@ test('Hourly monitor: create survey and validate', async ({ page }) => {
     const remaining = () => Math.max(0, deadline - Date.now());
     const mins = ms => Math.round(ms / 600) / 100;
 
-    const result = { startedAt: new Date(t0).toISOString(), baseUrl: BASE_URL, checks: [], facts: {}, screenshots: [] };
+    const result = { group: 'basic', startedAt: new Date(t0).toISOString(), baseUrl: BASE_URL, checks: [], defects: [], facts: {}, screenshots: [] };
     const check = (name, ok, detail, severity = 'fail') => {
         const status = ok ? 'PASS' : severity === 'warn' ? 'WARN' : 'FAIL';
         result.checks.push({ name, status, detail });
@@ -70,8 +71,12 @@ test('Hourly monitor: create survey and validate', async ({ page }) => {
         // 3. Wizard + brief, until "create the survey" appears
         const gen = new HerculesSurveyGenerator(page);
         const createBtn = page.getByRole('button', { name: /create the survey/i }).last();
-        const runVersionBtn = page.getByRole('button', { name: /^Run (your version|it this way)$/i }).last();
+        const runVersionBtn = page.getByRole('button', { name: /^Run (your version|it this way|the self-serve version)$/i }).last();
         const versionCard = page.locator('.bg-white.rounded-\\[12px\\].border').last();
+        // Option cards ("Hard-to-find audience"): "Run the self-serve version … Select" vs "Book a consult".
+        // "Select" isn't always a <button>; prefer the self-serve row and never click "Book a consult".
+        const selectOption = page.locator('div, li').filter({ hasText: /self-serve/i }).getByText('Select', { exact: true }).last()
+            .or(page.getByText('Select', { exact: true }).last());
         const briefDeadline = Math.min(deadline, Date.now() + EXPECT.brief.maxMinutes * 60_000);
         let steps = 0;
         while (Date.now() < briefDeadline) {
@@ -83,6 +88,11 @@ test('Hourly monitor: create survey and validate', async ({ page }) => {
                 acted = true;
             } else if (await gen.clickGenerateBrief()) acted = true;
             else if (await gen.handleSelectAndRunItThisWay().catch(() => false)) acted = true;
+            else if (await selectOption.first().isVisible().catch(() => false)) {
+                await selectOption.first().click({ force: true }).catch(() => {});
+                console.log('[Monitor] Clicked "Select" on the option card (self-serve)');
+                acted = true;
+            }
             else if (await gen.handleSelectAllThatApply(wizardContext).catch(() => false)) acted = true;
             else if (await gen.handleSingleSelect(wizardContext).catch(() => false)) acted = true;
             else if (await gen.handleTextInputFallback(wizardContext).catch(() => false)) acted = true;

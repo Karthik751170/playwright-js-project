@@ -8,17 +8,22 @@ on:
     - cron: '7 * * * *'   # hh:07 UTC every hour (GitHub may start scheduled runs a few minutes late)
   workflow_dispatch:
 
-concurrency:
-  group: hourly-survey-monitor
-  cancel-in-progress: false   # never cut a run short; an overlapping run waits
 
 permissions:
   contents: read
 
 jobs:
   monitor:
+    name: monitor (${{ matrix.group }})
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 80
+    strategy:
+      fail-fast: false
+      matrix:
+        group: [core, logic, manage]   # each creates its own survey; they run in parallel
+    concurrency:
+      group: hourly-survey-monitor-${{ matrix.group }}
+      cancel-in-progress: false        # never cut a run short; an overlapping run waits
     steps:
       - uses: actions/checkout@v4
 
@@ -36,12 +41,16 @@ jobs:
       - name: Create survey and validate (headless)
         env:
           CI: true
+          MONITOR_GROUP: ${{ matrix.group }}
           HERCULES_URL: https://hercules.works
           # Mailosaur server from https://mailosaur.com/app/servers/i3nehdds
           MAILOSAUR_SERVER_ID: i3nehdds
           MAILOSAUR_API_KEY: ${{ secrets.MAILOSAUR_API_KEY }}
           HERCULES_MONITOR_EMAIL: ${{ secrets.HERCULES_MONITOR_EMAIL }}       # optional; default hercules-monitor@i3nehdds.mailosaur.net
           HERCULES_MONITOR_PASSWORD: ${{ secrets.HERCULES_MONITOR_PASSWORD }}
+          # New Mailosaur account every run (sign-up → confirm → onboarding), so each run has a full
+          # daily AI token limit. Set to 'false' to reuse the fixed account above instead.
+          MONITOR_FRESH_ACCOUNT: 'true'
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GROQ_API_KEY_2: ${{ secrets.GROQ_API_KEY_2 }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -55,16 +64,25 @@ jobs:
         run: |
           f=reports/monitor/latest.json
           if [ -f "$f" ]; then
-            node -e "const r=require('./$f');console.log('## Monitor: '+r.status+'\n\n| Check | Status | Detail |\n|---|---|---|\n'+r.checks.map(c=>'| '+c.name+' | '+c.status+' | '+String(c.detail||'').replace(/\|/g,'/')+' |').join('\n')+'\n\nChat: '+(r.facts.chatUrl||'-')+'  \nSurvey: '+(r.facts.surveyUrl||'-'))" >> "$GITHUB_STEP_SUMMARY"
+            node -e "
+              const { results } = require('./' + process.argv[1]);
+              const esc = s => String(s || '').replace(/\|/g, '/').replace(/\n/g, ' ');
+              for (const r of results) {
+                let md = '## ' + r.group + ': ' + r.status + '\n\n';
+                if ((r.defects || []).length) md += '### 🐞 Defects\n' + r.defects.map(d => '- **' + esc(d.name) + '** — ' + esc(d.detail)).join('\n') + '\n\n';
+                md += '| Check | Status | Type | Detail |\n|---|---|---|---|\n' + r.checks.map(c => '| ' + esc(c.name) + ' | ' + c.status + ' | ' + (c.kind || '') + ' | ' + esc(c.detail).slice(0, 220) + ' |').join('\n');
+                md += '\n\nChat: ' + (r.facts && r.facts.chatUrl || '-') + '\n\n';
+                console.log(md);
+              }" "$f" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "## Monitor: no result produced" >> "$GITHUB_STEP_SUMMARY"
+            echo "## ${{ matrix.group }}: no result produced" >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Upload screenshots and logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: survey-monitor-${{ github.run_id }}
+          name: survey-monitor-${{ matrix.group }}-${{ github.run_id }}
           path: |
             reports/monitor/
             test-results/monitor/

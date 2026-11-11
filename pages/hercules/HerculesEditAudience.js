@@ -3,6 +3,8 @@ const BasePage = require('../../base/BasePage');
 class HerculesEditAudience extends BasePage {
   constructor(page) {
     super(page);
+    // What the random edits actually picked (read by tests that verify the edits persisted).
+    this.applied = { sampleSize: null, locationsAdded: [], locationRemoved: null, genders: null, ages: [], attributesAdded: [] };
 
     // --- MODAL BUTTONS ---
     this.confirmBtn = page.getByRole('button', { name: 'Confirm' });
@@ -76,6 +78,7 @@ class HerculesEditAudience extends BasePage {
         await this.sampleSizeInput.fill(randomSize.toString());
         await this.page.waitForTimeout(400);
         console.log(`[HerculesEditAudience] ✔ Sample size set to ${randomSize}`);
+        this.applied.sampleSize = randomSize;
       }
     } catch (e) {
       console.log(`[HerculesEditAudience] ⚠ Could not set sample size: ${e.message}`);
@@ -97,6 +100,7 @@ class HerculesEditAudience extends BasePage {
     if (removeCount > 0) {
       console.log(`[HerculesEditAudience] Found ${removeCount} existing locations. Removing 1 randomly...`);
       const randomIdx = Math.floor(Math.random() * removeCount);
+      this.applied.locationRemoved = ((await this.removeLocationBtn.nth(randomIdx).getAttribute('aria-label').catch(() => '')) || '').replace(/^Remove\s*/i, '');
       await this.removeLocationBtn.nth(randomIdx).click({ force: true });
       await this.page.waitForTimeout(600);
     } else {
@@ -118,6 +122,7 @@ class HerculesEditAudience extends BasePage {
           const txt = await btn.textContent();
           await btn.click({ force: true });
           console.log(`[HerculesEditAudience] ✔ Selected location: ${txt?.trim()}`);
+          this.applied.locationsAdded.push(txt?.trim());
           await this.page.waitForTimeout(400);
         } catch (e) {
           console.log(`[HerculesEditAudience] ⚠ Skipped one location: ${e.message}`);
@@ -173,6 +178,7 @@ class HerculesEditAudience extends BasePage {
 
     const wantMale   = genderChoice === 0 || genderChoice === 2;
     const wantFemale = genderChoice === 1 || genderChoice === 2;
+    this.applied.genders = [wantMale && 'Male', wantFemale && 'Female'].filter(Boolean);
 
     // Only click if the current state differs from what we want
     // (clicking a selected checkbox deselects it, clicking an unselected one selects it)
@@ -219,6 +225,7 @@ class HerculesEditAudience extends BasePage {
       if (!isSelected) {
         await ag.locator.first().click({ force: true });
         console.log(`[HerculesEditAudience] ✔ Selected age: ${ag.label}`);
+        this.applied.ages.push(ag.label);
         await this.page.waitForTimeout(400);
       } else {
         console.log(`[HerculesEditAudience] Age ${ag.label} is already selected, skipping click.`);
@@ -260,6 +267,7 @@ class HerculesEditAudience extends BasePage {
           const txt = await btn.textContent();
           await btn.click({ force: true });
           console.log(`[HerculesEditAudience] ✔ Selected attribute: ${txt?.trim()}`);
+          this.applied.attributesAdded.push(txt?.trim());
           await this.page.waitForTimeout(400);
         } catch (e) {
           console.log(`[HerculesEditAudience] ⚠ Skipped attribute: ${e.message}`);

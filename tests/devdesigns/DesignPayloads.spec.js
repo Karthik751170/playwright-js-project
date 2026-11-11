@@ -115,12 +115,15 @@ for (const d of DESIGNS) {
 
             const made = await h.scenario('brief and survey', async () => {
                 const ctxText = `${d.what} We are a consumer brand in India; please run this as described.`;
-                const r = await F.briefAndCreate(page, ctxText);
+                const r = await F.briefAndCreate(page, ctxText, { net });
                 fs.writeFileSync(path.join(outDir, 'brief.txt'), r.brief);
+                if (r.pageText) fs.writeFileSync(path.join(outDir, 'after-create.txt'), r.pageText);
                 h.result.facts.wizard = r.wizard;
-                await h.shot('brief-or-survey');
+                await h.shot(r.created ? 'survey-created' : 'no-survey-after-create');
                 if (!h.expectProduct('brief leads to "create the survey"', r.briefOk, `${r.wizard.steps} steps: ${r.wizard.seen.join(', ')}`)) return null;
-                h.expectProduct('survey created', r.created, r.created ? `${r.createMinutes} min after "create the survey"` : 'no "Survey is In-drafts" card');
+                // Keep the last chat replies as evidence when no survey shows up.
+                if (!r.created) fs.writeFileSync(path.join(outDir, 'chat-stream-tail.json'), JSON.stringify(net.filter(e => /chat\/stream/.test(e.url)).slice(-3).map(e => ({ at: e.at, status: e.status, tail: e.body.slice(-6000) })), null, 1));
+                h.expectProduct('survey created', r.created, r.created ? `${r.createMinutes} min after "create the survey" (${r.how})` : `no In-drafts card, Deploy button or payload preview within ${r.createMinutes} min (+ reload); last replies in chat-stream-tail.json`);
                 return r.created ? r : null;
             }, { needsMinutes: 15 });
             if (!made) return;

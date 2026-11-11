@@ -68,7 +68,7 @@ async function sendPrompt(page, baseUrl, prompt, uploads, log) {
 }
 
 /** Drives clarifications → brief → "create the survey" → In-drafts card. */
-async function briefAndCreate(page, context, { briefMinutes = 25, createMinutes = 20 } = {}) {
+async function briefAndCreate(page, context, { briefMinutes = 25, createMinutes = 20, net = [] } = {}) {
     const w = wizardDriver(page);
     const r = await w.driveToCreate(0, briefMinutes * 60_000, context);
     const brief = await page.locator('body').innerText();
@@ -76,11 +76,20 @@ async function briefAndCreate(page, context, { briefMinutes = 25, createMinutes 
     await w.createBtn.last().scrollIntoViewIfNeeded().catch(() => {});
     await w.createBtn.last().click();
     const t0 = Date.now();
-    const card = page.getByText(/Survey is In-drafts/i).last();
-    let created = await card.waitFor({ state: 'visible', timeout: createMinutes * 60_000 }).then(() => true).catch(() => false);
-    if (!created) { await page.reload().catch(() => {}); created = await card.waitFor({ state: 'visible', timeout: 90_000 }).then(() => true).catch(() => false); }
+    // A survey counts as created when ANY of Hercules' own signals shows up: the "In-drafts" card,
+    // the survey panel's Deploy button, or a Super J payload preview fetched for this chat.
+    const signals = async () => {
+        if (await page.getByText(/Survey is In-drafts/i).last().isVisible().catch(() => false)) return 'In-drafts card';
+        if (await page.getByRole('button', { name: 'Deploy', exact: true }).last().isVisible().catch(() => false)) return 'Deploy button';
+        if (net.some(e => /\/versions\/\d+\/preview/.test(e.url) && e.status === 200)) return 'payload preview';
+        return null;
+    };
+    let how = null;
+    const until = Date.now() + createMinutes * 60_000;
+    while (!how && Date.now() < until) { await page.waitForTimeout(10_000); how = await signals(); }
+    if (!how) { await page.reload().catch(() => {}); await page.waitForTimeout(20_000); how = await signals(); if (how) how += ' (after reload)'; }
     await page.waitForTimeout(6000);
-    return { briefOk: true, created, wizard: r, brief, createMinutes: Math.round((Date.now() - t0) / 6000) / 10 };
+    return { briefOk: true, created: !!how, how, wizard: r, brief, createMinutes: Math.round((Date.now() - t0) / 6000) / 10, pageText: (await page.locator('body').innerText().catch(() => '')).slice(-4000) };
 }
 
 /**

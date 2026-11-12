@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const fs = require('fs');
 const HerculesSurveyGenerator = require('../pages/hercules/HerculesSurveyGenerator');
+const { landOnHercules } = require('../utils/automationTag');
 
 test.use({ storageState: '.auth/google-user.json' });
 
@@ -60,6 +61,7 @@ test('Locator Crawler - Dashboard & Survey Generation', async ({ page }) => {
     const surveyGenerator = new HerculesSurveyGenerator(page);
 
     console.log('Navigating to Dashboard...');
+    await landOnHercules(page, 'https://dev.hercules.works/ai'); // tagged landing: ?automation_test=1&test_agent=claude
     await page.goto('https://dev.hercules.works/ai');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(3000);

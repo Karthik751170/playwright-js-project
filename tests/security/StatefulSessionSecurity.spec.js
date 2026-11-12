@@ -2,6 +2,7 @@ const { test, expect } = require('@playwright/test');
 const { setupMailosaurAccount } = require('../utils/MailosaurSetup');
 const HerculesSurveyGenerator = require('../../pages/hercules/HerculesSurveyGenerator');
 const herculesConfig = require('../../config/hercules.config');
+const { landOnHercules } = require('../../utils/automationTag');
 
 const TARGET_URL = process.env.TARGET_URL || herculesConfig.baseUrl || 'https://dev.hercules.works';
 
@@ -20,6 +21,7 @@ test.describe('🛡️ Stateful Session Security & Multi-Tenant BOLA Tests', () 
     // 1. Fast Survey Creation in /ai
     console.log('[Step 1] Navigating to /ai for fast survey creation...');
     if (!page.url().includes('/ai')) {
+      await landOnHercules(page, `${TARGET_URL}/ai`); // tagged landing: ?automation_test=1&test_agent=claude
       await page.goto(`${TARGET_URL}/ai`, { waitUntil: 'domcontentloaded' }).catch(() => {});
       await page.waitForTimeout(3000);
     }

@@ -1,5 +1,6 @@
 const { test, expect } = require('@playwright/test');
 const HerculesSignupPage = require('../pages/hercules/HerculesSignupPage');
+const { landOnHercules } = require('../utils/automationTag');
 
 test('Test 1secmail API for Hercules Verification', async ({ context }) => {
     test.setTimeout(120000); // 2 minutes
@@ -14,6 +15,7 @@ test('Test 1secmail API for Hercules Verification', async ({ context }) => {
     // 2. Open Hercules in a new tab and sign up
     const herculesPage = await context.newPage();
     console.log('Navigating to dev.hercules.works...');
+    await landOnHercules(herculesPage, 'https://dev.hercules.works/'); // tagged landing: ?automation_test=1&test_agent=claude
     await herculesPage.goto('https://dev.hercules.works/', { waitUntil: 'domcontentloaded' });
 
     console.log('Clicking Sign Up...');

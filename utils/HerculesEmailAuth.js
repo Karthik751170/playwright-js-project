@@ -15,6 +15,7 @@
 const fs = require('fs');
 const path = require('path');
 const MailosaurApi = require('./MailosaurApi');
+const { landOnHercules } = require('./automationTag');
 
 const STATE_FILE = path.resolve(__dirname, '..', '.auth', 'monitor-state.json');
 
@@ -96,12 +97,14 @@ async function completeOnboarding(page, log = console.log) {
  * 'cached-session' | 'password-login' | 'new-signup'. Throws with a clear message otherwise.
  */
 async function ensureSignedIn(page, { baseUrl = 'https://hercules.works', log = console.log } = {}) {
+    // Every run lands on the tagged home page first (?automation_test=1&test_agent=claude).
+    await landOnHercules(page, baseUrl);
     // A fresh-account run must never reuse a saved session.
     if (!FRESH && await isSignedIn(page, baseUrl)) return { email: '(cached session)', method: 'cached-session' };
     const { email, password } = monitorAccount();
 
     await page.context().clearCookies();
-    await page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
+    await landOnHercules(page, baseUrl);
     await page.getByRole('button', { name: /^log in$/i }).first().click();
     await page.locator('input#guest-email, input[type="email"]').first().fill(email);
     await page.getByRole('button', { name: 'Continue', exact: true }).click();
@@ -134,7 +137,7 @@ async function ensureSignedIn(page, { baseUrl = 'https://hercules.works', log = 
     if (method === 'new-signup' && !(await isSignedIn(page, baseUrl))) {
         log(`[Auth] ${email} landed logged out after sign-up — logging in with the new password.`);
         await page.context().clearCookies();
-        await page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
+        await landOnHercules(page, baseUrl);
         await page.getByRole('button', { name: /^log in$/i }).first().click();
         await page.locator('input#guest-email, input[type="email"]').first().fill(email);
         await page.getByRole('button', { name: 'Continue', exact: true }).click();

@@ -1,5 +1,6 @@
 const { test, expect } = require('@playwright/test');
 const fs = require('fs');
+const { landOnHercules } = require('../utils/automationTag');
 
 test.use({ storageState: '.auth/apple-user.json' });
 
@@ -7,6 +8,7 @@ test('Explore Logged-In App', async ({ page }) => {
     test.setTimeout(300000); // 5 minutes for exploration
 
     console.log('Navigating to https://dev.hercules.works...');
+    await landOnHercules(page, 'https://dev.hercules.works'); // tagged landing: ?automation_test=1&test_agent=claude
     await page.goto('https://dev.hercules.works');
     await page.waitForLoadState('networkidle');
 

@@ -2,6 +2,7 @@ const { test, expect } = require('@playwright/test');
 const herculesConfig = require('../../config/hercules.config');
 const ScopeGuard = require('../../utils/security/ScopeGuard');
 const SecurityReporter = require('../../utils/security/SecurityReporter');
+const { landOnHercules } = require('../../utils/automationTag');
 
 const TARGET_URL = process.env.TARGET_URL || herculesConfig.baseUrl || 'https://dev.hercules.works';
 
@@ -20,6 +21,7 @@ test.describe('Automated Browser Security Posture Audit', () => {
   });
 
   test('1. HTTP Security Headers Audit', async ({ page }) => {
+    await landOnHercules(page, TARGET_URL); // tagged landing: ?automation_test=1&test_agent=claude
     const response = await page.goto(TARGET_URL, { waitUntil: 'domcontentloaded' });
     const headers = response ? response.headers() : {};
 

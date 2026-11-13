@@ -1,6 +1,7 @@
 const { test, expect } = require('../../fixtures/zapFixture');
 const herculesConfig = require('../../config/hercules.config');
 const path = require('path');
+const { landOnHercules } = require('../../utils/automationTag');
 
 test.describe('OWASP ZAP Passive Security Scan - Hercules Platform', () => {
   const TARGET_URL = process.env.TARGET_URL || herculesConfig.baseUrl || 'https://dev.hercules.works';
@@ -21,6 +22,7 @@ test.describe('OWASP ZAP Passive Security Scan - Hercules Platform', () => {
   test('Execute User Flow on dev.hercules.works & Validate Security Posture', async ({ page, zap }) => {
     // 1. Navigate application flows through the ZAP Proxy
     console.log(`[ZAP] Navigating through: ${TARGET_URL}`);
+    await landOnHercules(page, TARGET_URL); // tagged landing: ?automation_test=1&test_agent=claude
     await page.goto(TARGET_URL, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(2000);
 

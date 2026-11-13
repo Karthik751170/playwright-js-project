@@ -1,0 +1,732 @@
+{
+ "source": "https://claude.ai/artifact/Js6P6HucEupt4yzGPH2Yuv (Doc 1 design payloads, PR #46)",
+ "footer": "Generated on branch feat/doc1-survey-designs. Question payloads are built by generate_superj_payload_preview; survey and audience by prepare_for_delivery + with_designs, the same calls the preview endpoint makes. Readable ids replace each qId with the question's flow key; switch to Real qIds for the payload exactly as sent.",
+ "designs": [
+  {
+   "sd": "003",
+   "name": "Proto-monadic",
+   "what": "Each respondent rates one ad on its own, then picks a favourite with every ad on screen.",
+   "prompt": "Proto-monadic test: rate each of our 3 new biscuit pack designs (uploaded) on its own, then at the end show all three and ask which is their favourite.",
+   "keys": [
+    "monadic",
+    "monadicState",
+    "allAds"
+   ],
+   "superj": "Serve each respondent one ad, balanced across ads, with the battery after it; then show the allAds question with every ad on screen.",
+   "note": "SuperJ fills the preference question's options with the ads when the survey loads (designs.allAds), so we only send 'None of these'. The battery is listed once; SuperJ repeats it after each ad.",
+   "result": null,
+   "problem": "You need each design's own score and a clear favourite, but seeing all of them first biases the scores.",
+   "solution": "Each person rates one design on its own, then sees all of them and picks a favourite.",
+   "uploads": [
+    "sd003-a.png",
+    "sd003-b.png",
+    "sd003-c.png"
+   ],
+   "example": {
+    "questionsTotal": 17,
+    "surveyKeys": [
+     "hercules",
+     "monadic"
+    ],
+    "questionKeys": [
+     "monadicState"
+    ],
+    "audience": {
+     "total": 300,
+     "ages": [
+      "18-24",
+      "24-35",
+      "35-45"
+     ],
+     "cities": [
+      "Mumbai",
+      "Bangalore",
+      "Delhi"
+     ],
+     "checkCity": true,
+     "designs": [
+      "allAds"
+     ]
+    }
+   }
+  },
+  {
+   "sd": "004",
+   "name": "Reverse sequential monadic",
+   "what": "Every ad shown together first, then each ad on its own.",
+   "prompt": "Reverse sequential monadic: show people our 3 new juice packs together first and ask which grabs them, then get feedback on each pack one at a time.",
+   "keys": [
+    "monadic",
+    "monadicState",
+    "monadicRotation",
+    "allAds"
+   ],
+   "superj": "Show the allAds question with every ad first, then each ad on its own in a monadicRotation order (balanced per city), repeating the battery after each.",
+   "note": "Same allAds entry as proto-monadic, but on a question placed BEFORE the first ad (STANDOUT_ALL). Sequential, so the audience also gets the ad-order rotation (monadicRotation). This run had no uploaded images, so the ads carry no questionImage. Known gap: with images uploaded, 3 of 3 runs built a plain sequential test instead of reverse.",
+   "result": null,
+   "problem": "On a shelf people see every option at once, and you want that first-glance standout plus detailed feedback.",
+   "solution": "Show all designs together first to capture which one stands out, then each one alone for the details.",
+   "uploads": [
+    "sd004-a.png",
+    "sd004-b.png",
+    "sd004-c.png"
+   ],
+   "example": {
+    "questionsTotal": 17,
+    "surveyKeys": [
+     "hercules",
+     "monadic"
+    ],
+    "questionKeys": [
+     "monadicState"
+    ],
+    "audience": {
+     "total": 400,
+     "ages": [
+      "18-24",
+      "24-35",
+      "35-45"
+     ],
+     "cities": [
+      "Mumbai",
+      "Delhi",
+      "Bangalore",
+      "Chennai"
+     ],
+     "checkCity": true,
+     "designs": [
+      "allAds"
+     ]
+    }
+   }
+  },
+  {
+   "sd": "005",
+   "name": "Paired comparison",
+   "what": "Each respondent sees two of the candidates, a different pair per person.",
+   "prompt": "We have 4 logo options for our cafe (uploaded). Which one wins head-to-head? Use a paired comparison.",
+   "keys": [
+    "pairs"
+   ],
+   "superj": "Show each respondent two of the question's options, a different pair per person and balanced across pairs, keep anchor options always visible, and save which two were shown.",
+   "note": "designs.pairs names the question; SuperJ shows each respondent two of the four logos.",
+   "result": null,
+   "problem": "With 4+ close options on one screen, people get overloaded and the loudest-looking one wins by default.",
+   "solution": "Each person judges just two head to head; across people every pair gets compared and a clear winner emerges.",
+   "uploads": [
+    "sd005-a.png",
+    "sd005-b.png",
+    "sd005-c.png",
+    "sd005-d.png"
+   ],
+   "example": {
+    "questionsTotal": 9,
+    "surveyKeys": [],
+    "questionKeys": [],
+    "audience": {
+     "total": 400,
+     "ages": [
+      "18-24",
+      "24-35"
+     ],
+     "cities": [
+      "Mumbai",
+      "Delhi",
+      "Bangalore",
+      "Hyderabad"
+     ],
+     "checkCity": true,
+     "designs": [
+      "pairs"
+     ]
+    }
+   }
+  },
+  {
+   "sd": "006",
+   "name": "Side-by-side images",
+   "what": "Several uploaded images compared on one screen.",
+   "prompt": "Put our 3 shampoo packs (uploaded) side by side on one screen and ask which one people would pick and which looks most premium.",
+   "keys": [
+    "image",
+    "answerType"
+   ],
+   "superj": "Nothing new: render the image options together on one screen.",
+   "note": "Each option carries its uploaded image, so all packs show on one screen. The audience is not touched.",
+   "result": null,
+   "problem": "You need a quick pick the way a shopper compares options lying next to each other.",
+   "solution": "All images on one screen with comparative questions: a fast winner, but no standalone score per design.",
+   "uploads": [
+    "sd006-a.png",
+    "sd006-b.png",
+    "sd006-c.png"
+   ],
+   "example": {
+    "questionsTotal": 8,
+    "surveyKeys": [],
+    "questionKeys": [
+     "answerType"
+    ],
+    "audience": null
+   }
+  },
+  {
+   "sd": "007",
+   "name": "Forced choice",
+   "what": "A pick-one with no neutral way out (no 'both', 'neither' or 'no preference').",
+   "prompt": "Which of our two brand names do people like more, Zesto or Fizzo? Forced choice, no 'both' or 'neither' option.",
+   "keys": [
+    "choice"
+   ],
+   "superj": "Nothing new: a plain single-choice question.",
+   "note": "Only two options, no neutral escape. The audience is not touched.",
+   "result": null,
+   "problem": "With 'both' or 'no preference' on offer, many people sit on the fence and the winner stays unclear.",
+   "solution": "Remove the escape option so everyone commits to one choice.",
+   "uploads": [],
+   "example": {
+    "questionsTotal": 4,
+    "surveyKeys": [],
+    "questionKeys": [
+     "choice"
+    ],
+    "audience": null
+   }
+  },
+  {
+   "sd": "009",
+   "name": "Block rotation",
+   "what": "Topic sections are asked in a different order for each respondent.",
+   "prompt": "One survey on tea, coffee and wellness drinks habits. Rotate the order of the three topic sections so the order doesn't bias answers.",
+   "keys": [
+    "blockRotation",
+    "blocks"
+   ],
+   "superj": "Shuffle the order of the listed blocks per respondent, keeping each block's questions together and in their order.",
+   "note": "No question changes: each block lists the existing questions of one topic section, and SuperJ shuffles the block order per respondent.",
+   "result": null,
+   "problem": "Sections asked first get fresher, more careful answers, so the order biases the comparison between topics.",
+   "solution": "Each respondent gets the sections in a different order, so the order effect averages out.",
+   "uploads": [],
+   "example": {
+    "questionsTotal": 19,
+    "surveyKeys": [],
+    "questionKeys": [],
+    "audience": {
+     "total": 400,
+     "ages": [
+      "18-24",
+      "24-35",
+      "35-45"
+     ],
+     "cities": [
+      "Mumbai",
+      "Delhi",
+      "Bangalore",
+      "Chennai",
+      "Hyderabad"
+     ],
+     "checkCity": true,
+     "designs": [
+      "blockRotation"
+     ]
+    }
+   }
+  },
+  {
+   "sd": "012",
+   "name": "Van Westendorp (PSM)",
+   "what": "Four price questions that map the acceptable price range.",
+   "prompt": "What price range should we charge for our new protein bar? Use Van Westendorp price sensitivity.",
+   "keys": [
+    "psm",
+    "tooCheap",
+    "cheap",
+    "expensive",
+    "tooExpensive"
+   ],
+   "superj": "Treat the four questions as one price set and refuse a price lower than the one before it (too cheap ≤ bargain ≤ getting expensive ≤ too expensive).",
+   "note": "The four questions are numeric text-entry questions; designs.psm links them so SuperJ refuses a price lower than an earlier one.",
+   "result": null,
+   "problem": "You don't know what price range buyers accept, and 'what would you pay?' gives unreliable single numbers.",
+   "solution": "Four price thresholds per person map the range from too cheap to too expensive, and the sweet spot inside it.",
+   "uploads": [],
+   "example": {
+    "questionsTotal": 14,
+    "surveyKeys": [],
+    "questionKeys": [],
+    "audience": {
+     "total": 400,
+     "ages": [
+      "18-24",
+      "24-35"
+     ],
+     "cities": [
+      "Mumbai",
+      "Delhi",
+      "Bangalore",
+      "Pune"
+     ],
+     "checkCity": true,
+     "designs": [
+      "psm"
+     ]
+    }
+   }
+  },
+  {
+   "sd": "013",
+   "name": "Gabor-Granger",
+   "what": "'Would you buy it at ₹X?', moving up or down a price ladder.",
+   "prompt": "Gabor-Granger test: would people buy our 500 ml cold coffee at Rs 40, 50, 60, 70 or 80? Find the price that maximises revenue.",
+   "keys": [
+    "gaborGranger",
+    "ladder",
+    "start",
+    "yes",
+    "skip"
+   ],
+   "superj": "Start each respondent at the start price and walk the ladder with the skips on the questions, then report the share saying yes at each price.",
+   "note": "The skips are written by code: 'Yes' at a price skips the cheaper rungs, 'No' skips the dearer ones. designs.gaborGranger tells SuperJ the ladder and where to start.",
+   "result": null,
+   "problem": "You have a few candidate prices and need the one that earns the most revenue.",
+   "solution": "Yes/no at each price builds a demand curve; price × % who'd buy points to the revenue-maximising price.",
+   "uploads": [],
+   "example": {
+    "questionsTotal": 12,
+    "surveyKeys": [],
+    "questionKeys": [
+     "skip"
+    ],
+    "audience": {
+     "total": 400,
+     "ages": [
+      "18-24",
+      "24-35"
+     ],
+     "cities": [
+      "Delhi",
+      "Mumbai",
+      "Bangalore",
+      "Pune"
+     ],
+     "checkCity": true,
+     "designs": [
+      "gaborGranger"
+     ]
+    }
+   }
+  },
+  {
+   "sd": "014",
+   "name": "Monadic price test",
+   "what": "Each respondent sees only one price.",
+   "prompt": "Monadic price test for our face cream: test Rs 299, Rs 349 and Rs 399, each respondent sees only one price. Which price sells best?",
+   "keys": [
+    "monadic",
+    "monadicState",
+    "break"
+   ],
+   "superj": "Serve exactly one price card per respondent, balanced across cards, as the pure-monadic ad, followed by its questions.",
+   "note": "Each price card is a break card that is also the ad (monadicState). Pure monadic needs no rotation, so the audience is not touched. Open for SuperJ: confirm a break card is served as a pure-monadic ad.",
+   "result": null,
+   "problem": "Show one person several prices and they anchor on the cheapest, so the read is distorted.",
+   "solution": "Each person sees only one price; comparing the groups gives a clean read of how demand drops as price rises.",
+   "uploads": [],
+   "example": {
+    "questionsTotal": 13,
+    "surveyKeys": [
+     "hercules",
+     "monadic"
+    ],
+    "questionKeys": [
+     "break",
+     "monadicState"
+    ],
+    "audience": null
+   }
+  },
+  {
+   "sd": "015",
+   "name": "MaxDiff",
+   "what": "Pick the most and least important from a few items at a time.",
+   "prompt": "We have 12 feature ideas for our banking app. Use MaxDiff to find which matter most.",
+   "keys": [
+    "maxDiff",
+    "tasks",
+    "setSize"
+   ],
+   "superj": "On each task screen show a different setSize subset of the items, balanced so each item appears about equally, and save one most and one least.",
+   "note": "The AI writes one question; code adds the extra task screens, each with the full list. SuperJ shows setSize items per screen.",
+   "result": null,
+   "problem": "On rating scales everything comes out 'important', so you can't tell what matters most.",
+   "solution": "Repeatedly picking the most and least important from small sets forces trade-offs and gives a clear ranking.",
+   "uploads": [],
+   "example": {
+    "questionsTotal": 13,
+    "surveyKeys": [],
+    "questionKeys": [],
+    "audience": {
+     "total": 400,
+     "ages": [
+      "18-24",
+      "24-35",
+      "35-45"
+     ],
+     "cities": [
+      "Mumbai",
+      "Delhi",
+      "Bangalore",
+      "Hyderabad"
+     ],
+     "checkCity": true,
+     "designs": [
+      "maxDiff"
+     ]
+    }
+   }
+  },
+  {
+   "sd": "016",
+   "name": "Kano",
+   "what": "'Had it / didn't have it' question pairs that sort features into must-haves, delighters and so on.",
+   "prompt": "Kano study: which of these food delivery app features are must-haves and which are delighters: live tracking, scheduled orders, group ordering, no-contact delivery.",
+   "keys": [
+    "kano",
+    "feature",
+    "functional",
+    "dysfunctional"
+   ],
+   "superj": "Treat each feature's two questions as a Kano pair and classify every respondent's answer pair (must-be, performance, attractive, indifferent, reverse).",
+   "note": "Two questions per feature, the five Kano answers in a fixed order (written by code).",
+   "result": null,
+   "problem": "Features don't all move satisfaction the same way: some are expected, some delight, some don't matter.",
+   "solution": "Asking how people feel with and without each feature sorts it into must-have, performance, delighter or indifferent.",
+   "uploads": [],
+   "example": {
+    "questionsTotal": 16,
+    "surveyKeys": [],
+    "questionKeys": [],
+    "audience": {
+     "total": 400,
+     "ages": [
+      "18-24",
+      "24-35",
+      "35-45"
+     ],
+     "cities": [
+      "Bangalore",
+      "Mumbai",
+      "Delhi",
+      "Hyderabad"
+     ],
+     "checkCity": true,
+     "designs": [
+      "kano"
+     ]
+    }
+   }
+  },
+  {
+   "sd": "017",
+   "name": "NPS",
+   "what": "0–10 'would you recommend us?'; SuperJ tags each person as promoter, passive or detractor.",
+   "prompt": "How loyal are our gym members? Run an NPS survey and find out why promoters love us and detractors don't.",
+   "keys": [
+    "nps",
+    "promoter",
+    "passive",
+    "detractor"
+   ],
+   "superj": "Score the 0–10 question into detractor, passive and promoter, and show each respondent only their segment's follow-up.",
+   "note": "designs.nps names the score question and which follow-up each segment sees.",
+   "result": null,
+   "problem": "You need one standard loyalty number you can track and benchmark.",
+   "solution": "The 0–10 recommend question splits people into promoters, passives and detractors; NPS = % promoters − % detractors.",
+   "uploads": [],
+   "example": {
+    "questionsTotal": 12,
+    "surveyKeys": [],
+    "questionKeys": [],
+    "audience": {
+     "total": 400,
+     "ages": [
+      "18-24",
+      "24-35",
+      "35-45"
+     ],
+     "cities": [
+      "Mumbai",
+      "Delhi",
+      "Bangalore",
+      "Hyderabad"
+     ],
+     "checkCity": true,
+     "designs": [
+      "nps"
+     ]
+    }
+   }
+  },
+  {
+   "sd": "018",
+   "name": "Semantic differential",
+   "what": "Something placed on a number scale between two opposite words, one word pair per row.",
+   "prompt": "How do young people see Thums Up? Is it seen as modern or old-school, cheap or premium, boring or exciting?",
+   "keys": [
+    "semanticDifferential",
+    "ends"
+   ],
+   "superj": "Draw each grid row's two end words (from ends, in row order) at the left and right of its 1–N scale.",
+   "note": "Pending SuperJ: designs.semanticDifferential names the grid and gives each row's two end words in row order; SuperJ draws them at the row's ends. The question itself is a plain grid (row text \"Old-school – Modern\", scale 1-5), so it reads right and answers the same where the entry is not drawn. Entered only when every row has both ends; ends missing from the draft are read from \"<left> – <right>\" row text. Live run on feat/doc1-survey-designs-continuation (2026-11-04).",
+   "result": "The user never names the method: the brief chose a semantic differential on its own.",
+   "problem": "A grid has one scale for all rows, so a row of opposite words shows bare numbers and nothing says which end 1 is; an agree/disagree version pushes people to agree.",
+   "solution": "Each row gets its own two end words, so 1 is clearly the left word and 5 the right one.",
+   "uploads": [],
+   "example": {
+    "questionsTotal": 16,
+    "surveyKeys": [],
+    "questionKeys": [],
+    "audience": {
+     "total": 400,
+     "ages": [
+      "18-24"
+     ],
+     "cities": [
+      "Delhi",
+      "Mumbai",
+      "Bengaluru",
+      "Kolkata"
+     ],
+     "checkCity": true,
+     "designs": [
+      "semanticDifferential"
+     ]
+    }
+   }
+  },
+  {
+   "sd": "019",
+   "name": "Choice-based conjoint",
+   "what": "People choose between product bundles, which shows what each part (size, flavour, price) is worth.",
+   "prompt": "Choice-based conjoint: help us pick the best mix of pack size (300ml, 500ml), flavour (mango, lime, cola) and price (Rs 30, 40, 50) for our juice.",
+   "keys": [
+    "subHeading"
+   ],
+   "superj": "Nothing new: serve the 8 choice screens as ordinary single-choice questions.",
+   "note": "No new keys: code builds 8 balanced choice screens from one drafted question. The audience is not touched.",
+   "result": null,
+   "problem": "Asked one at a time, every feature looks important; real purchases trade features against price.",
+   "solution": "People choose between whole product bundles, which reveals what each feature and price level is really worth.",
+   "uploads": [],
+   "example": {
+    "questionsTotal": 17,
+    "surveyKeys": [],
+    "questionKeys": [
+     "subHeading"
+    ],
+    "audience": null
+   }
+  },
+  {
+   "sd": "024",
+   "name": "Loop & Merge",
+   "what": "The same follow-up questions are asked once for each item a respondent picked earlier.",
+   "prompt": "Shampoo usage study: find out which shampoo brands people have used in the last 3 months, then for each brand they used, ask how satisfied they are with it and what they like most about it.",
+   "keys": [
+    "optionLoopSource",
+    "loopOptionImage"
+   ],
+   "superj": "Ask each looped question once per option picked at its source, putting that option in place of <loop option> (and its image, with loopOptionImage), saving each round as its own answer.",
+   "note": "optionLoopSource on each repeated question names the multi-select it loops over; SuperJ asks it once per option picked there, and <loop option> in the text is replaced by that round's option. loopOptionImage (not used here: text options) would also show the picked option's image. The audience is not touched. Generated on master (2026-11-04), not the PR #46 branch.",
+   "result": null,
+   "problem": "You want each brand's own score from the people who use it, but a single question about 'the brands you use' gives one blended answer, and writing a copy per brand breaks when the list changes.",
+   "solution": "Write the follow-ups once; they repeat for every brand the respondent picked, and each round is saved as its own answer for that brand.",
+   "uploads": [],
+   "example": {
+    "questionsTotal": 8,
+    "surveyKeys": [],
+    "questionKeys": [
+     "optionLoopSource"
+    ],
+    "audience": null
+   }
+  },
+  {
+   "sd": "026",
+   "name": "Answer quotas",
+   "what": "Caps how many people can give each answer to a question in the survey.",
+   "prompt": "Chips usage survey. We want 150 Lay's buyers and 150 Bingo buyers, based on the brand they buy most often.",
+   "keys": [
+    "dynamicQuotas"
+   ],
+   "superj": "Stop taking respondents who give an answer once that answer's cap in dynamicQuotas is full.",
+   "note": "dynamicQuotas caps each answer. The designs.nps entry in this audience comes from an NPS question the AI added on its own, not from this design.",
+   "result": null,
+   "problem": "Some answer groups fill up fast while others stay too small to analyse.",
+   "solution": "Cap how many people can give each answer, so the sample stays balanced across groups.",
+   "uploads": [],
+   "example": {
+    "questionsTotal": 18,
+    "surveyKeys": [],
+    "questionKeys": [],
+    "audience": {
+     "total": 300,
+     "ages": [
+      "18-24",
+      "24-35",
+      "35-45"
+     ],
+     "cities": [
+      "Mumbai",
+      "Delhi",
+      "Bangalore",
+      "Hyderabad"
+     ],
+     "checkCity": true,
+     "designs": [
+      "nps"
+     ]
+    }
+   }
+  },
+  {
+   "sd": "036",
+   "name": "Stimulus labels",
+   "what": "The name a report prints for each ad.",
+   "prompt": "Sequential monadic test of our 3 TV ads (uploaded videos) for a new energy drink. Every respondent watches and rates all three.",
+   "keys": [
+    "break",
+    "heading"
+   ],
+   "superj": "Print each ad's break.heading as its name in reports and exports; serve the ads as usual.",
+   "note": "break.heading on each ad is the name reports print. The ads stay video questions.",
+   "result": null,
+   "problem": "Reports show ads as raw ids or 'Stimulus A', which makes results hard to read.",
+   "solution": "Each ad carries a readable label that the report prints next to its results.",
+   "uploads": [
+    "sd036-a.mp4",
+    "sd036-b.mp4",
+    "sd036-c.mp4"
+   ],
+   "example": {
+    "questionsTotal": 18,
+    "surveyKeys": [
+     "hercules",
+     "monadic"
+    ],
+    "questionKeys": [
+     "break"
+    ],
+    "audience": {
+     "total": 300,
+     "ages": [
+      "18-24",
+      "24-35"
+     ],
+     "cities": [
+      "Mumbai",
+      "Delhi",
+      "Bangalore",
+      "Hyderabad"
+     ],
+     "checkCity": true,
+     "designs": []
+    }
+   }
+  },
+  {
+   "sd": "037",
+   "name": "Shelf test",
+   "what": "The test pack among its competitors: 'which do you notice first?' or 'which would you buy?'",
+   "prompt": "Shelf test: will shoppers notice our redesigned Crunchos chips pack among competitors in a store, and would they pick it? Pack images uploaded.",
+   "keys": [
+    "shelf",
+    "shelfTest"
+   ],
+   "superj": "Lay the options out as a shelf (the rows given), shuffle pack positions per respondent, and mark the shelfTest pack as the test product in results.",
+   "note": "shelf says pick or notice and how many rows; shelfTest marks our pack. The audience is not touched. Both keys are new for SuperJ.",
+   "result": null,
+   "problem": "A pack that looks great on its own can disappear among competitors on a real shelf.",
+   "solution": "Show the test pack among competitor packs and measure whether it's noticed first or picked.",
+   "uploads": [
+    "sd037-a.png",
+    "sd037-b.png",
+    "sd037-c.png",
+    "sd037-d.png"
+   ],
+   "example": {
+    "questionsTotal": 14,
+    "surveyKeys": [],
+    "questionKeys": [
+     "shelf"
+    ],
+    "audience": null
+   }
+  },
+  {
+   "sd": "040",
+   "name": "Card sort",
+   "what": "Each item placed in one of a set of given groups.",
+   "prompt": "Where do people put these snack brands in their heads: everyday snack, party snack, healthy option or treat for kids? Brands: Kurkure, Lay's, Haldiram Bhujia, Too Yumm, Pringles, Parle Monaco.",
+   "keys": [
+    "cardSort"
+   ],
+   "superj": "Draw the grid's rows as cards the respondent drags into the groups (the scale), saving each card's group as that row's answer.",
+   "note": "Pending SuperJ: designs.cardSort names the grid; SuperJ draws its rows as cards to drag into the groups (the shared scale). The question is a plain grid with one group per card, so it answers the same where the entry is not drawn. Only the brands the respondent knows are shown (funnel), so the cards differ per person. No entry for fewer than two cards or groups, repeats, or rows with different groups. Open sort (respondents naming groups) is not built.",
+   "result": "The drafter built the card-sort grid but the brief filed it as brand imagery, so its role was set to card_sort by hand for this example; asked to 'sort into groups', another run allowed several groups per brand instead. When to force a card sort is still open.",
+   "problem": "Asking 'is this brand healthy?' one brand at a time loses the comparison; you want each item's place among the others.",
+   "solution": "People place every item into one group, judging the whole set at once, which maps where each item sits in their minds.",
+   "uploads": [],
+   "example": {
+    "questionsTotal": 13,
+    "surveyKeys": [],
+    "questionKeys": [],
+    "audience": {
+     "total": 400,
+     "ages": [],
+     "cities": [
+      "Delhi",
+      "Mumbai",
+      "Chennai",
+      "Jaipur"
+     ],
+     "checkCity": true,
+     "designs": [
+      "cardSort"
+     ]
+    }
+   }
+  },
+  {
+   "sd": "042",
+   "name": "Swipe rating",
+   "what": "Many items shown one at a time, each answered yes (swipe right) or no (swipe left).",
+   "prompt": "Let people swipe through our 12 new chip flavour ideas, like or skip each one. Flavours: Peri Peri Mango, Masala Chai, Pani Puri, Butter Chicken, Schezwan, Kokum Chilli, Tandoori Paneer, Mint Chutney, Cheese Jalapeno, Achari Mirch, Garlic Bread, Thai Sweet Chilli.",
+   "keys": [
+    "swipe"
+   ],
+   "superj": "Show the question's options one card at a time; a right swipe selects the option, a left swipe leaves it unselected, and every card must be swiped.",
+   "note": "Pending SuperJ: designs.swipe names the question; SuperJ shows its options as cards one at a time and a right swipe selects. The question is a plain multi-select, so where the entry is not drawn it is the same list on one screen, with the same answer (the items liked). No entry, and the user is told why, for a single-answer question, fewer than three items, a repeated label, 'None of these', a cap on picks, or options filtered by an earlier answer. Live run on feat/doc1-survey-designs-continuation (2026-11-04).",
+   "result": "The brief committed to swipe and also added a MaxDiff on the same flavours (designs.maxDiff, also in this audience). Asked without the word swipe ('a quick read on which ones people would try, to cut it down to 3 or 4'), it chose MaxDiff alone.",
+   "problem": "Screening many ideas needs a yes or no on every one; a long checklist gets skimmed, and an unticked item could mean 'no' or 'didn't read it'.",
+   "solution": "One card at a time, each answered yes or no: every item gets a real judgement, fast, and the yeses are the shortlist.",
+   "uploads": [],
+   "example": {
+    "questionsTotal": 22,
+    "surveyKeys": [],
+    "questionKeys": [],
+    "audience": {
+     "total": 400,
+     "ages": [],
+     "cities": [],
+     "checkCity": false,
+     "designs": [
+      "maxDiff",
+      "swipe"
+     ]
+    }
+   }
+  }
+ ]
+}

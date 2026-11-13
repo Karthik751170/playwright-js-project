@@ -17,7 +17,8 @@ const EXPECT = require('../../config/hourlyMonitorExpectations');
  */
 
 const BASE_URL = process.env.HERCULES_URL || 'https://hercules.works';
-const OUT_DIR = process.env.MONITOR_OUT_DIR || path.resolve('reports/monitor', new Date().toISOString().replace(/[:.]/g, '-'));
+// "basic" group of scripts/hourlySurveyMonitor.js (results go to <MONITOR_OUT_DIR>/basic).
+const OUT_DIR = path.join(process.env.MONITOR_OUT_DIR || path.resolve('reports/monitor', new Date().toISOString().replace(/[:.]/g, '-')), 'basic');
 const RUN_BUDGET = EXPECT.run.maxMinutes * 60_000;
 
 test('Hourly monitor: create survey and validate', async ({ page }) => {
@@ -28,7 +29,7 @@ test('Hourly monitor: create survey and validate', async ({ page }) => {
     const remaining = () => Math.max(0, deadline - Date.now());
     const mins = ms => Math.round(ms / 600) / 100;
 
-    const result = { startedAt: new Date(t0).toISOString(), baseUrl: BASE_URL, checks: [], facts: {}, screenshots: [] };
+    const result = { group: 'basic', startedAt: new Date(t0).toISOString(), baseUrl: BASE_URL, checks: [], defects: [], facts: {}, screenshots: [] };
     const check = (name, ok, detail, severity = 'fail') => {
         const status = ok ? 'PASS' : severity === 'warn' ? 'WARN' : 'FAIL';
         result.checks.push({ name, status, detail });

@@ -2,6 +2,7 @@ const { test } = require('@playwright/test');
 const { setupMailosaurAccount } = require('./utils/MailosaurSetup');
 const HerculesCampaignManager = require('../pages/hercules/HerculesCampaignManager');
 const HerculesPaymentModal = require('../pages/hercules/HerculesPaymentModal');
+const { landOnHercules } = require('../utils/automationTag');
 
 test.use({ storageState: { cookies: [], origins: [] } });
 test.setTimeout(120000);
@@ -9,6 +10,7 @@ test.setTimeout(120000);
 test('Quick Verify Locators', async ({ page }) => {
     // 1. Log in with the account we just created
     const email = 'excited-tears@kzdzyaot.mailosaur.net'; // from the logs
+    await landOnHercules(page, 'https://dev.hercules.works/login'); // tagged landing: ?automation_test=1&test_agent=claude
     await page.goto('https://dev.hercules.works/login');
     
     console.log('Entering login details...');

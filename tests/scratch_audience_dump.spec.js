@@ -1,6 +1,7 @@
 const { test } = require('@playwright/test');
 const { setupMailosaurAccount } = require('./utils/MailosaurSetup');
 const HerculesCampaignManager = require('../pages/hercules/HerculesCampaignManager');
+const { landOnHercules } = require('../utils/automationTag');
 
 test.use({ storageState: { cookies: [], origins: [] } });
 
@@ -11,6 +12,7 @@ test('Navigate past Premium Audience Modal', async ({ browser }) => {
     const page = await context.newPage();
     
     // Login with the previous account
+    await landOnHercules(page, 'https://dev.hercules.works/login'); // tagged landing: ?automation_test=1&test_agent=claude
     await page.goto('https://dev.hercules.works/login');
     await page.locator('input[type="email"]').fill('middle-happily@kzdzyaot.mailosaur.net');
     await page.locator('input[type="password"]').fill('TestPassword@2026!');

@@ -1,4 +1,5 @@
 const { test, expect } = require('@playwright/test');
+const { landOnHercules } = require('../utils/automationTag');
 
 test.use({ storageState: '.auth/apple-user.json' });
 
@@ -6,6 +7,7 @@ test.describe('Hercules Logged-In Features - Navigation & Dashboards', () => {
   
   test.beforeEach(async ({ page }) => {
     console.log('Navigating to Dashboard...');
+    await landOnHercules(page, 'https://dev.hercules.works/ai'); // tagged landing: ?automation_test=1&test_agent=claude
     await page.goto('https://dev.hercules.works/ai');
     
     // Wait for the main page to load

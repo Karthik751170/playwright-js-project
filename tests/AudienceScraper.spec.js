@@ -1,9 +1,11 @@
 const { test, expect } = require('@playwright/test');
 const fs = require('fs');
 const config = require('../config/hercules.config.js');
+const { landOnHercules } = require('../utils/automationTag');
 
 test('Scrape Edit Audience Modal Locators', async ({ page }) => {
   console.log(`Navigating to ${config.baseUrl}...`);
+  await landOnHercules(page, config.baseUrl); // tagged landing: ?automation_test=1&test_agent=claude
   await page.goto(config.baseUrl);
   await page.waitForTimeout(3000); // Wait for dashboard to load
   

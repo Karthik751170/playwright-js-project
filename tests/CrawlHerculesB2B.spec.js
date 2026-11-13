@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const fs = require('fs');
 const path = require('path');
+const { landOnHercules } = require('../utils/automationTag');
 
 const authFile = path.join(__dirname, '../.auth/google-karthik.json');
 const storageState = fs.existsSync(authFile) ? authFile : undefined;
@@ -22,6 +23,7 @@ test('Crawl Hercules B2B and Explore Sections', async ({ context, page }) => {
     });
 
     console.log('Navigating to Hercules Homepage...');
+    await landOnHercules(page, 'https://dev.hercules.works'); // tagged landing: ?automation_test=1&test_agent=claude
     await page.goto('https://dev.hercules.works');
     await page.waitForLoadState('networkidle');
 

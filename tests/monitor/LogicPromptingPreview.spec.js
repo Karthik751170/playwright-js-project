@@ -53,9 +53,9 @@ test('logic: prompting, all logic types, preview follows logic', async ({ page }
                 { maxFollowUps: 0 });
             supported = LOGIC_TYPES.filter(t => t.re.test(r.finalReply)).map(t => t.id);
             h.result.facts.logicTypesSupported = supported;
-            h.expectProduct('Hercules explains its logic types', supported.length >= 2, supported.join(', ') || r.finalReply.slice(0, 200));
+            await h.expectProduct('Hercules explains its logic types', supported.length >= 2, supported.join(', ') || r.finalReply.slice(0, 200));
             const after = await H.surveyState(page);
-            h.expectProduct('read-only question leaves survey unchanged', after.logicRules === start.logicRules && after.questions.length === start.questions.length,
+            await h.expectProduct('read-only question leaves survey unchanged', after.logicRules === start.logicRules && after.questions.length === start.questions.length,
                 `rules ${start.logicRules}→${after.logicRules}, questions ${start.questions.length}→${after.questions.length}`);
         }, { needsMinutes: E.chat.replyTimeoutMinutes + 2 });
 
@@ -72,10 +72,10 @@ test('logic: prompting, all logic types, preview follows logic', async ({ page }
                 const declined = /does(n't| not) make sense|not (needed|necessary|appropriate|applicable)|no (suitable|sensible)|already (has|have|exists)|change nothing|won't add|not add/i.test(r.finalReply);
                 const claimsAdded = /\b(added|applied|created|set up|now (skips|shows|ends|terminates))\b/i.test(r.finalReply) && !declined;
                 h.result.facts[`logic_${type}`] = { before: before.logicRules, after: after.logicRules, vBefore: before.logicVersion, vAfter: after.logicVersion, declined, claimsAdded };
-                if (changed) h.expectProduct(`${type} logic added`, true, `rules ${before.logicRules}→${after.logicRules}, logic v${before.logicVersion}→v${after.logicVersion}`);
-                else if (declined) h.expectProduct(`${type} logic: declined with a reason`, true, r.finalReply.slice(0, 200));
-                else h.expectProduct(`${type} logic added`, false, claimsAdded ? `reply says it was added but the Logics panel is unchanged (${before.logicRules} rules, v${before.logicVersion})` : `no change and no clear reason: ${r.finalReply.slice(0, 160)}`);
-                h.expectProduct(`${type}: questions unchanged`, after.questions.length === before.questions.length, `${before.questions.length}→${after.questions.length}`, 'warn');
+                if (changed) await h.expectProduct(`${type} logic added`, true, `rules ${before.logicRules}→${after.logicRules}, logic v${before.logicVersion}→v${after.logicVersion}`);
+                else if (declined) await h.expectProduct(`${type} logic: declined with a reason`, true, r.finalReply.slice(0, 200));
+                else await h.expectProduct(`${type} logic added`, false, claimsAdded ? `reply says it was added but the Logics panel is unchanged (${before.logicRules} rules, v${before.logicVersion})` : `no change and no clear reason: ${r.finalReply.slice(0, 160)}`);
+                await h.expectProduct(`${type}: questions unchanged`, after.questions.length === before.questions.length, `${before.questions.length}→${after.questions.length}`, 'warn');
             }, { needsMinutes: E.chat.replyTimeoutMinutes + 2 });
         }
 
@@ -84,14 +84,14 @@ test('logic: prompting, all logic types, preview follows logic', async ({ page }
             const before = await H.surveyState(page);
             const r = await converse('circular', 'Add logic so the last question skips back to question 1, and question 1 skips straight to the last question.', { maxFollowUps: 0 });
             const after = await H.surveyState(page);
-            h.expectProduct('circular logic not applied', after.logicRules === before.logicRules, `rules ${before.logicRules}→${after.logicRules}; reply: ${r.finalReply.slice(0, 160)}`);
+            await h.expectProduct('circular logic not applied', after.logicRules === before.logicRules, `rules ${before.logicRules}→${after.logicRules}; reply: ${r.finalReply.slice(0, 160)}`);
         }, { needsMinutes: E.chat.replyTimeoutMinutes + 2 });
 
         // 4. Logic Version moved?
         await h.scenario('logic version', async () => {
             const end = await H.surveyState(page);
             h.result.facts.logicEnd = { rules: end.logicRules, version: end.logicVersion };
-            if (end.logicRules > start.logicRules) h.expectProduct('Logic Version increments when rules change', (end.logicVersion ?? 0) > (start.logicVersion ?? 0), `v${start.logicVersion} → v${end.logicVersion} (rules ${start.logicRules}→${end.logicRules})`);
+            if (end.logicRules > start.logicRules) await h.expectProduct('Logic Version increments when rules change', (end.logicVersion ?? 0) > (start.logicVersion ?? 0), `v${start.logicVersion} → v${end.logicVersion} (rules ${start.logicRules}→${end.logicRules})`);
             else h.skip('Logic Version increments when rules change', 'no rule was added this run');
         });
 
@@ -110,12 +110,12 @@ test('logic: prompting, all logic types, preview follows logic', async ({ page }
             await h.shot('preview-q1');
             if (!(await pv.answersClickable()).clickable) await pv.dismissHint();
             const click = await pv.answersClickable();
-            if (!h.expectProduct('preview: answers tappable', click.clickable, click.clickable ? `${click.count} options` : `still covered by ${click.blocker} after tapping "More options"`)) return;
+            if (!await h.expectProduct('preview: answers tappable', click.clickable, click.clickable ? `${click.count} options` : `still covered by ${click.blocker} after tapping "More options"`)) return;
 
             // b) Required: Next without an answer should not advance.
             const s0 = await pv.state(); await pv.next(); const s1 = await pv.state();
             h.result.facts.previewSkipUnanswered = `${s0.counter} → ${s1.counter}`;
-            h.expectProduct('preview: Q1 cannot be skipped unanswered', s1.n === s0.n, `${s0.counter} → ${s1.counter}`, 'warn');
+            await h.expectProduct('preview: Q1 cannot be skipped unanswered', s1.n === s0.n, `${s0.counter} → ${s1.counter}`, 'warn');
 
             // c) Terminating answer ends the survey ("Sorry, you're not Eligible for this Survey!").
             await page.goto(chatUrl, { waitUntil: 'domcontentloaded' }); await page.waitForTimeout(8000);
@@ -124,7 +124,7 @@ test('logic: prompting, all logic types, preview follows logic', async ({ page }
             await pv.next();
             const sT = await pv.state();
             await h.shot('preview-terminated');
-            h.expectProduct(`preview: "${term.options[0]}" at Q1 terminates`, sT.notEligible, sT.notEligible ? '"not Eligible" screen shown' : `moved to ${sT.counter}`);
+            await h.expectProduct(`preview: "${term.options[0]}" at Q1 terminates`, sT.notEligible, sT.notEligible ? '"not Eligible" screen shown' : `moved to ${sT.counter}`);
 
             // d) A non-terminating answer moves on to Q2.
             await page.goto(chatUrl, { waitUntil: 'domcontentloaded' }); await page.waitForTimeout(8000);
@@ -137,7 +137,7 @@ test('logic: prompting, all logic types, preview follows logic', async ({ page }
             await pv.next();
             const sC = await pv.state();
             await h.shot('preview-continued');
-            h.expectProduct(`preview: "${ok}" at Q1 continues to Q2`, sC.n === 2 && !sC.notEligible, sC.notEligible ? 'wrongly terminated' : `now at ${sC.counter}`);
+            await h.expectProduct(`preview: "${ok}" at Q1 continues to Q2`, sC.n === 2 && !sC.notEligible, sC.notEligible ? 'wrongly terminated' : `now at ${sC.counter}`);
         }, { needsMinutes: 5 });
     } finally {
         await cleanup(page, h, chatUrl, E);

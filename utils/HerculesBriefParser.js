@@ -35,14 +35,24 @@ function parseTargetAudience(pageText) {
     for (const m of genderLine.matchAll(/(\d+)%\s*(Male|Female|Men|Women|Non-binary|Other)[^(\d]*(?:\((\d[\d,]*)\s*respondents?\))?/gi)) {
         gender[m[2].toLowerCase()] = { pct: Number(m[1]), n: num(m[3]) };
     }
-    const ageLine = (raw.match(/Age(?: Range)?:\s*([^\n]+)/i)?.[1] || '').split('(')[0];
+    // e.g. "Age Range: 24-55 across three bands, 24-35 (34 respondents), 35-45 (33 respondents) and 45-55 (33 respondents)".
+    // The first range there is the overall span, not a band, so it is kept apart from the bands.
+    const ageLine = raw.match(/Age(?: Range)?:\s*([^\n]+)/i)?.[1] || '';
+    let ageBands = [...new Set([...ageLine.matchAll(/(\d{2})\s*[-–]\s*(\d{2})/g)].map(m => `${m[1]}-${m[2]}`))];
+    let ageRange = null;
+    if (ageBands.length > 1 && /across|bands?|split/i.test(ageLine)) {
+        const [lo, hi] = ageBands[0].split('-').map(Number);
+        const rest = ageBands.slice(1);
+        if (rest.every(r => { const [a, b] = r.split('-').map(Number); return a >= lo && b <= hi; })) { ageRange = ageBands[0]; ageBands = rest; }
+    }
     const sec = raw.match(/Socio-?economic Class:\s*([^\n(]+)/i)?.[1] || '';
 
     return {
         totalSampleSize: num(sample?.[1]),
         geographicFocus: geo ? geo[1].split(/,|\band\b/).map(s => s.trim()).filter(Boolean) : [],
         gender,
-        ageBands: [...new Set([...ageLine.matchAll(/(\d{2})\s*[-–]\s*(\d{2})/g)].map(m => `${m[1]}-${m[2]}`))],
+        ageRange,
+        ageBands,
         socioeconomicClass: [...sec.matchAll(/[A-Z]{2,5}\s*[A-Z]\d|\b[A-C]\d\b/g)].map(m => m[0].trim()),
         behavioralFilters: listAfter(raw, 'Behavioral/Psychographic Filters'),
         screeningCriteria: listAfter(raw, 'Screening Criteria'),
@@ -66,7 +76,8 @@ function audienceConsistencyIssues(a) {
     }
     const bands = a.ageBands.map(b => b.split('-').map(Number)).sort((x, y) => x[0] - y[0]);
     for (let i = 1; i < bands.length; i++) {
-        if (bands[i][0] <= bands[i - 1][1]) issues.push(`Age bands overlap: ${bands[i - 1].join('-')} and ${bands[i].join('-')}`);
+        // A shared boundary (24-35, 35-45) is Hercules' normal way of writing bands, not an overlap.
+        if (bands[i][0] < bands[i - 1][1]) issues.push(`Age bands overlap: ${bands[i - 1].join('-')} and ${bands[i].join('-')}`);
     }
     if (bands.some(([lo]) => lo < 18)) issues.push('Age band includes under-18s');
     return issues;

@@ -35,6 +35,10 @@ const worst = list => ['FAIL', 'WARN', 'PASS', 'SKIP'].find(s => list.some(r => 
 const esc = v => String(v == null ? '' : v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const started = groups.map(g => g.startedAt).filter(Boolean).sort()[0];
+// Optional notes.json in the run dir: ["text", …], shown above the results.
+const notes = fs.existsSync(path.join(runDir, 'notes.json')) ? JSON.parse(fs.readFileSync(path.join(runDir, 'notes.json'), 'utf8')) : [];
+const hhmm = t => t ? new Date(t).toISOString().slice(11, 16) : '-';
+const sameRun = new Set(groups.map(g => hhmm(g.startedAt))).size <= 1;
 const productFails = rows.filter(r => r.status === 'FAIL' && r.type === 'Product');
 const testFails = rows.filter(r => r.status === 'FAIL' && r.type === 'Test');
 
@@ -149,7 +153,7 @@ dialog figcaption{color:var(--on-scrim);font-size:14px;display:flex;justify-cont
     <span>Run <b>${esc(started ? new Date(started).toISOString().replace('T', ' ').slice(0, 16) + ' UTC' : '-')}</b></span>
     <span>Site <b>hercules.works</b> (production)</span>
     <span>Account <b>existing monitor account</b>, no sign-up</span>
-    <span>Groups <b>${groups.map(g => esc(GROUP_LABEL[g.group] || g.group)).join(', ')}</b></span>
+    <span>Groups <b>${groups.map(g => esc(GROUP_LABEL[g.group] || g.group) + (sameRun ? '' : ` (${hhmm(g.startedAt)} UTC)`)).join(', ')}</b></span>
   </div>
   <div class="totals">
     <span class="total FAIL"><strong>${n(rows, 'FAIL')}</strong> failed</span>
@@ -158,6 +162,8 @@ dialog figcaption{color:var(--on-scrim);font-size:14px;display:flex;justify-cont
     <span class="total SKIP"><strong>${n(rows, 'SKIP')}</strong> skipped</span>
   </div>
 </header>
+
+${notes.length ? `<section class="panel" aria-labelledby="notes-h"><h2 id="notes-h">Notes on this report</h2><ul class="issues">${notes.map(n => `<li>${esc(n)}</li>`).join('')}</ul></section>` : ''}
 
 ${productFails.length || testFails.length ? `<section class="panel" aria-labelledby="issues-h">
   <h2 id="issues-h">What failed</h2>

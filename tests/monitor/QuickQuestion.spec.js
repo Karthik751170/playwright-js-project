@@ -345,7 +345,7 @@ test('quick question: validation, types, wording checks, step 2, rename / duplic
             const r = await H.menuAction(page, cardFor(current).getByRole('button', { name: 'Open menu' }).first(), 'Delete');
             if (!r.available) return h.skip('delete via Quick Question tab', 'Delete not offered');
             const after = await countCards(current);
-            await h.expectProduct('delete via Quick Question tab removes one card', after === before - 1, `cards named "${current}" ${before}→${after}`, 'fail', { el: cardFor(current) });
+            await h.expectProduct('delete via Quick Question tab removes one card', after === before - 1, `"${current}": ${before} card(s) before Delete, ${after} after${after === before - 1 ? " (the deleted one is gone)" : ""}`, 'fail', { el: cardFor(current) });
         });
         await h.scenario('delete via H icon', async () => {
             const before = await countCards(current);
@@ -356,7 +356,7 @@ test('quick question: validation, types, wording checks, step 2, rename / duplic
             await confirmIfAsked(/^(Delete( Question| Campaign)?|Confirm|Yes)$/);
             await page.waitForTimeout(4000);
             const after = await countCards(current);
-            await h.expectProduct('Delete Question removes the quick question', after === before - 1, `cards named "${current}" ${before}→${after}`, 'fail', { el: cardFor(current) });
+            await h.expectProduct('Delete Question removes the quick question', after === before - 1, `"${current}": ${before} card(s) before Delete, ${after} after${after === before - 1 ? " (the deleted one is gone)" : ""}`, 'fail', { el: cardFor(current) });
         });
     } finally {
         // Clean-up: ALWAYS delete the quick questions this group creates (every Continue saves a

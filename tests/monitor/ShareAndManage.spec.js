@@ -199,8 +199,8 @@ test('manage: share links, rename / duplicate / delete from every place', async 
                 if (!r.available) return h.skip(`delete via ${where}`, r.reason || 'option not available here');
                 const after = await H.countListed(page, BASE_URL, target);
                 await h.expectProduct(`delete via ${where}`, after === before - 1,
-                    `searched Campaigns for "${target}": ${before}→${after} card(s)`, 'fail',
-                    { el: page.getByPlaceholder('Search...'), expected: `Delete from the ${where} removes "${target}" from the Campaigns tab (one fewer card)` });
+                    `searched Campaigns for "${target}": ${before} card(s) before Delete, ${after} after${after === before - 1 ? " (the deleted one is gone)" : ""}`, 'fail',
+                    { el: page.getByPlaceholder('Search...'), expected: `After Delete from the ${where}, "${target}" disappears from the Campaigns tab` });
             });
         }
     } finally {

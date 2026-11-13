@@ -91,7 +91,7 @@ const RULES = [
     // Rename / duplicate / delete (survey campaigns and quick questions)
     [/^rename|rename via/i, 'Rename', 'The new name shows on the card / chat title right away'],
     [/duplicate|Duplicate Question/i, 'Duplicate', 'Duplicate creates exactly one copy'],
-    [/delete|Delete Question/i, 'Delete', 'Delete removes the item from the list (one fewer card)'],
+    [/delete|Delete Question/i, 'Delete', 'The deleted survey or quick question disappears from its list'],
 
     // Share
     [/Share Survey link differs/i, 'Share links', 'Share Survey and Share Campaign Chat give different links'],

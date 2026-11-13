@@ -32,8 +32,9 @@ function wizardDriver(page) {
         const until = Date.now() + limitMs;
         let steps = 0;
         const seen = [];
+        let idleSince = Date.now(), nudged = null;
         while (Date.now() < until) {
-            if ((await createBtn.count()) > minCount && await createBtn.last().isVisible().catch(() => false)) return { ok: true, steps, seen };
+            if ((await createBtn.count()) > minCount && await createBtn.last().isVisible().catch(() => false)) return { ok: true, steps, seen, nudged };
             let acted = null;
             if (await runVersionBtn.isVisible().catch(() => false)) {
                 if (!(await runVersionBtn.isEnabled().catch(() => false))) await versionCard.click().catch(() => {});
@@ -46,10 +47,21 @@ function wizardDriver(page) {
             } else if (await gen.handleSelectAllThatApply(context).catch(() => false)) acted = 'multi-select';
             else if (await gen.handleSingleSelect(context).catch(() => false)) acted = 'single-select';
             else if (await gen.handleTextInputFallback(context).catch(() => false)) acted = 'text';
-            if (acted) { steps++; seen.push(acted); }
+            if (acted) { steps++; seen.push(acted); idleSince = Date.now(); }
+            // Seen on dev 2026-11-13: Hercules said "I have one remaining question … before I build
+            // the framework" and then stopped, with no question and no card. After 4 idle minutes,
+            // send one nudge as a user would (the caller reports the dead end as a product issue).
+            if (!acted && !nudged && Date.now() - idleSince > 4 * 60_000) {
+                const last = (await page.locator('.hchat').last().innerText().catch(() => '')).trim();
+                nudged = { afterSteps: steps, lastReply: last.slice(0, 300) };
+                await H.ask(page, 'Please go ahead and ask your remaining question.', { timeoutMs: 5 * 60_000 }).catch(() => {});
+                seen.push('nudge');
+                idleSince = Date.now();
+                continue;
+            }
             await page.waitForTimeout(acted ? 2500 : 10_000);
         }
-        return { ok: false, steps, seen };
+        return { ok: false, steps, seen, nudged };
     }
     return { createBtn, driveToCreate };
 }
@@ -165,7 +177,10 @@ async function loginAndBrief(page, h, { baseUrl, expect: E, outDir }) {
 
         const tB = Date.now();
         const r = await out.wizard.driveToCreate(0, E.brief.maxMinutes * 60_000, context);
-        h.result.facts.wizard = { steps: r.steps, actions: r.seen, minutes: h.mins(Date.now() - tB) };
+        h.result.facts.wizard = { steps: r.steps, actions: r.seen, minutes: h.mins(Date.now() - tB), nudged: r.nudged };
+        await h.expectProduct('wizard never stalls without a next step', !r.nudged,
+            r.nudged ? `after ${r.nudged.afterSteps} steps Hercules stopped with no question or card for 4 min; last reply: "${r.nudged.lastReply}". The test sent one nudge.` : 'every turn ended with a question, a card or the brief',
+            'warn', { el: page.locator('.hchat').last() });
         await h.shot('research-brief');
         if (!await h.expectProduct('brief leads to "create the survey"', r.ok,
             r.ok ? `${r.steps} steps (${r.seen.join(', ')}), ${h.mins(Date.now() - tB)} min`

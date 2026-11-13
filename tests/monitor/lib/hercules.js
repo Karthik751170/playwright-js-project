@@ -41,6 +41,10 @@ async function ask(page, text, { timeoutMs = 6 * 60_000 } = {}) {
         el.dispatchEvent(new Event('input', { bubbles: true }));
     }, text);
     if ((await box.inputValue()) !== text) await box.fill(text);
+    // Hercules's answer is a new .hchat block; the "Working out dependencies…" progress steps
+    // before it are collapsible buttons and must never be read as the reply.
+    const answers = page.locator('.hchat');
+    const answersBefore = await answers.count();
     await page.locator('button[aria-label="submit button"]').or(page.getByRole('button', { name: 'Send' })).first().click();
 
     const marker = text.slice(0, 60);
@@ -50,10 +54,14 @@ async function ask(page, text, { timeoutMs = 6 * 60_000 } = {}) {
         await page.waitForTimeout(POLL);
         const all = await chatText(page).catch(() => '');
         const at = all.lastIndexOf(marker);
-        const reply = at >= 0 ? all.slice(at + text.length).trim() : '';
+        const n = await answers.count().catch(() => answersBefore);
+        // Once the answer block exists, the reply is its text (no progress steps in it).
+        const reply = n > answersBefore
+            ? (await answers.evaluateAll((els, from) => els.slice(from).map(e => e.innerText).join('\n'), answersBefore).catch(() => '')).trim()
+            : (at >= 0 ? all.slice(at + text.length).trim() : '');
         if (reply !== last) { last = reply; stableSince = Date.now(); continue; }
-        const thinking = !reply || /^(Thinking|Working|Analy[sz]ing|Updating)[\s.…]*$/i.test(reply);
-        if (!thinking && Date.now() - stableSince >= STABLE_FOR) break;
+        const answered = n > answersBefore && !!reply;
+        if (answered && Date.now() - stableSince >= STABLE_FOR) break;
     }
     return { reply: last.slice(0, 6000), seconds: Math.round((Date.now() - t0) / 1000), timedOut: Date.now() - t0 >= timeoutMs };
 }
@@ -267,11 +275,14 @@ async function editAudienceModal(page, { addCity = 'Pune' } = {}) {
     if (await locationEditBtn.isVisible().catch(() => false)) {
         // Add a city through the search box.
         await locationEditBtn.click();
-        const search = modal.getByPlaceholder('Search cities...');
-        await search.fill(addCity);
-        await page.waitForTimeout(1500);
-        const opt = modal.locator('label, li, div').filter({ hasText: new RegExp(`^${addCity}$`) }).last();
-        if (await opt.isVisible().catch(() => false)) { await opt.click(); applied.cityAdded = addCity; }
+        // The city list opens as a pop-over outside the modal, so look for it on the whole page.
+        const search = page.getByPlaceholder('Search cities...').filter({ visible: true }).first();
+        if (await search.waitFor({ state: 'visible', timeout: 10_000 }).then(() => true).catch(() => false)) {
+            await search.fill(addCity).catch(() => {});
+            await page.waitForTimeout(1500);
+            const opt = page.locator('label, li, div').filter({ hasText: new RegExp(`^${addCity}$`) }).filter({ visible: true }).last();
+            if (await opt.isVisible().catch(() => false)) { await opt.click(); applied.cityAdded = addCity; }
+        }
         await closeDropdown();
         // Remove a different city (never the one just added).
         const removable = modal.getByRole('button', { name: /^Remove / }).filter({ hasNotText: addCity });

@@ -25,6 +25,7 @@ const RULES = [
     [/AI quota|daily limit/i, 'AI prompt & research brief', 'The account still has AI quota; if not, Hercules tells the user clearly'],
     [/chat opens|chat opened/i, 'AI prompt & research brief', 'Sending the prompt opens a new chat'],
     [/brief (leads to|offers)/i, 'AI prompt & research brief', 'After the clarifying questions, the research brief offers "create the survey" within the time limit'],
+    [/wizard never stalls/i, 'AI prompt & research brief', 'Every Hercules turn ends with a question, an answer card or the brief: never a dead end'],
     [/wizard step count/i, 'AI prompt & research brief', 'The clarifying-question wizard finishes within the step limit'],
     [/Target Audience consistency/i, 'AI prompt & research brief', 'The brief\'s Target Audience is internally consistent (no overlapping age bands, matching counts)'],
     [/Target Audience/i, 'AI prompt & research brief', 'The research brief includes a Target Audience section with a sample size'],

@@ -155,7 +155,8 @@ test('quick question: validation, types, wording checks, step 2, rename / duplic
             await h.expectProduct('valid rating question reaches step 2', r.moved, r.validation?.reason || '');
             if (r.moved) await h.expectProduct('step 2 shows RATING', /RATING/i.test(await page.locator('body').innerText()), '');
         });
-        await wordingCase('rating without scale meaning', 'Rate our app.', { expectFlag: true, severity: 'warn', responseType: 'Rating 1-5' });
+        // With Rating 1-5 selected the page itself explains the scale, so a short rating question is fine.
+        await wordingCase('rating question with Rating 1-5', 'Rate our app.', { expectFlag: false, severity: 'warn', responseType: 'Rating 1-5' });
 
         // ── Step 1: Hercules' wording check ──
         await wordingCase('leading question', "Don't you agree that our amazing new app is better and cheaper than others?");
@@ -174,7 +175,17 @@ test('quick question: validation, types, wording checks, step 2, rename / duplic
 
         // ── Happy path Yes / No → step 2 (never launched) ──
         let yesNoDraft = null;
-        const question = `QA-QQ ${new Date().toISOString().slice(5, 16)} Do you currently use a payment app for daily purchases?`.slice(0, 180);
+        // Plain wording, no numbers or run stamps: Hercules's wording check rejects those, and a
+        // draft only exists once step 1 is accepted. A random natural question keeps runs apart.
+        const QUESTIONS = [
+            'Do you currently use a payment app for your daily grocery purchases?',
+            'Do you usually check online reviews before buying a new phone?',
+            'Have you ordered a meal through a food delivery app this week?',
+            'Do you prefer paying for small purchases with a payment app over cash?',
+            'Do you usually compare prices online before buying household items?',
+            'Have you watched a cricket match on a streaming app this month?',
+        ];
+        const question = QUESTIONS[Math.floor(Math.random() * QUESTIONS.length)];
         const reached = await h.scenario('yes/no to step 2', async () => {
             await fresh();
             await box().fill(question);
@@ -266,7 +277,7 @@ test('quick question: validation, types, wording checks, step 2, rename / duplic
         const openQuickQuestion = async text => {
             await qqTab();
             await cardFor(text).getByText(text).first().click();
-            await page.waitForURL(/quick-question\?surveyId=/, { timeout: 30_000 });
+            await page.waitForURL(/quick-question\?(surveyId|chatId)=/, { timeout: 30_000 });
             await page.waitForTimeout(5000);
             return page.url();
         };
@@ -278,7 +289,9 @@ test('quick question: validation, types, wording checks, step 2, rename / duplic
             const b = page.getByRole('button', { name: re }).filter({ visible: true }).last();
             await b.waitFor({ state: 'visible', timeout: 4000 }).then(() => b.click()).catch(() => {});
         };
-        const stamp = new Date().toISOString().slice(5, 16).replace(/[-:T]/g, '');
+        // Rename labels stay letters-only as well.
+        const WORDS = ['Amber', 'Cobalt', 'Maple', 'Saffron', 'Teal', 'Indigo', 'Coral', 'Olive', 'Pearl', 'Jade'];
+        const stamp = `${WORDS[Math.floor(Math.random() * WORDS.length)]} ${WORDS[Math.floor(Math.random() * WORDS.length)]}`;
         let current = qKey; // what the card is currently called
 
         await h.scenario('draft on Quick Question tab', async () => {
@@ -287,7 +300,7 @@ test('quick question: validation, types, wording checks, step 2, rename / duplic
             await h.expectProduct('draft listed on the Quick Question tab', names.some(n => n.includes(qKey)), `${names.filter(n => n.includes(qKey)).length} card(s) named "${qKey}…"`);
             const url = await openQuickQuestion(qKey);
             const t = await page.locator('body').innerText();
-            await h.expectProduct('card opens the quick question with its text', /quick-question\?surveyId=/.test(url) && (await box().inputValue()).includes(qKey), url);
+            await h.expectProduct('card opens the quick question with its text', /quick-question\?(surveyId|chatId)=/.test(url) && (await page.locator('body').innerText()).includes(qKey), url);
             await h.shot('quick-question-page');
         });
 
@@ -376,7 +389,7 @@ test('quick question: validation, types, wording checks, step 2, rename / duplic
                 if (!name) break;
                 const card = page.locator('div').filter({ hasText: name }).filter({ has: page.getByRole('button', { name: 'Open menu' }) }).last();
                 await card.getByText(name).first().click();
-                await page.waitForURL(/quick-question\?surveyId=/, { timeout: 30_000 });
+                await page.waitForURL(/quick-question\?(surveyId|chatId)=/, { timeout: 30_000 });
                 await page.waitForTimeout(4000);
                 await page.locator("img[alt='hercules-logo']").first().click({ force: true });
                 await page.getByText('Delete Question', { exact: true }).first().click();

@@ -1,0 +1,102 @@
+name: Monitor feature report (on demand)
+
+# Runs every monitor group once on production (headless, existing monitor account, never signs up)
+# and builds the feature-wise report: each check with expected result, actual result and a
+# highlighted screenshot. Start it by hand; it has no schedule, so the hourly monitor stays as it is.
+# No alerts are posted from here: the report is published and shared separately.
+on:
+  workflow_dispatch:
+    inputs:
+      groups:
+        description: 'Comma-separated groups (auth,basic,core,logic,manage,quickq). Empty = all.'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  group:
+    name: group (${{ matrix.group }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 80
+    strategy:
+      fail-fast: false
+      matrix:
+        group: [auth, basic, core, logic, manage, quickq]
+    steps:
+      - name: Pick group
+        id: pick
+        run: |
+          want="${{ github.event.inputs.groups }}"
+          if [ -z "$want" ] || echo ",$want," | grep -q ",${{ matrix.group }},"; then echo "run=true" >> "$GITHUB_OUTPUT"; else echo "run=false" >> "$GITHUB_OUTPUT"; fi
+
+      - uses: actions/checkout@v4
+        if: steps.pick.outputs.run == 'true'
+
+      - uses: actions/setup-node@v4
+        if: steps.pick.outputs.run == 'true'
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        if: steps.pick.outputs.run == 'true'
+        run: npm ci
+
+      - name: Install Google Chrome for Playwright
+        if: steps.pick.outputs.run == 'true'
+        run: npx playwright install --with-deps chrome
+
+      - name: Run group (headless)
+        if: steps.pick.outputs.run == 'true'
+        continue-on-error: true   # a failing check must not stop the report
+        env:
+          CI: true
+          MONITOR_GROUP: ${{ matrix.group }}
+          HERCULES_URL: https://hercules.works
+          MAILOSAUR_SERVER_ID: i3nehdds
+          MAILOSAUR_API_KEY: ${{ secrets.MAILOSAUR_API_KEY }}
+          HERCULES_MONITOR_EMAIL: ${{ secrets.HERCULES_MONITOR_EMAIL }}
+          HERCULES_MONITOR_PASSWORD: ${{ secrets.HERCULES_MONITOR_PASSWORD }}
+          MONITOR_FRESH_ACCOUNT: 'false'   # existing account only; the monitor never signs up
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GROQ_API_KEY_2: ${{ secrets.GROQ_API_KEY_2 }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GCHAT_WEBHOOK_URL: ''            # no per-group alerts from this workflow
+        run: node scripts/hourlySurveyMonitor.js
+
+      - name: Upload group results
+        if: always() && steps.pick.outputs.run == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: group-${{ matrix.group }}
+          path: reports/monitor/
+          retention-days: 14
+          if-no-files-found: ignore
+
+  report:
+    needs: group
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: group-*
+          path: downloaded
+      - name: Build feature report
+        run: |
+          mkdir -p reports/monitor/run
+          # Each group's folder (<timestamp>/<group>/result.json + evidence/) goes into one run folder.
+          for f in $(find downloaded -name result.json -path '*/*/*/result.json'); do
+            g=$(basename "$(dirname "$f")"); cp -R "$(dirname "$f")" "reports/monitor/run/$g"
+          done
+          ls reports/monitor/run
+          node scripts/monitorFeatureReport.js reports/monitor/run | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: monitor-feature-report
+          path: reports/monitor/run/
+          retention-days: 30

@@ -72,36 +72,36 @@ test('quick question: validation, types, wording checks, step 2, rename / duplic
         await box().fill(question);
         const r = await submit();
         h.result.facts[`validation_${name}`] = r.validation;
-        if (!r.validation) return h.expectTest(name, false, 'no wording-check response captured');
+        if (!r.validation) return await h.expectTest(name, false, 'no wording-check response captured');
         if (expectFlag) {
-            h.expectProduct(`${name}: flagged by Hercules`, r.validation.can_proceed === false, `can_proceed=${r.validation.can_proceed}; ${r.validation.reason || ''}`, severity);
+            await h.expectProduct(`${name}: flagged by Hercules`, r.validation.can_proceed === false, `can_proceed=${r.validation.can_proceed}; ${r.validation.reason || ''}`, severity);
             if (r.validation.can_proceed === false) {
-                h.expectProduct(`${name}: stays on step 1`, !r.moved, r.moved ? 'moved to step 2 despite the flag' : 'stayed');
+                await h.expectProduct(`${name}: stays on step 1`, !r.moved, r.moved ? 'moved to step 2 despite the flag' : 'stayed');
                 const shown = await reasonShown(r.validation);
                 await h.shot(`${name}-${shown ? 'reason-shown' : 'reason-not-shown'}`);
-                h.expectProduct(`${name}: reason shown to the user`, shown, shown ? 'shown' : `server reason "${r.validation.reason}" is not on the page; Continue just stays busy`);
+                await h.expectProduct(`${name}: reason shown to the user`, shown, shown ? 'shown' : `server reason "${r.validation.reason}" is not on the page; Continue just stays busy`);
             }
         } else {
-            h.expectProduct(`${name}: accepted`, r.validation.can_proceed === true && r.moved, `can_proceed=${r.validation.can_proceed}, step 2=${r.moved}; ${r.validation.reason || ''}`, severity);
+            await h.expectProduct(`${name}: accepted`, r.validation.can_proceed === true && r.moved, `can_proceed=${r.validation.can_proceed}, step 2=${r.moved}; ${r.validation.reason || ''}`, severity);
         }
     });
 
     try {
         // ── Login ──
-        const auth = await h.scenario('login', async () => { const a = await ensureSignedIn(page, { baseUrl: BASE_URL }); h.expectTest('login', true, a.method); return a; });
+        const auth = await h.scenario('login', async () => { const a = await ensureSignedIn(page, { baseUrl: BASE_URL }); await h.expectTest('login', true, a.method); return a; });
         if (!auth) return;
 
         // ── Step 1: basic validation ──
         await h.scenario('step 1 loads', async () => {
             await fresh();
             const t = await page.locator('body').innerText();
-            h.expectProduct('step 1 shows "What do you want to ask?" and 3 response types', /What do you want to ask\?/.test(t) && ['Yes / No', 'Multiple choice', 'Rating 1-5'].every(x => t.includes(x)), '');
-            h.expectProduct('Continue disabled for an empty question', await cont().isDisabled(), '');
+            await h.expectProduct('step 1 shows "What do you want to ask?" and 3 response types', /What do you want to ask\?/.test(t) && ['Yes / No', 'Multiple choice', 'Rating 1-5'].every(x => t.includes(x)), '');
+            await h.expectProduct('Continue disabled for an empty question', await cont().isDisabled(), '');
             await box().fill('     ');
-            h.expectProduct('Continue disabled for a whitespace-only question', await cont().isDisabled(), '', 'warn');
+            await h.expectProduct('Continue disabled for a whitespace-only question', await cont().isDisabled(), '', 'warn');
             await box().fill('x'.repeat(200));
             const len = (await box().inputValue()).length;
-            h.expectProduct('question capped at 180 characters', len === 180, `${len} kept of 200 typed; counter "${(t.match(/\d+ \/ 180/) || [''])[0]}"`);
+            await h.expectProduct('question capped at 180 characters', len === 180, `${len} kept of 200 typed; counter "${(t.match(/\d+ \/ 180/) || [''])[0]}"`);
             await h.shot('step1-limits');
         });
 
@@ -112,23 +112,23 @@ test('quick question: validation, types, wording checks, step 2, rename / duplic
             await type('Multiple choice').click({ force: true });
             const opts = () => page.locator('textarea[placeholder^="Option"]');
             await opts().first().waitFor({ state: 'visible', timeout: 10_000 });
-            h.expectProduct('multiple choice starts with 2 options', (await opts().count()) === 2, `${await opts().count()}`);
-            h.expectProduct('Continue disabled until options are filled', await cont().isDisabled(), '');
-            h.expectProduct('cannot remove below 2 options', await page.getByRole('button', { name: 'Remove option 1' }).isDisabled(), '');
+            await h.expectProduct('multiple choice starts with 2 options', (await opts().count()) === 2, `${await opts().count()}`);
+            await h.expectProduct('Continue disabled until options are filled', await cont().isDisabled(), '');
+            await h.expectProduct('cannot remove below 2 options', await page.getByRole('button', { name: 'Remove option 1' }).isDisabled(), '');
             const add = page.getByRole('button', { name: /\+ Add option/ });
             for (let i = 0; i < 8 && await add.isVisible().catch(() => false) && await add.isEnabled().catch(() => false); i++) { await add.click(); await page.waitForTimeout(300); }
             const n = await opts().count();
-            h.expectProduct('maximum 7 options', n === 7, `${n} options after pressing "+ Add option" repeatedly`);
+            await h.expectProduct('maximum 7 options', n === 7, `${n} options after pressing "+ Add option" repeatedly`);
             await opts().nth(0).fill('y'.repeat(520));
             const olen = (await opts().nth(0).inputValue()).length;
-            h.expectProduct('option capped at 500 characters', olen === 500, `${olen} kept of 520`);
-            h.expectProduct('can remove options above 2', await page.getByRole('button', { name: `Remove option ${n}` }).isEnabled(), '');
+            await h.expectProduct('option capped at 500 characters', olen === 500, `${olen} kept of 520`);
+            await h.expectProduct('can remove options above 2', await page.getByRole('button', { name: `Remove option ${n}` }).isEnabled(), '');
             for (let i = n; i > 3; i--) { await page.getByRole('button', { name: `Remove option ${i}` }).click(); await page.waitForTimeout(250); }
             await opts().nth(0).fill('UPI app'); await opts().nth(1).fill('UPI app'); await opts().nth(2).fill('Card');
             await h.shot('mc-duplicate-options');
             const dup = await submit();
             h.result.facts.validation_mcDuplicate = dup.validation;
-            h.expectProduct('duplicate options are blocked or flagged', !dup.moved || dup.validation?.can_proceed === false, dup.moved ? 'accepted "UPI app" twice' : 'blocked', 'warn');
+            await h.expectProduct('duplicate options are blocked or flagged', !dup.moved || dup.validation?.can_proceed === false, dup.moved ? 'accepted "UPI app" twice' : 'blocked', 'warn');
             if (dup.moved) { await page.getByText('Back', { exact: true }).first().click().catch(() => {}); await page.waitForTimeout(2000); }
             await fresh();
             await box().fill('Which payment app do you use most often for daily purchases?');
@@ -136,18 +136,18 @@ test('quick question: validation, types, wording checks, step 2, rename / duplic
             await opts().nth(0).fill('Google Pay'); await opts().nth(1).fill('PhonePe');
             await page.getByRole('button', { name: /\+ Add option/ }).click(); await opts().nth(2).fill('Paytm');
             const ok = await submit();
-            h.expectProduct('valid multiple-choice question reaches step 2', ok.moved, ok.validation?.reason || '');
-            if (ok.moved) h.expectProduct('step 2 shows MULTIPLE CHOICE', /MULTIPLE CHOICE/i.test(await page.locator('body').innerText()), '');
+            await h.expectProduct('valid multiple-choice question reaches step 2', ok.moved, ok.validation?.reason || '');
+            if (ok.moved) await h.expectProduct('step 2 shows MULTIPLE CHOICE', /MULTIPLE CHOICE/i.test(await page.locator('body').innerText()), '');
         });
 
         await h.scenario('rating question', async () => {
             await fresh();
             await box().fill('How satisfied are you with your current payment app, where 1 is very unsatisfied and 5 is very satisfied?');
             await type('Rating 1-5').click({ force: true });
-            h.expectProduct('rating explains 1 = lowest, 5 = highest', /1 \(lowest\) to 5 \(highest\)/.test(await page.locator('body').innerText()), '');
+            await h.expectProduct('rating explains 1 = lowest, 5 = highest', /1 \(lowest\) to 5 \(highest\)/.test(await page.locator('body').innerText()), '');
             const r = await submit();
-            h.expectProduct('valid rating question reaches step 2', r.moved, r.validation?.reason || '');
-            if (r.moved) h.expectProduct('step 2 shows RATING', /RATING/i.test(await page.locator('body').innerText()), '');
+            await h.expectProduct('valid rating question reaches step 2', r.moved, r.validation?.reason || '');
+            if (r.moved) await h.expectProduct('step 2 shows RATING', /RATING/i.test(await page.locator('body').innerText()), '');
         });
         await wordingCase('rating without scale meaning', 'Rate our app.', { expectFlag: true, severity: 'warn' });
 
@@ -161,8 +161,8 @@ test('quick question: validation, types, wording checks, step 2, rename / duplic
             await box().fill('<script>alert("xss")</script> Do you use UPI daily?');
             const r = await submit();
             h.result.facts.validation_script = r.validation;
-            h.expectProduct('script tag never runs', !dialogFired, dialogFired ? `dialog fired: ${dialogFired}` : 'no dialog');
-            if (r.moved) h.expectProduct('script tag not rendered as HTML on step 2', !(await page.locator('script:text("alert")').count()), '');
+            await h.expectProduct('script tag never runs', !dialogFired, dialogFired ? `dialog fired: ${dialogFired}` : 'no dialog');
+            if (r.moved) await h.expectProduct('script tag not rendered as HTML on step 2', !(await page.locator('script:text("alert")').count()), '');
         });
         await wordingCase('Hindi question', 'क्या आप रोज़ की खरीदारी के लिए UPI ऐप का इस्तेमाल करते हैं?', { expectFlag: false, severity: 'warn' });
 
@@ -175,13 +175,13 @@ test('quick question: validation, types, wording checks, step 2, rename / duplic
             const r = await submit();
             await page.waitForTimeout(2000);
             yesNoDraft = drafts[drafts.length - 1] || null;
-            h.expectProduct('neutral yes/no question accepted', r.validation?.can_proceed === true, r.validation?.reason || 'no verdict');
-            if (!h.expectProduct('reaches step 2 "Who should we ask?"', r.moved, '')) return false;
+            await h.expectProduct('neutral yes/no question accepted', r.validation?.can_proceed === true, r.validation?.reason || 'no verdict');
+            if (!await h.expectProduct('reaches step 2 "Who should we ask?"', r.moved, '')) return false;
             const t = await page.locator('body').innerText();
-            h.expectProduct('step 2 shows the question', t.includes(question.slice(0, 40)), '');
-            h.expectProduct('step 2 shows YES / NO', /YES \/ NO/i.test(t), '');
-            h.expectProduct('step 2 offers sizes 50 / 100 / 500 / 1,000 / Custom', ['50', '100', '500', '1,000', 'Custom'].every(x => t.includes(x)), '');
-            h.expectProduct('step 2 offers Geography, NCCS, Age group, Gender', ['Geography', 'NCCS', 'Age group', 'Gender'].every(x => t.includes(x)), '');
+            await h.expectProduct('step 2 shows the question', t.includes(question.slice(0, 40)), '');
+            await h.expectProduct('step 2 shows YES / NO', /YES \/ NO/i.test(t), '');
+            await h.expectProduct('step 2 offers sizes 50 / 100 / 500 / 1,000 / Custom', ['50', '100', '500', '1,000', 'Custom'].every(x => t.includes(x)), '');
+            await h.expectProduct('step 2 offers Geography, NCCS, Age group, Gender', ['Geography', 'NCCS', 'Age group', 'Gender'].every(x => t.includes(x)), '');
             await h.shot('step2');
             return true;
         });
@@ -192,7 +192,7 @@ test('quick question: validation, types, wording checks, step 2, rename / duplic
                 await page.getByText(size, { exact: true }).first().click({ force: true });
                 await page.waitForTimeout(600);
                 const txt = (await launch.innerText().catch(() => '')).trim();
-                h.expectProduct(`audience ${size} → launch button says ${label}`, txt.includes(label), `"${txt}"`);
+                await h.expectProduct(`audience ${size} → launch button says ${label}`, txt.includes(label), `"${txt}"`);
             }
             // Custom size: invalid then valid values
             await page.getByText('Custom', { exact: true }).first().click({ force: true });
@@ -203,7 +203,7 @@ test('quick question: validation, types, wording checks, step 2, rename / duplic
                     await custom.fill(v); await page.waitForTimeout(700);
                     const enabled = await launch.isEnabled().catch(() => false);
                     const txt = (await launch.innerText().catch(() => '')).trim();
-                    h.expectProduct(`custom size ${v} ${valid ? 'accepted' : 'rejected'}`, valid ? txt.includes('250') : (!enabled || !txt.includes(v)), `launch "${txt}", enabled=${enabled}`, 'warn');
+                    await h.expectProduct(`custom size ${v} ${valid ? 'accepted' : 'rejected'}`, valid ? txt.includes('250') : (!enabled || !txt.includes(v)), `launch "${txt}", enabled=${enabled}`, 'warn');
                 }
             } else h.skip('custom size values', 'no input appeared after choosing Custom');
             // Everyone in India + filters
@@ -215,12 +215,12 @@ test('quick question: validation, types, wording checks, step 2, rename / duplic
                 const c = page.getByText(chip, { exact: true }).first();
                 if (await c.isVisible().catch(() => false)) { await c.click({ force: true }); await page.waitForTimeout(300); }
             }
-            h.expectProduct('launch button present (not pressed)', await launch.isVisible().catch(() => false), `"${(await launch.innerText().catch(() => '')).trim()}" — never pressed: it sends to real consumers and spends credits`);
+            await h.expectProduct('launch button present (not pressed)', await launch.isVisible().catch(() => false), `"${(await launch.innerText().catch(() => '')).trim()}" — never pressed: it sends to real consumers and spends credits`);
             await h.shot('step2-filters');
             // Back keeps the question
             await page.getByText('Back', { exact: true }).first().click({ force: true });
             await page.waitForTimeout(2500);
-            h.expectProduct('Back returns to step 1 with the question kept', !(await onStep2()) && (await box().inputValue()).includes(question.slice(0, 30)), '');
+            await h.expectProduct('Back returns to step 1 with the question kept', !(await onStep2()) && (await box().inputValue()).includes(question.slice(0, 30)), '');
         });
 
         await h.scenario('use chat instead', async () => {
@@ -231,7 +231,7 @@ test('quick question: validation, types, wording checks, step 2, rename / duplic
             await page.waitForTimeout(8000);
             h.result.facts.useChatInsteadUrl = page.url();
             const inChat = /\/chat\/[0-9a-f-]{20,}/.test(page.url()) && (await page.locator('body').innerText()).includes('cash or UPI');
-            h.expectProduct('"Use chat instead" opens a chat with the question', inChat, inChat ? page.url() : `landed on ${page.url()}${drafts.length > before ? ' and created a Yes/No quick-question draft without the wording check' : ''}`, 'warn');
+            await h.expectProduct('"Use chat instead" opens a chat with the question', inChat, inChat ? page.url() : `landed on ${page.url()}${drafts.length > before ? ' and created a Yes/No quick-question draft without the wording check' : ''}`, 'warn');
         });
 
         // ── The draft quick question ──
@@ -278,10 +278,10 @@ test('quick question: validation, types, wording checks, step 2, rename / duplic
         await h.scenario('draft on Quick Question tab', async () => {
             const names = await cardNames();
             h.result.facts.qqCardNames = names.slice(0, 10);
-            h.expectProduct('draft listed on the Quick Question tab', names.some(n => n.includes(qKey)), `${names.filter(n => n.includes(qKey)).length} card(s) named "${qKey}…"`);
+            await h.expectProduct('draft listed on the Quick Question tab', names.some(n => n.includes(qKey)), `${names.filter(n => n.includes(qKey)).length} card(s) named "${qKey}…"`);
             const url = await openQuickQuestion(qKey);
             const t = await page.locator('body').innerText();
-            h.expectProduct('card opens the quick question with its text', /quick-question\?surveyId=/.test(url) && (await box().inputValue()).includes(qKey), url);
+            await h.expectProduct('card opens the quick question with its text', /quick-question\?surveyId=/.test(url) && (await box().inputValue()).includes(qKey), url);
             await h.shot('quick-question-page');
         });
 
@@ -296,7 +296,7 @@ test('quick question: validation, types, wording checks, step 2, rename / duplic
             await page.getByRole('button', { name: /^(Save|Rename|Done)$/ }).filter({ visible: true }).last().click();
             await page.waitForTimeout(3000);
             const names = await cardNames();
-            if (h.expectProduct('rename via H icon shows on the card', names.includes(n), names.includes(n) ? n : `not found; names: ${names.slice(0, 5).join(' | ')}`)) current = n;
+            if (await h.expectProduct('rename via H icon shows on the card', names.includes(n), names.includes(n) ? `card shows "${n}"` : `not found; names: ${names.slice(0, 5).join(' | ')}`, 'fail', { el: cardFor(n) })) current = n;
         });
 
         await h.scenario('rename via Quick Question tab', async () => {
@@ -305,7 +305,7 @@ test('quick question: validation, types, wording checks, step 2, rename / duplic
             const r = await H.menuAction(page, cardFor(current).getByRole('button', { name: 'Open menu' }).first(), 'Rename', { newName: n });
             if (!r.available) return h.skip('rename via Quick Question tab', 'Rename not offered');
             const names = await cardNames();
-            if (h.expectProduct('rename via Quick Question tab shows on the card', names.includes(n), names.includes(n) ? n : `not found; names: ${names.slice(0, 5).join(' | ')}`)) current = n;
+            if (await h.expectProduct('rename via Quick Question tab shows on the card', names.includes(n), names.includes(n) ? `card shows "${n}"` : `not found; names: ${names.slice(0, 5).join(' | ')}`, 'fail', { el: cardFor(n) })) current = n;
         });
         h.skip('rename via sidebar', 'quick questions have no sidebar row menu');
 
@@ -323,13 +323,13 @@ test('quick question: validation, types, wording checks, step 2, rename / duplic
             h.result.facts.duplicateNetwork = calls;
             const after = await countCards(current);
             await h.shot('after-duplicate');
-            h.expectProduct('Duplicate Question creates a copy', after > before, `cards named "${current}" ${before}→${after}; requests sent: ${calls.length ? calls.join('; ') : 'none'}`);
+            await h.expectProduct('Duplicate Question creates a copy', after > before, `cards named "${current}" ${before}→${after}; requests sent: ${calls.length ? calls.join('; ') : 'none'}`, 'fail', { el: cardFor(current) });
         });
         await h.scenario('duplicate via Quick Question tab', async () => {
             await qqTab();
             const r = await H.menuAction(page, cardFor(current).getByRole('button', { name: 'Open menu' }).first(), 'Duplicate');
             if (!r.available) return h.skip('duplicate via Quick Question tab', 'the card menu offers only Rename / Settings / Delete');
-            h.expectProduct('duplicate via Quick Question tab', true, 'offered');
+            await h.expectProduct('duplicate via Quick Question tab', true, 'offered');
         });
 
         await h.scenario('delete via Quick Question tab', async () => {
@@ -339,7 +339,7 @@ test('quick question: validation, types, wording checks, step 2, rename / duplic
             const r = await H.menuAction(page, cardFor(current).getByRole('button', { name: 'Open menu' }).first(), 'Delete');
             if (!r.available) return h.skip('delete via Quick Question tab', 'Delete not offered');
             const after = await countCards(current);
-            h.expectProduct('delete via Quick Question tab removes one card', after === before - 1, `${before}→${after}`);
+            await h.expectProduct('delete via Quick Question tab removes one card', after === before - 1, `cards named "${current}" ${before}→${after}`, 'fail', { el: cardFor(current) });
         });
         await h.scenario('delete via H icon', async () => {
             const before = await countCards(current);
@@ -350,7 +350,7 @@ test('quick question: validation, types, wording checks, step 2, rename / duplic
             await confirmIfAsked(/^(Delete( Question| Campaign)?|Confirm|Yes)$/);
             await page.waitForTimeout(4000);
             const after = await countCards(current);
-            h.expectProduct('Delete Question removes the quick question', after === before - 1, `cards named "${current}" ${before}→${after}`);
+            await h.expectProduct('Delete Question removes the quick question', after === before - 1, `cards named "${current}" ${before}→${after}`, 'fail', { el: cardFor(current) });
         });
     } finally {
         // Clean-up: ALWAYS delete the quick questions this group creates (every Continue saves a
@@ -379,9 +379,9 @@ test('quick question: validation, types, wording checks, step 2, rename / duplic
                 await page.waitForTimeout(3000);
                 deleted++;
             }
-            h.expectTest('cleanup: test quick questions deleted', true, `${deleted} deleted`);
+            await h.expectTest('cleanup: test quick questions deleted', true, `${deleted} deleted`);
         } catch (e) {
-            h.expectTest('cleanup: test quick questions deleted', false, `${deleted} deleted, then: ${e.message.split('\n')[0]}`, 'warn');
+            await h.expectTest('cleanup: test quick questions deleted', false, `${deleted} deleted, then: ${e.message.split('\n')[0]}`, 'warn');
         }
         h.finish();
     }

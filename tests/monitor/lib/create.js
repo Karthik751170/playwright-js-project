@@ -64,7 +64,7 @@ async function loginAndBrief(page, h, { baseUrl, expect: E, outDir }) {
     const out = { chatUrl: null, audience: null, topic: null };
     const auth = await h.scenario('login', async () => {
         const a = await ensureSignedIn(page, { baseUrl });
-        h.expectTest('login', true, a.method);
+        await h.expectTest('login', true, `${a.method} — dashboard prompt box visible`, 'fail', { el: H.promptBox(page) });
         return a;
     });
     if (!auth) return out;
@@ -96,7 +96,7 @@ async function loginAndBrief(page, h, { baseUrl, expect: E, outDir }) {
             await box.fill(prompt);
             await page.waitForTimeout(800);
         }
-        if (!h.expectTest('prompt entered', (await box.inputValue()) === prompt, 'prompt box value')) { await h.shot('prompt-not-entered'); return false; }
+        if (!await h.expectTest('prompt entered', (await box.inputValue()) === prompt, 'prompt box value')) { await h.shot('prompt-not-entered'); return false; }
 
         // Capture the network call(s) that carry the prompt, as evidence for "chat didn't open".
         const marker = prompt.slice(0, 30);
@@ -130,9 +130,9 @@ async function loginAndBrief(page, h, { baseUrl, expect: E, outDir }) {
         if (limit) {
             h.result.facts.dailyLimit = limit;
             await h.shot('daily-limit');
-            h.expectTest('account has AI quota left', false, `Hercules: "${limit}" — the monitor account's daily token limit is used up, so no survey can be created until it resets`);
+            await h.expectTest('account has AI quota left', false, `Hercules: "${limit}" — the monitor account's daily token limit is used up, so no survey can be created until it resets`);
             const shown = await page.getByText(/token limit|upgrade your plan|wait till tomorrow/i).first().isVisible().catch(() => false);
-            h.expectProduct('daily limit message shown to the user', shown, shown ? 'shown' : 'the page shows only the prompt bubble: no reply, no limit message (user waits with no explanation)');
+            await h.expectProduct('daily limit message shown to the user', shown, shown ? 'shown' : 'the page shows only the prompt bubble: no reply, no limit message (user waits with no explanation)');
             return false;
         }
         if (!opened) {
@@ -149,41 +149,75 @@ async function loginAndBrief(page, h, { baseUrl, expect: E, outDir }) {
             const found = await H.findCampaignByText(page, baseUrl, prompt.slice(0, 40));
             h.result.facts.chatCreatedServerSide = found;
             if (found) {
-                h.expectProduct('chat opens after prompt', false, `prompt reached Hercules (campaign ${found.url}, created at ${found.created || '?'}) but the page stayed on ${out.chatUrl} and never opened it; network: ${h.result.facts.chatOpenDiagnosis}`);
+                await h.expectProduct('chat opens after prompt', false, `prompt reached Hercules (campaign ${found.url}, created at ${found.created || '?'}) but the page stayed on ${out.chatUrl} and never opened it; network: ${h.result.facts.chatOpenDiagnosis}`);
                 out.chatUrl = found.url;
                 h.result.facts.chatUrl = found.url;
                 await page.goto(found.url, { waitUntil: 'domcontentloaded' });
                 await page.waitForTimeout(8000);
             } else if (!calls.length) {
-                h.expectTest('chat opens after prompt', false, `${out.chatUrl} — prompt not found in All campaigns and no request carried it: never sent`);
+                await h.expectTest('chat opens after prompt', false, `${out.chatUrl} — prompt not found in All campaigns and no request carried it: never sent`);
                 return false;
             } else {
-                h.expectProduct('chat opens after prompt', false, `${out.chatUrl} — ${h.result.facts.chatOpenDiagnosis}; no campaign found (payload in prompt-network.json)`);
+                await h.expectProduct('chat opens after prompt', false, `${out.chatUrl} — ${h.result.facts.chatOpenDiagnosis}; no campaign found (payload in prompt-network.json)`);
                 return false;
             }
-        } else h.expectProduct('chat opens after prompt', true, out.chatUrl);
+        } else await h.expectProduct('chat opens after prompt', true, out.chatUrl, 'fail', { el: page.locator('main h1, main h2').first() });
 
         const tB = Date.now();
         const r = await out.wizard.driveToCreate(0, E.brief.maxMinutes * 60_000, context);
         h.result.facts.wizard = { steps: r.steps, actions: r.seen, minutes: h.mins(Date.now() - tB) };
         await h.shot('research-brief');
-        if (!h.expectProduct('brief leads to "create the survey"', r.ok,
+        if (!await h.expectProduct('brief leads to "create the survey"', r.ok,
             r.ok ? `${r.steps} steps (${r.seen.join(', ')}), ${h.mins(Date.now() - tB)} min`
-                : `no "create the survey" within ${E.brief.maxMinutes} min after ${r.steps} steps (${r.seen.join(', ')})`)) return false;
-        h.expectProduct('wizard step count', r.steps <= E.brief.maxWizardSteps, `${r.steps} (max ${E.brief.maxWizardSteps})`, 'warn');
+                : `no "create the survey" within ${E.brief.maxMinutes} min after ${r.steps} steps (${r.seen.join(', ')})`,
+            'fail', { el: page.getByRole('button', { name: /create the survey/i }).last() })) return false;
+        await h.expectProduct('wizard step count', r.steps <= E.brief.maxWizardSteps, `${r.steps} (max ${E.brief.maxWizardSteps})`, 'warn');
 
         const briefText = await page.locator('body').innerText();
         fs.writeFileSync(path.join(outDir, 'brief.txt'), briefText);
         out.audience = parseTargetAudience(briefText);
         h.result.facts.briefAudience = out.audience && { ...out.audience, raw: undefined };
-        h.expectProduct('brief has Target Audience', !!out.audience, out.audience ? `sample ${out.audience.totalSampleSize}, geo ${out.audience.geographicFocus.join(' / ')}` : 'section not found');
-        for (const issue of out.audience ? audienceConsistencyIssues(out.audience) : []) {
-            h.expectProduct('Target Audience consistency', false, issue, E.brief.failOnAudienceInconsistency ? 'fail' : 'warn');
-        }
+        await h.expectProduct('brief has Target Audience', !!out.audience, out.audience ? `sample ${out.audience.totalSampleSize}, geo ${out.audience.geographicFocus.join(' / ')}` : 'section not found',
+            'fail', { el: page.getByText(/Target Audience/i).last() });
+        // The audience itself is checked after the survey is created (View Audience), not here:
+        // at this point the brief's audience is only a proposal.
         return true;
     }, { needsMinutes: 10 });
     out.briefOk = !!ok;
     return out;
+}
+
+/**
+ * After the survey is created: open View Audience and check what is actually selected against the
+ * brief. Shared by every group (and the basic monitor) so the rule lives in one place.
+ */
+async function checkCreatedAudience(page, h, brief, E) {
+    await H.withAudiencePage(page, async a => {
+        if (!a.found) return h.expectProduct('audience after create: View Audience opens', false, 'no View Audience button on the survey', 'warn');
+        h.result.facts.createdAudience = a;
+        const bands = a.ageGroups.map(b => b.split('-').map(Number)).sort((x, y) => x[0] - y[0]);
+        const overlaps = [];
+        for (let i = 1; i < bands.length; i++) if (bands[i][0] < bands[i - 1][1]) overlaps.push(`${bands[i - 1].join('-')} and ${bands[i].join('-')}`);
+        const under18 = bands.some(([lo]) => lo < 18);
+        const ageChip = page.getByText(/^\s*\d{2}\s*-\s*\d{2}\s*$/).first();
+        await h.expectProduct('audience after create: age groups consistent', !overlaps.length && !under18,
+            `selected age groups: ${a.ageGroups.join(', ') || 'none'}${overlaps.length ? `; overlapping: ${overlaps.join('; ')}` : ''}${under18 ? '; includes under-18s' : ''}`,
+            E.brief.failOnAudienceInconsistency ? 'fail' : 'warn', { el: ageChip });
+        if (!(brief && brief.ageBands && brief.ageBands.length)) h.skip?.('audience after create: age groups match the brief', 'the brief\'s age groups could not be read');
+        else {
+            const want = [...brief.ageBands].sort(), got = [...a.ageGroups].sort();
+            const same = want.length === got.length && want.every((b, i) => b === got[i]);
+            await h.expectProduct('audience after create: age groups match the brief', same,
+                `brief: ${want.join(', ')} · View Audience: ${got.join(', ') || 'none'}`, 'warn',
+                { el: ageChip, expected: `View Audience has the brief's age groups (${want.join(', ')})` });
+        }
+        if (!(brief && brief.totalSampleSize)) h.skip?.('audience after create: count matches the brief', 'the brief\'s sample size could not be read');
+        else {
+            await h.expectProduct('audience after create: count matches the brief', a.count === brief.totalSampleSize,
+                `brief: ${brief.totalSampleSize} · View Audience: ${a.count ?? 'not read'} users`, 'warn',
+                { el: page.getByText(/^\s*Users\s*$/).first(), expected: `View Audience shows the brief's sample size (${brief.totalSampleSize})` });
+        }
+    });
 }
 
 /** Click the latest "create the survey" and wait for the In-drafts card. */
@@ -206,11 +240,17 @@ async function createSurvey(page, h, { expect: E, outDir }) {
         }
         h.result.facts.createMinutes = h.mins(Date.now() - tC);
         await h.shot(ok ? 'survey-created' : 'no-response-after-create');
-        if (!h.expectProduct('survey created after brief', ok, ok ? `${h.result.facts.createMinutes} min` : `nothing within ${E.survey.maxMinutesAfterCreate} min + reload`)) return false;
-        if (afterReload) h.expectProduct('survey shows without reload', false, 'only appeared after a page reload', E.survey.failIfOnlyVisibleAfterReload ? 'fail' : 'warn');
-        if (E.survey.requireDeployButton) h.expectProduct('Deploy button on survey card', await page.getByRole('button', { name: /^Deploy/ }).last().isVisible().catch(() => false));
+        if (!await h.expectProduct('survey created after brief', ok, ok ? `In-drafts card after ${h.result.facts.createMinutes} min` : `nothing within ${E.survey.maxMinutesAfterCreate} min + reload`,
+            'fail', { el: card })) return false;
+        if (afterReload) await h.expectProduct('survey shows without reload', false, 'only appeared after a page reload', E.survey.failIfOnlyVisibleAfterReload ? 'fail' : 'warn');
+        if (E.survey.requireDeployButton) {
+            const deploy = page.getByRole('button', { name: /^Deploy/ }).last();
+            const seen = await deploy.isVisible().catch(() => false);
+            await h.expectProduct('Deploy button on survey card', seen, seen ? 'Deploy button visible (not pressed)' : 'no Deploy button', 'fail', { el: deploy });
+        }
         await page.waitForTimeout(5000);
         fs.writeFileSync(path.join(outDir, 'survey.txt'), await page.locator('body').innerText());
+        await checkCreatedAudience(page, h, h.result.facts.briefAudience, E);
         return true;
     }, { needsMinutes: 6 });
 }
@@ -224,10 +264,10 @@ async function cleanup(page, h, chatUrl, E) {
         await page.goto(chatUrl, { waitUntil: 'domcontentloaded' });
         await page.waitForTimeout(8000);
         await H.deleteCampaign(page);
-        h.expectTest('cleanup: campaign deleted', true, chatUrl);
+        await h.expectTest('cleanup: campaign deleted', true, chatUrl);
     } catch (e) {
-        h.expectTest('cleanup: campaign deleted', false, e.message.split('\n')[0], 'warn');
+        await h.expectTest('cleanup: campaign deleted', false, e.message.split('\n')[0], 'warn');
     }
 }
 
-module.exports = { loginAndBrief, createSurvey, cleanup, wizardDriver };
+module.exports = { checkCreatedAudience, loginAndBrief, createSurvey, cleanup, wizardDriver };

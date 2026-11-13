@@ -5,6 +5,9 @@ const HerculesSurveyGenerator = require('../../pages/hercules/HerculesSurveyGene
 const { parseTargetAudience, audienceConsistencyIssues } = require('../../utils/HerculesBriefParser');
 const { generateTopic } = require('../../utils/HerculesTopicGenerator');
 const { ensureSignedIn } = require('../../utils/HerculesEmailAuth');
+const { installTracker, highlightShot } = require('./lib/evidence');
+const { describeCheck } = require('./lib/expectations');
+const { checkCreatedAudience } = require('./lib/create');
 const EXPECT = require('../../config/hourlyMonitorExpectations');
 
 /**
@@ -30,10 +33,18 @@ test('Hourly monitor: create survey and validate', async ({ page }) => {
     const mins = ms => Math.round(ms / 600) / 100;
 
     const result = { group: 'basic', startedAt: new Date(t0).toISOString(), baseUrl: BASE_URL, checks: [], defects: [], facts: {}, screenshots: [] };
-    const check = (name, ok, detail, severity = 'fail') => {
+    installTracker(page).catch(() => {});
+    /** Records a check with feature, expected and actual result, plus a highlighted screenshot. */
+    const check = async (name, ok, detail, severity = 'fail', opts = {}) => {
         const status = ok ? 'PASS' : severity === 'warn' ? 'WARN' : 'FAIL';
-        result.checks.push({ name, status, detail });
+        const d = describeCheck(name);
+        const entry = { name, status, detail, feature: d.feature, expected: opts.expected || d.expected,
+            actual: opts.actual || detail || (ok ? 'Matches the expected result' : 'Did not match the expected result') };
+        result.checks.push(entry);
         console.log(`[Monitor] ${status} ${name}${detail ? ` — ${detail}` : ''}`);
+        fs.mkdirSync(path.join(OUT_DIR, 'evidence'), { recursive: true });
+        const file = path.join(OUT_DIR, 'evidence', `${String(result.checks.length).padStart(3, '0')}-${name.replace(/\W+/g, '-').slice(0, 60)}.jpg`);
+        if (await highlightShot(page, file, { el: opts.el, name, status, expected: entry.expected, actual: entry.actual })) entry.screenshot = file;
         return ok;
     };
     const shot = async name => {
@@ -47,9 +58,9 @@ test('Hourly monitor: create survey and validate', async ({ page }) => {
         let auth;
         try {
             auth = await ensureSignedIn(page, { baseUrl: BASE_URL });
-            check('login', true, `${auth.method}`);
+            await check('login', true, `${auth.method}`);
         } catch (e) {
-            check('login', false, e.message);
+            await check('login', false, e.message);
             await shot('login-failed');
             return;
         }
@@ -66,7 +77,7 @@ test('Hourly monitor: create survey and validate', async ({ page }) => {
         await page.getByRole('button', { name: 'Send' }).click();
         const chatOk = await page.waitForURL(/\/(ai\/)?chat\/[^/]+/, { timeout: 120_000 }).then(() => true).catch(() => false);
         result.facts.chatUrl = page.url();
-        if (!check('chat opened', chatOk, page.url())) { await shot('no-chat'); return; }
+        if (!await check('chat opened', chatOk, page.url())) { await shot('no-chat'); return; }
 
         // 3. Wizard + brief, until "create the survey" appears
         const gen = new HerculesSurveyGenerator(page);
@@ -103,11 +114,11 @@ test('Hourly monitor: create survey and validate', async ({ page }) => {
         result.facts.wizardSteps = steps;
         result.facts.briefMinutes = mins(briefMs);
         const briefOk = await createBtn.isVisible().catch(() => false);
-        if (!check('brief offers "create the survey"', briefOk, `${steps} steps, ${mins(briefMs)} min (limit ${EXPECT.brief.maxMinutes})`)) {
+        if (!await check('brief offers "create the survey"', briefOk, `${steps} steps, ${mins(briefMs)} min (limit ${EXPECT.brief.maxMinutes})`)) {
             await shot('brief-not-ready');
             return;
         }
-        check('wizard step count', steps <= EXPECT.brief.maxWizardSteps, `${steps} (max ${EXPECT.brief.maxWizardSteps})`);
+        await check('wizard step count', steps <= EXPECT.brief.maxWizardSteps, `${steps} (max ${EXPECT.brief.maxWizardSteps})`);
         await shot('research-brief');
 
         const briefText = await page.locator('body').innerText();
@@ -115,10 +126,8 @@ test('Hourly monitor: create survey and validate', async ({ page }) => {
         const audience = parseTargetAudience(briefText);
         result.facts.targetAudience = audience && { ...audience, raw: undefined };
         result.facts.briefQuestionCount = Number(briefText.match(/(\d+)[-\s]question/i)?.[1]) || null;
-        if (EXPECT.brief.requireTargetAudience) check('brief has Target Audience', !!audience, audience ? `sample ${audience.totalSampleSize}` : 'section not found');
-        for (const issue of audience ? audienceConsistencyIssues(audience) : []) {
-            check('Target Audience consistency', false, issue, EXPECT.brief.failOnAudienceInconsistency ? 'fail' : 'warn');
-        }
+        if (EXPECT.brief.requireTargetAudience) await check('brief has Target Audience', !!audience, audience ? `sample ${audience.totalSampleSize}` : 'section not found');
+        // The audience is checked after the survey is created (View Audience), not on the brief.
 
         // 4. Create the survey
         await createBtn.scrollIntoViewIfNeeded();
@@ -139,15 +148,17 @@ test('Hourly monitor: create survey and validate', async ({ page }) => {
         result.facts.createMinutes = mins(Date.now() - tCreate);
         result.facts.surveyUrl = page.url();
         await shot(created ? 'survey-created' : 'no-response-after-create');
-        if (!check('survey created', created || !EXPECT.survey.requireCreated,
+        if (!await check('survey created', created || !EXPECT.survey.requireCreated,
             created ? `${result.facts.createMinutes} min` : `no survey within ${EXPECT.survey.maxMinutesAfterCreate} min + reload (known "no response" bug?)`)) return;
-        if (afterReload) check('survey visible without reload', false, 'only appeared after a reload (known bug)', EXPECT.survey.failIfOnlyVisibleAfterReload ? 'fail' : 'warn');
+        if (afterReload) await check('survey visible without reload', false, 'only appeared after a reload (known bug)', EXPECT.survey.failIfOnlyVisibleAfterReload ? 'fail' : 'warn');
 
         // 5. Validate the created survey
         if (EXPECT.survey.requireDeployButton) {
             const deploy = await page.getByRole('button', { name: /Deploy/ }).first().waitFor({ state: 'visible', timeout: 60_000 }).then(() => true).catch(() => false);
-            check('Deploy button visible', deploy);
+            await check('Deploy button visible', deploy);
         }
+        // Audience as actually set on the created survey (View Audience) vs the brief.
+        await checkCreatedAudience(page, { expectProduct: check, result }, audience && { ...audience, raw: undefined }, EXPECT);
         await page.waitForTimeout(5000);
         const surveyText = await page.locator('body').innerText();
         fs.writeFileSync(path.join(OUT_DIR, 'survey.txt'), surveyText);
@@ -156,11 +167,11 @@ test('Hourly monitor: create survey and validate', async ({ page }) => {
         const qCount = qNums.length ? Math.max(...qNums) : result.facts.briefQuestionCount;
         result.facts.questionCount = qCount;
         result.facts.questionCountSource = qNums.length ? 'questions panel' : 'brief';
-        check('question count in range', qCount != null && qCount >= EXPECT.survey.minQuestions && qCount <= EXPECT.survey.maxQuestions,
+        await check('question count in range', qCount != null && qCount >= EXPECT.survey.minQuestions && qCount <= EXPECT.survey.maxQuestions,
             `${qCount ?? 'not found'} (${result.facts.questionCountSource}; expected ${EXPECT.survey.minQuestions}-${EXPECT.survey.maxQuestions})`);
-        check('whole run within budget', Date.now() - t0 <= RUN_BUDGET, `${mins(Date.now() - t0)} min (max ${EXPECT.run.maxMinutes})`);
+        await check('whole run within budget', Date.now() - t0 <= RUN_BUDGET, `${mins(Date.now() - t0)} min (max ${EXPECT.run.maxMinutes})`);
     } catch (e) {
-        check('unexpected error', false, e.stack?.split('\n').slice(0, 3).join(' | ') || String(e));
+        await check('unexpected error', false, e.stack?.split('\n').slice(0, 3).join(' | ') || String(e));
         await shot('unexpected-error');
     } finally {
         result.finishedAt = new Date().toISOString();

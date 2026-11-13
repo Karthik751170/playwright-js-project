@@ -3,6 +3,7 @@
  * Hourly headless Hercules monitor runner (scheduled by .github/workflows/hourly-survey-monitor.yml).
  *
  * Runs one monitor group, or all of them in parallel, headless:
+ *   auth   tests/monitor/AuthAccess.spec.js            sign-up form (never submitted), wrong password, login
  *   basic  tests/monitor/HourlySurveyMonitor.spec.js      login → prompt → brief → create survey → checks
  *   core   tests/monitor/CoreSurveyAudience.spec.js     create, Edit Audience, versions, wallet
  *   logic  tests/monitor/LogicPromptingPreview.spec.js  logic prompting, all logic types, preview
@@ -25,6 +26,7 @@ require('dotenv').config({ quiet: true });
 const { sendAlert } = require('../utils/MonitorAlert');
 
 const GROUPS = {
+    auth: 'tests/monitor/AuthAccess.spec.js',
     basic: 'tests/monitor/HourlySurveyMonitor.spec.js',
     core: 'tests/monitor/CoreSurveyAudience.spec.js',
     logic: 'tests/monitor/LogicPromptingPreview.spec.js',

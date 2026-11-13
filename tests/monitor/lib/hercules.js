@@ -149,6 +149,47 @@ async function readAudience(page) {
     return result;
 }
 
+/**
+ * Opens "View Audience" for the survey in this chat, reads what is SELECTED there, runs
+ * fn(state) while still on the audience page (so evidence screenshots show it), then returns
+ * to the chat. Selected chips have a grey fill; unselected ones only an outline.
+ * state: { found, url, count, ageGroups: ['24-35', …], genders: ['Male', …], other: [...], summary }
+ */
+async function withAudiencePage(page, fn) {
+    const chatUrl = page.url();
+    const btn = page.getByRole('button', { name: 'View Audience' }).last();
+    if (!(await btn.isVisible().catch(() => false))) return fn({ found: false });
+    await btn.click();
+    await page.waitForURL(/\/audience/, { timeout: 30_000 }).catch(() => {});
+    await page.getByText('Audience Count').first().waitFor({ state: 'visible', timeout: 30_000 }).catch(() => {});
+    await page.waitForTimeout(3000);
+    const chips = await page.evaluate(() => [...document.querySelectorAll('div')]
+        .filter(d => d.offsetParent && /rounded-\[24px\]/.test(d.className) && /cursor-pointer/.test(d.className) && d.innerText.trim() && d.innerText.trim().length < 80)
+        .map(d => ({ text: d.innerText.trim(), selected: getComputedStyle(d).backgroundColor !== 'rgba(0, 0, 0, 0)' })));
+    const text = await page.locator('body').innerText();
+    const sel = chips.filter(c => c.selected).map(c => c.text);
+    const count = Number((text.match(/\n\s*([\d,]+)\s*\n\s*Users\b/) || [])[1]?.replace(/,/g, '')) || null;
+    const state = {
+        found: true, url: page.url(), count,
+        ageGroups: [...new Set(sel.filter(t => /^\d{2}\s*[-–]\s*\d{2}$/.test(t)).map(t => t.replace(/\s+/g, '')))],
+        genders: sel.filter(t => /^(Male|Female|Others?)$/i.test(t)),
+        other: sel.filter(t => !/^\d{2}\s*[-–]\s*\d{2}$/.test(t) && !/^(Male|Female|Others?)$/i.test(t)),
+        summary: (text.match(/Gender:[^\n]+|\d+ Age Groups? Selected|\d+ NCCS categor[^\n]+|\d+ attributes? selected/gi) || []).join(' · '),
+    };
+    try { return await fn(state); } finally {
+        await page.goto(chatUrl, { waitUntil: 'domcontentloaded' });
+        await promptBox(page).waitFor({ state: 'visible', timeout: 60_000 }).catch(() => {});
+        await page.waitForTimeout(4000);
+    }
+}
+
+/** Title on the latest survey card in the chat ("Survey is In-drafts"). The card may cut it short. */
+async function surveyTitle(page) {
+    const t = await page.locator('body').innerText().catch(() => '');
+    const m = [...t.matchAll(/Survey is In-drafts\s*\n+\s*([^\n]+)/g)].pop();
+    return m ? m[1].trim() : null;
+}
+
 // ── H-icon campaign menu (Rename / Duplicate Campaign / Delete Campaign) ────────────────────
 
 async function openHMenu(page) {
@@ -308,7 +349,8 @@ async function shareLink(page, option) {
 }
 
 /** Open a shared link in a fresh, logged-out context and report what a visitor sees. */
-async function openLoggedOut(browser, link, { videoDir } = {}) {
+/** beforeClose(page, result): optional; runs on the logged-out page before it closes (e.g. evidence checks). */
+async function openLoggedOut(browser, link, { videoDir, beforeClose } = {}) {
     const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, ...(videoDir ? { recordVideo: { dir: videoDir, size: { width: 1280, height: 800 } } } : {}) });
     const p = await ctx.newPage();
     const nav = [];
@@ -326,6 +368,7 @@ async function openLoggedOut(browser, link, { videoDir } = {}) {
             navigations: nav,
             shotBuffer: await p.screenshot().catch(() => null),
         };
+        if (beforeClose) await beforeClose(p, result);
         return result;
     } finally {
         const video = p.video();
@@ -351,6 +394,7 @@ async function menuAction(page, opener, action, { newName } = {}) {
         return { available: false };
     }
     await item.click();
+    let copyName = null;
     if (action === 'Rename') {
         // Never the page's own Search box (hasNot only filters descendants, so exclude it in CSS).
         const input = page.locator('input:focus:not([placeholder^="Search"]), input[placeholder*="name" i]:not([placeholder^="Search"])').filter({ visible: true }).last();
@@ -359,18 +403,32 @@ async function menuAction(page, opener, action, { newName } = {}) {
         const save = page.getByRole('button', { name: /^(Save|Rename|Done)$/ }).last();
         if (await save.isVisible().catch(() => false)) await save.click(); else await input.press('Enter');
     } else {
-        // Wait for the confirmation dialog to render (isVisible() does not wait).
+        // Duplicate from the 3-dot menu asks for a name ("Duplicate Campaign — Give this campaign a
+        // name", prefilled "<campaign name>-copy") and is confirmed with Save (seen 2026-11-13).
+        const askName = page.getByText(/Give this campaign a name/i).first();
         const confirm = page.getByRole('button', { name: new RegExp(`^(${action}( Campaign| Question)?|Confirm|Yes)$`, 'i') }).filter({ visible: true }).last();
-        await confirm.waitFor({ state: 'visible', timeout: 6000 }).then(() => confirm.click()).catch(() => {});
+        await askName.or(confirm).first().waitFor({ state: 'visible', timeout: 6000 }).catch(() => {});
+        if (await askName.isVisible().catch(() => false)) {
+            const input = page.locator('input:not([placeholder^="Search"])').filter({ visible: true }).last();
+            copyName = (await input.inputValue().catch(() => '')).trim() || null;
+            await page.getByRole('button', { name: 'Save', exact: true }).filter({ visible: true }).last().click();
+        } else if (await confirm.isVisible().catch(() => false)) await confirm.click();
     }
     await page.waitForTimeout(4000);
-    return { available: true };
+    return { available: true, copyName };
 }
 
 /** "..." menu of a campaign card on All campaigns, found by name via the search box. */
+/** Survey campaigns live on the "Campaigns" tab of All campaigns (quick questions have their own tab). */
+async function campaignsTab(page) {
+    const tab = page.getByRole('tab', { name: 'Campaigns', exact: true });
+    if (await tab.isVisible().catch(() => false)) { await tab.click(); await page.waitForTimeout(2500); }
+}
+
 async function allCampaignsAction(page, baseUrl, name, action, opts) {
     await page.goto(`${baseUrl}/chat/campaign-history`, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(6000);
+    await campaignsTab(page);
     const search = page.getByPlaceholder('Search...');
     if (await search.isVisible().catch(() => false)) { await search.fill(name); await page.waitForTimeout(2500); }
     const card = page.locator('div').filter({ hasText: name }).filter({ has: page.getByRole('button', { name: 'Open menu' }) }).last();
@@ -378,17 +436,34 @@ async function allCampaignsAction(page, baseUrl, name, action, opts) {
     return menuAction(page, card.getByRole('button', { name: 'Open menu' }).first(), action, opts);
 }
 
-/** Sidebar row menu ("Open chat menu") of the campaign currently open. */
+/**
+ * Sidebar row menu of a campaign. Open any campaign → "Open sidebar"
+ * (//button[@aria-label='Open sidebar']) → the campaign's row under Recents (a link to its chat)
+ * shows a 3-dot button (class "dots", no label) on hover.
+ */
 async function sidebarAction(page, chatUrl, action, opts) {
     await page.goto(chatUrl, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(8000);
-    const opener = page.getByRole('button', { name: 'Open chat menu' }).first();
-    if (!(await opener.isVisible().catch(() => false))) {
-        await page.getByRole('button', { name: 'Open sidebar' }).click().catch(() => {});
-        await page.waitForTimeout(1500);
-    }
-    if (!(await opener.isVisible().catch(() => false))) return { available: false, reason: '"Open chat menu" not found' };
+    const openSidebar = page.locator("xpath=//button[@aria-label='Open sidebar']").first();
+    if (await openSidebar.isVisible().catch(() => false)) { await openSidebar.click(); await page.waitForTimeout(2000); }
+    const id = (chatUrl.match(/\/chat\/([0-9a-f-]{20,})/) || [])[1];
+    const row = page.locator(`a[href*="${id}"]`).filter({ visible: true }).first();
+    if (!id || !(await row.isVisible().catch(() => false))) return { available: false, reason: 'campaign row not found in the sidebar' };
+    await row.hover();
+    const opener = row.locator('button.dots').first();
+    if (!(await opener.isVisible().catch(() => false))) return { available: false, reason: 'no 3-dot button on the sidebar row' };
     return menuAction(page, opener, action, opts);
+}
+
+/** Opens a campaign by its name from the Campaigns tab of All campaigns; returns its chat URL or null. */
+async function openCampaign(page, baseUrl, name) {
+    await countListed(page, baseUrl, name);
+    const card = page.getByText(name, { exact: true }).first();
+    if (!(await card.isVisible().catch(() => false))) return null;
+    await card.click();
+    const ok = await page.waitForURL(/\/chat\/[0-9a-f-]{20,}/, { timeout: 30_000 }).then(() => true).catch(() => false);
+    await page.waitForTimeout(5000);
+    return ok ? page.url() : null;
 }
 
 /** Finds a campaign on All campaigns whose card shows `text` (e.g. the prompt marker) and returns its chat URL. */
@@ -407,6 +482,7 @@ async function findCampaignByText(page, baseUrl, text) {
 async function countListed(page, baseUrl, name) {
     await page.goto(`${baseUrl}/chat/campaign-history`, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(6000);
+    await campaignsTab(page);
     const search = page.getByPlaceholder('Search...');
     if (await search.isVisible().catch(() => false)) { await search.fill(name); await page.waitForTimeout(2500); }
     return page.getByRole('button', { name: 'Open menu' }).count();
@@ -527,7 +603,7 @@ async function openPreview(page) {
 }
 
 module.exports = {
-    ask, askAndResolve, isClarification, surveyState, readAudience,
+    ask, askAndResolve, isClarification, surveyState, readAudience, withAudiencePage, surveyTitle, openCampaign,
     renameCampaign, duplicateCampaign, deleteCampaign, campaignHistory, occurrences, promptBox,
     editAudienceModal, readWallet, shareLink, openLoggedOut, allCampaignsAction, sidebarAction, countListed,
     readLogicRules, parseTerminate, openPreview, findCampaignByText, menuAction,

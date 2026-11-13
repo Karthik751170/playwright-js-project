@@ -20,9 +20,14 @@ function landingUrl(baseUrl) {
     return tagUrl(new URL('/', baseUrl).href);
 }
 
+/** Tagged login page: https://<host>/login?automation_test=1&test_agent=claude (opens on the email form). */
+function loginUrl(baseUrl) {
+    return tagUrl(new URL('/login', baseUrl).href);
+}
+
 /** Opens the tagged home page. Call it before a test's first Hercules navigation. */
 async function landOnHercules(page, baseUrl, opts = {}) {
     await page.goto(landingUrl(baseUrl), { waitUntil: 'domcontentloaded', ...opts });
 }
 
-module.exports = { tagUrl, landingUrl, landOnHercules };
+module.exports = { tagUrl, landingUrl, loginUrl, landOnHercules };

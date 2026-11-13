@@ -6,16 +6,16 @@
  *   email    = HERCULES_MONITOR_EMAIL || hercules-monitor@<MAILOSAUR_SERVER_ID>.mailosaur.net
  *   password = HERCULES_MONITOR_PASSWORD (required; a GitHub secret in CI)
  *
- * If Hercules says the account doesn't exist yet ("Create your account"), it is created once
- * with that same email/password and verified through the Mailosaur API (MAILOSAUR_API_KEY).
- * Every later run just logs in, so no new accounts pile up.
+ * The account must already exist: the monitor only logs in and never signs up (if Hercules
+ * offers "Create your account" it fails with a clear error). Only MONITOR_FRESH_ACCOUNT=true
+ * (the dev design-payload test) creates accounts, verified through Mailosaur.
  *
  * Locally the signed-in session is cached in .auth/monitor-state.json (gitignored).
  */
 const fs = require('fs');
 const path = require('path');
 const MailosaurApi = require('./MailosaurApi');
-const { landOnHercules } = require('./automationTag');
+const { loginUrl } = require('./automationTag');
 
 const STATE_FILE = path.resolve(__dirname, '..', '.auth', 'monitor-state.json');
 
@@ -72,6 +72,12 @@ async function verifyViaMailosaur(page, email, receivedAfter) {
  */
 async function completeOnboarding(page, log = console.log) {
     for (let i = 0; i < 10 && !(await promptBoxOf(page).isVisible().catch(() => false)); i++) {
+        // Logged out (public home page with "Log In"): nothing to onboard; let the caller log in.
+        if (!/\/details|\/signup|\/verify/.test(page.url())
+            && await page.getByRole('button', { name: 'Log In' }).first().isVisible().catch(() => false)) {
+            log('[Auth] onboarding: page is logged out — stopping onboarding');
+            return;
+        }
         const fullName = page.locator("[placeholder='Full name']");
         const cards = page.locator('button.h-\\[95px\\]');
         if (await fullName.isVisible().catch(() => false)) {
@@ -86,10 +92,27 @@ async function completeOnboarding(page, log = console.log) {
         } else {
             const next = page.getByRole('button', { name: /^(continue|next|submit|finish|get started|done)$/i }).first();
             if (await next.isVisible().catch(() => false)) await next.click().catch(() => {});
-            else if (!/\/details|\/signup|\/verify/.test(page.url())) await page.goto(new URL('/ai', page.url()).href).catch(() => {});
+            // 2026-11-11/12 on GitHub: this goto waited for the full "load" event with no limit and
+            // froze the monitor for 35 min. Wait for the DOM only, and never longer than 60 s.
+            else if (!/\/details|\/signup|\/verify/.test(page.url())) {
+                await page.goto(new URL('/ai', page.url()).href, { waitUntil: 'domcontentloaded', timeout: 60_000 }).catch(() => {});
+            }
         }
         await page.waitForTimeout(3000);
     }
+}
+
+/**
+ * Opens the tagged login page (https://<host>/login?automation_test=1&test_agent=claude), which
+ * shows the email form directly. Falls back to the "Log In" button if the form isn't there.
+ */
+async function openLoginForm(page, baseUrl) {
+    await page.goto(loginUrl(baseUrl), { waitUntil: 'domcontentloaded', timeout: 60_000 });
+    const emailBox = page.locator('input#guest-email, input[type="email"]').first();
+    const logIn = page.getByRole('button', { name: /^log in$/i }).first();
+    await emailBox.or(logIn).first().waitFor({ state: 'visible', timeout: 30_000 }).catch(() => {});
+    if (!(await emailBox.isVisible().catch(() => false))) await logIn.click();
+    return emailBox;
 }
 
 /**
@@ -97,16 +120,14 @@ async function completeOnboarding(page, log = console.log) {
  * 'cached-session' | 'password-login' | 'new-signup'. Throws with a clear message otherwise.
  */
 async function ensureSignedIn(page, { baseUrl = 'https://hercules.works', log = console.log } = {}) {
-    // Every run lands on the tagged home page first (?automation_test=1&test_agent=claude).
-    await landOnHercules(page, baseUrl);
+    // Every run lands on the tagged login page first (/login?automation_test=1&test_agent=claude).
+    await page.goto(loginUrl(baseUrl), { waitUntil: 'domcontentloaded', timeout: 60_000 });
     // A fresh-account run must never reuse a saved session.
     if (!FRESH && await isSignedIn(page, baseUrl)) return { email: '(cached session)', method: 'cached-session' };
     const { email, password } = monitorAccount();
 
     await page.context().clearCookies();
-    await landOnHercules(page, baseUrl);
-    await page.getByRole('button', { name: /^log in$/i }).first().click();
-    await page.locator('input#guest-email, input[type="email"]').first().fill(email);
+    await (await openLoginForm(page, baseUrl)).fill(email);
     await page.getByRole('button', { name: 'Continue', exact: true }).click();
     // Existing accounts get "Continue with password" first; new ones go straight to the password box.
     const pw = page.locator('input[type="password"]').first();
@@ -121,6 +142,11 @@ async function ensureSignedIn(page, { baseUrl = 'https://hercules.works', log = 
     const submittedAt = new Date(Date.now() - 5_000);
     let method = 'password-login';
     if (FRESH && !isSignup) throw new Error(`Fresh account ${email} unexpectedly already exists.`);
+    // The fixed monitor account must already exist: never sign up a new one by accident.
+    if (isSignup && !FRESH) {
+        throw new Error(`${email} has no Hercules account and sign-up is disabled for the monitor. `
+            + 'Check HERCULES_MONITOR_EMAIL / HERCULES_MONITOR_PASSWORD.');
+    }
     if (isSignup) {
         method = 'new-signup';
         log(`[Auth] ${email} has no Hercules account yet — creating it once.`);
@@ -137,9 +163,7 @@ async function ensureSignedIn(page, { baseUrl = 'https://hercules.works', log = 
     if (method === 'new-signup' && !(await isSignedIn(page, baseUrl))) {
         log(`[Auth] ${email} landed logged out after sign-up — logging in with the new password.`);
         await page.context().clearCookies();
-        await landOnHercules(page, baseUrl);
-        await page.getByRole('button', { name: /^log in$/i }).first().click();
-        await page.locator('input#guest-email, input[type="email"]').first().fill(email);
+        await (await openLoginForm(page, baseUrl)).fill(email);
         await page.getByRole('button', { name: 'Continue', exact: true }).click();
         const pw2 = page.locator('input[type="password"]').first();
         const withPw = page.getByRole('button', { name: 'Continue with password' });

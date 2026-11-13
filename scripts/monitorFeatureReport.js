@@ -58,7 +58,7 @@ const row = r => `
   <td class="ev">${r.shot ? `<button class="thumb" type="button" data-src="${esc(r.shot)}" data-cap="${esc(`${r.status} · ${r.name}`)}" aria-label="Open screenshot for ${esc(r.name)}"><img loading="lazy" src="${esc(r.shot)}" alt=""></button>` : `<span class="muted">${r.status === 'SKIP' ? 'Not run' : 'No screenshot'}</span>`}</td>
 </tr>`;
 
-const html = `<title>Hercules Monitor Report</title>
+const html = `<title>${IS_DEV ? 'Hercules Dev Monitor Report' : 'Hercules Monitor Report'}</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -150,7 +150,7 @@ dialog figcaption{color:var(--on-scrim);font-size:14px;display:flex;justify-cont
 <div class="wrap">
 <header>
   <span class="eyebrow">${IS_DEV ? 'Dev' : 'Production'} monitor · feature report</span>
-  <h1>Hercules Monitor Report</h1>
+  <h1>${IS_DEV ? 'Hercules Dev Monitor Report' : 'Hercules Monitor Report'}</h1>
   <div class="meta-line">
     <span>Run <b>${esc(started ? new Date(started).toISOString().replace('T', ' ').slice(0, 16) + ' UTC' : '-')}</b></span>
     <span>Site <b>${esc(SITE)}</b> (${IS_DEV ? 'dev' : 'production'})</span>

@@ -67,14 +67,20 @@ test('quick question: validation, types, wording checks, step 2, rename / duplic
         return (!!head && text.includes(head)) || text.includes('Question needs changes');
     };
     /** A wording case: expect the server to flag it AND the page to tell the user why. */
-    const wordingCase = async (name, question, { expectFlag = true, severity = 'fail' } = {}) => h.scenario(name, async () => {
+    // Plain-language verdict for the report (never raw field names).
+    const verdict = v => v.can_proceed === false
+        ? `Hercules flagged it: "${v.reason || 'no reason given'}"`
+        : `Hercules accepted it without a flag${v.reason ? `: "${v.reason}"` : ''}`;
+    const wordingCase = async (name, question, { expectFlag = true, severity = 'fail', responseType = 'Yes / No' } = {}) => h.scenario(name, async () => {
         await fresh();
+        // Pick the response type the question is written for (step 1 opens on Yes / No).
+        if (responseType !== 'Yes / No') await type(responseType).click({ force: true });
         await box().fill(question);
         const r = await submit();
         h.result.facts[`validation_${name}`] = r.validation;
         if (!r.validation) return await h.expectTest(name, false, 'no wording-check response captured');
         if (expectFlag) {
-            await h.expectProduct(`${name}: flagged by Hercules`, r.validation.can_proceed === false, `can_proceed=${r.validation.can_proceed}; ${r.validation.reason || ''}`, severity);
+            await h.expectProduct(`${name}: flagged by Hercules`, r.validation.can_proceed === false, `${responseType}, "${question}" → ${verdict(r.validation)}`, severity);
             if (r.validation.can_proceed === false) {
                 await h.expectProduct(`${name}: stays on step 1`, !r.moved, r.moved ? 'moved to step 2 despite the flag' : 'stayed');
                 const shown = await reasonShown(r.validation);
@@ -82,7 +88,7 @@ test('quick question: validation, types, wording checks, step 2, rename / duplic
                 await h.expectProduct(`${name}: reason shown to the user`, shown, shown ? 'shown' : `server reason "${r.validation.reason}" is not on the page; Continue just stays busy`);
             }
         } else {
-            await h.expectProduct(`${name}: accepted`, r.validation.can_proceed === true && r.moved, `can_proceed=${r.validation.can_proceed}, step 2=${r.moved}; ${r.validation.reason || ''}`, severity);
+            await h.expectProduct(`${name}: accepted`, r.validation.can_proceed === true && r.moved, `${responseType}, "${question}" → ${verdict(r.validation)}; ${r.moved ? 'moved to step 2' : 'did not reach step 2'}`, severity);
         }
     });
 
@@ -149,7 +155,7 @@ test('quick question: validation, types, wording checks, step 2, rename / duplic
             await h.expectProduct('valid rating question reaches step 2', r.moved, r.validation?.reason || '');
             if (r.moved) await h.expectProduct('step 2 shows RATING', /RATING/i.test(await page.locator('body').innerText()), '');
         });
-        await wordingCase('rating without scale meaning', 'Rate our app.', { expectFlag: true, severity: 'warn' });
+        await wordingCase('rating without scale meaning', 'Rate our app.', { expectFlag: true, severity: 'warn', responseType: 'Rating 1-5' });
 
         // ── Step 1: Hercules' wording check ──
         await wordingCase('leading question', "Don't you agree that our amazing new app is better and cheaper than others?");

@@ -37,6 +37,8 @@ const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, 
 const started = groups.map(g => g.startedAt).filter(Boolean).sort()[0];
 // Optional notes.json in the run dir: ["text", …], shown above the results.
 const notes = fs.existsSync(path.join(runDir, 'notes.json')) ? JSON.parse(fs.readFileSync(path.join(runDir, 'notes.json'), 'utf8')) : [];
+const SITE = new URL(process.env.REPORT_SITE || 'https://hercules.works').host;
+const IS_DEV = /^dev\./.test(SITE);
 const hhmm = t => t ? new Date(t).toISOString().slice(11, 16) : '-';
 const sameRun = new Set(groups.map(g => hhmm(g.startedAt))).size <= 1;
 const productFails = rows.filter(r => r.status === 'FAIL' && r.type === 'Product');
@@ -147,12 +149,12 @@ dialog figcaption{color:var(--on-scrim);font-size:14px;display:flex;justify-cont
 </style>
 <div class="wrap">
 <header>
-  <span class="eyebrow">Production monitor · feature report</span>
+  <span class="eyebrow">${IS_DEV ? 'Dev' : 'Production'} monitor · feature report</span>
   <h1>Hercules Monitor Report</h1>
   <div class="meta-line">
     <span>Run <b>${esc(started ? new Date(started).toISOString().replace('T', ' ').slice(0, 16) + ' UTC' : '-')}</b></span>
-    <span>Site <b>hercules.works</b> (production)</span>
-    <span>Account <b>existing monitor account</b>, no sign-up</span>
+    <span>Site <b>${esc(SITE)}</b> (${IS_DEV ? 'dev' : 'production'})</span>
+    <span>Account <b>${IS_DEV ? 'monitor account (signed up on dev if missing)' : 'existing monitor account'}</b>${IS_DEV ? '' : ', no sign-up'}</span>
     <span>Groups <b>${groups.map(g => esc(GROUP_LABEL[g.group] || g.group) + (sameRun ? '' : ` (${hhmm(g.startedAt)} UTC)`)).join(', ')}</b></span>
   </div>
   <div class="totals">

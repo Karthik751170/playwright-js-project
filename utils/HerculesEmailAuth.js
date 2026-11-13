@@ -28,6 +28,9 @@ const promptBoxOf = page => page.getByRole('textbox', { name: /Describe the rese
  * sign-up → email confirmation → onboarding. Otherwise one fixed account is reused.
  */
 const FRESH = /^(1|true|yes)$/i.test(process.env.MONITOR_FRESH_ACCOUNT || '');
+// MONITOR_ALLOW_SIGNUP=true (dev runs only) → if the fixed monitor email has no account yet,
+// sign it up once with the same email + password instead of failing.
+const ALLOW_SIGNUP = /^(1|true|yes)$/i.test(process.env.MONITOR_ALLOW_SIGNUP || '');
 let freshAccount = null;
 
 function monitorAccount() {
@@ -143,13 +146,13 @@ async function ensureSignedIn(page, { baseUrl = 'https://hercules.works', log = 
     let method = 'password-login';
     if (FRESH && !isSignup) throw new Error(`Fresh account ${email} unexpectedly already exists.`);
     // The fixed monitor account must already exist: never sign up a new one by accident.
-    if (isSignup && !FRESH) {
+    if (isSignup && !FRESH && !ALLOW_SIGNUP) {
         throw new Error(`${email} has no Hercules account and sign-up is disabled for the monitor. `
             + 'Check HERCULES_MONITOR_EMAIL / HERCULES_MONITOR_PASSWORD.');
     }
     if (isSignup) {
         method = 'new-signup';
-        log(`[Auth] ${email} has no Hercules account yet — creating it once.`);
+        log(`[Auth] ${email} has no Hercules account on ${baseUrl} yet — creating it once.`);
         await signupBtn.click();
         await verifyViaMailosaur(page, email, submittedAt);
     } else {

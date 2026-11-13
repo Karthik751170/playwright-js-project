@@ -11,12 +11,43 @@ on:
         description: 'Comma-separated groups (auth,basic,core,logic,manage,quickq). Empty = all.'
         required: false
         default: ''
+      site:
+        description: 'production = hercules.works (login only). dev = dev.hercules.works (signs the same email up if it has no account there).'
+        type: choice
+        options: [production, dev]
+        default: production
+
+env:
+  HERCULES_URL: ${{ github.event.inputs.site == 'dev' && 'https://dev.hercules.works' || 'https://hercules.works' }}
+  MONITOR_ALLOW_SIGNUP: ${{ github.event.inputs.site == 'dev' && 'true' || 'false' }}
 
 permissions:
   contents: read
 
 jobs:
+  account:
+    # One login (or, on dev, one sign-up) before the parallel groups, so they never race to create it.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chrome
+      - name: Log in (or sign up on dev) with the monitor account
+        env:
+          MAILOSAUR_SERVER_ID: i3nehdds
+          MAILOSAUR_API_KEY: ${{ secrets.MAILOSAUR_API_KEY }}
+          HERCULES_MONITOR_EMAIL: ${{ secrets.HERCULES_MONITOR_EMAIL }}
+          HERCULES_MONITOR_PASSWORD: ${{ secrets.HERCULES_MONITOR_PASSWORD }}
+          MONITOR_FRESH_ACCOUNT: 'false'
+        run: node scripts/ensureMonitorAccount.js
+
   group:
+    needs: account
     name: group (${{ matrix.group }})
     runs-on: ubuntu-latest
     timeout-minutes: 80
@@ -54,7 +85,6 @@ jobs:
         env:
           CI: true
           MONITOR_GROUP: ${{ matrix.group }}
-          HERCULES_URL: https://hercules.works
           MAILOSAUR_SERVER_ID: i3nehdds
           MAILOSAUR_API_KEY: ${{ secrets.MAILOSAUR_API_KEY }}
           HERCULES_MONITOR_EMAIL: ${{ secrets.HERCULES_MONITOR_EMAIL }}
@@ -76,7 +106,7 @@ jobs:
           if-no-files-found: ignore
 
   report:
-    needs: group
+    needs: [account, group]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -93,7 +123,7 @@ jobs:
             g=$(basename "$(dirname "$f")"); cp -R "$(dirname "$f")" "reports/monitor/run/$g"
           done
           ls reports/monitor/run
-          node scripts/monitorFeatureReport.js reports/monitor/run | tee -a "$GITHUB_STEP_SUMMARY"
+          REPORT_SITE="$HERCULES_URL" node scripts/monitorFeatureReport.js reports/monitor/run | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Upload report
         uses: actions/upload-artifact@v4
         with:

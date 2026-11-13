@@ -64,12 +64,15 @@ test('logic: prompting, all logic types, preview follows logic', async ({ page }
         for (const type of types) {
             await h.scenario(`ask: add ${type} logic`, async () => {
                 const before = await H.surveyState(page);
+                // Hercules's skip/jump rule: the questions between the source and the destination must
+                // not be related to them (no skipping over a question the later one depends on).
+                const rule = /skip|jump/.test(type) ? ' Keep to the skip rule: no question between the source and the destination may be related to them.' : '';
                 const r = await converse(`add-${type}`,
-                    `Add ONE ${type} logic rule to this survey, but only where it genuinely makes sense for the research goal. Choose the questions yourself, tell me exactly which rule you added (question numbers and the condition), and apply it. If ${type} logic does not make sense anywhere in this survey, say so and change nothing.`,
+                    `Add ONE ${type} logic rule to this survey, but only where it genuinely makes sense for the research goal.${rule} Choose the questions yourself, tell me exactly which rule you added (question numbers and the condition), and apply it. If ${type} logic does not make sense anywhere in this survey, say so and change nothing.`,
                     { followUp: 'Yes, apply that rule now.' });
                 const after = await H.surveyState(page);
                 const changed = after.logicRules > before.logicRules || (after.logicVersion ?? 0) > (before.logicVersion ?? 0);
-                const declined = /does(n't| not) make sense|not (needed|necessary|appropriate|applicable)|no (suitable|sensible)|already (has|have|exists)|change nothing|won't add|not add/i.test(r.finalReply);
+                const declined = /does(n't| not) make sense|not (needed|necessary|appropriate|applicable)|no (suitable|sensible)|already (has|have|exists|in use|in place)|change(d)? nothing|(haven't|hasn't|have not|has not) (been )?changed|left (the survey )?unchanged|won't add|not add|didn't (find|add)|no [a-z-]+ (rule|logic) (earns|fits|makes sense|would help)|would work against|not a good fit/i.test(r.finalReply);
                 const claimsAdded = /\b(added|applied|created|set up|now (skips|shows|ends|terminates))\b/i.test(r.finalReply) && !declined;
                 h.result.facts[`logic_${type}`] = { before: before.logicRules, after: after.logicRules, vBefore: before.logicVersion, vAfter: after.logicVersion, declined, claimsAdded };
                 if (changed) await h.expectProduct(`${type} logic added`, true, `rules ${before.logicRules}→${after.logicRules}, logic v${before.logicVersion}→v${after.logicVersion}`);

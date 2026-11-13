@@ -69,7 +69,8 @@ const RULES = [
     [/circular logic/i, 'Logic', 'Circular logic is refused and not applied'],
     [/logic: declined with a reason/i, 'Logic', 'If a logic type can\'t be added, Hercules explains why'],
     [/: questions unchanged/i, 'Logic', 'Adding logic does not change the questions'],
-    [/logic added|add .* logic/i, 'Logic', 'The requested logic rule is added to the survey'],
+    [/logic: declined/i, 'Logic', 'If the rule does not fit the survey, Hercules changes nothing and says why'],
+    [/logic added|add .* logic/i, 'Logic', 'The requested logic rule is added, or Hercules declines with a clear reason (for skip: no related question between source and destination)'],
 
     // Preview
     [/^preview/i, 'Survey preview', 'The survey preview behaves like the respondent app (answers tappable, required questions enforced, terminate rules followed)'],

@@ -24,6 +24,7 @@ const RULES = [
     [/^login/i, 'Login', 'The existing monitor account logs in and the dashboard prompt box appears'],
 
     // Prompt, brief
+    [/^prompt box/i, 'AI prompt & research brief', 'The prompt box only lets a real, non-blank prompt be sent'],
     [/prompt entered/i, 'AI prompt & research brief', 'The prompt box holds the full prompt text'],
     [/AI quota|daily limit/i, 'AI prompt & research brief', 'The account still has AI quota; if not, Hercules tells the user clearly'],
     [/chat opens|chat opened/i, 'AI prompt & research brief', 'Sending the prompt opens a new chat'],

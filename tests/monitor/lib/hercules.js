@@ -456,6 +456,25 @@ async function sidebarAction(page, chatUrl, action, opts) {
     return menuAction(page, opener, action, opts);
 }
 
+/**
+ * Opens the rename dialog ("Rename this quick question" / "Rename this campaign") from a 3-dot menu opener and returns its
+ * controls. Nothing is saved: the caller must press `cancel`.
+ * The app greys Save out (cursor not-allowed, opacity 0.5) but sets no `disabled` attribute (seen 2026-11-17), so
+ * Playwright's isDisabled() would wrongly say "enabled"; saveBlocked() reads what the user sees.
+ */
+async function openRenameDialog(page, opener) {
+    await opener.click({ force: true });
+    const item = page.getByRole('menuitem', { name: /^Rename/i }).filter({ visible: true }).last();
+    if (!(await item.isVisible({ timeout: 3000 }).catch(() => false))) { await page.keyboard.press('Escape').catch(() => {}); return { available: false }; }
+    await item.click();
+    const heading = page.getByText(/^Rename this (quick question|campaign)$/i).first();
+    await heading.waitFor({ state: 'visible', timeout: 8000 });
+    const dialog = page.locator('div').filter({ has: heading }).filter({ has: page.getByRole('button', { name: 'Save', exact: true }) }).last();
+    const save = dialog.getByRole('button', { name: 'Save', exact: true });
+    const saveBlocked = () => save.evaluate(e => { const c = getComputedStyle(e); return e.disabled || e.getAttribute('aria-disabled') === 'true' || c.cursor === 'not-allowed' || parseFloat(c.opacity) < 1; });
+    return { available: true, input: dialog.locator('input').first(), save, saveBlocked, cancel: dialog.getByRole('button', { name: 'Cancel', exact: true }) };
+}
+
 /** Opens a campaign by its name from the Campaigns tab of All campaigns; returns its chat URL or null. */
 async function openCampaign(page, baseUrl, name) {
     await countListed(page, baseUrl, name);
@@ -605,7 +624,7 @@ async function openPreview(page) {
 
 module.exports = {
     ask, askAndResolve, isClarification, surveyState, readAudience, withAudiencePage, surveyTitle, openCampaign,
-    renameCampaign, duplicateCampaign, deleteCampaign, campaignHistory, occurrences, promptBox,
+    openRenameDialog, renameCampaign, duplicateCampaign, deleteCampaign, campaignHistory, occurrences, promptBox,
     editAudienceModal, readWallet, shareLink, openLoggedOut, allCampaignsAction, sidebarAction, countListed,
     readLogicRules, parseTerminate, openPreview, findCampaignByText, menuAction,
 };

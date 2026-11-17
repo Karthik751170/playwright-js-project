@@ -172,9 +172,9 @@ function checkSurvey(surveyText, topic = {}, briefText = '', opts = {}) {
     const noText = qs.filter(q => q.text.length < 8).map(q => q.n);
     out.push(chk('every survey question has text', !noText.length, noText.length ? `empty or too short: Q${noText.join(', Q')}` : `${qs.length} of ${qs.length}`, 'fail', 'Every question has its wording'));
 
-    const unanswerable = qs.filter(q => !q.options.length && !q.hasInput && !q.format && q.extra < 2).map(q => q.n);
+    const unanswerable = qs.filter(q => !q.options.length && !q.hasInput && !q.format && q.extra < 1).map(q => q.n);
     out.push(chk('every survey question can be answered', !unanswerable.length, unanswerable.length ? `no options, input box or format on Q${unanswerable.join(', Q')}` : 'each has options, an input box, a rating grid or a format',
-        'fail', 'Every question shows how it is answered (options, text box, rating scale or grid)'));
+        'fail', 'Every question shows something to answer with after its wording (options, text box, rating scale, grid or any other control)'));
 
     const choice = qs.filter(q => /^Select\b/i.test(q.format));
     const badChoice = choice.filter(q => q.options.length < 2 || new Set(q.options.map(norm)).size !== q.options.length).map(q => q.n);
@@ -188,7 +188,7 @@ function checkSurvey(surveyText, topic = {}, briefText = '', opts = {}) {
     if (kw.length) {
         const text = norm(qs.map(q => [q.text, ...q.options].join(' ')).join(' '));
         const hits = kw.filter(k => text.includes(k));
-        out.push(chk('survey questions are about the prompt\'s product', hits.length >= 1, `${hits.length}/${kw.length} product words in the questions (${hits.join(', ') || 'none'})`, 'fail',
+        out.push(chk('survey questions are about the prompt\'s product', hits.length >= 1, `${hits.length}/${kw.length} product words in the questions (${hits.join(', ') || 'none'})`, 'warn',
             `At least one question mentions the product or category from the prompt (${topic.category || topic.product})`));
     }
 

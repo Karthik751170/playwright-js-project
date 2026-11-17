@@ -113,7 +113,8 @@ async function loginAndBrief(page, h, { baseUrl, expect: E, outDir }) {
         let sentOk = await expectPoll(left, 15_000);
         if (!sentOk) { await box.press('Enter').catch(() => {}); sentOk = await expectPoll(left, 15_000); }
         h.result.facts.sendRegistered = sentOk;
-        const opened = await page.waitForURL(/\/(ai\/)?chat\/[^/?]+/, { timeout: 120_000 }).then(() => true).catch(() => false);
+        // Chat opened = Hercules shows the prompt as a message. The URL is not used.
+        const opened = await page.waitForFunction(m => document.body.innerText.includes(m), marker, { timeout: 120_000 }).then(() => true).catch(() => false);
         out.chatUrl = page.url();
         h.result.facts.chatUrl = out.chatUrl;
         page.off('request', onRequest);
@@ -231,7 +232,7 @@ async function createSurvey(page, h, { expect: E, outDir }) {
         const card = page.getByText(/Survey is In-drafts/i).last();
         let ok = await Promise.race([
             card.waitFor({ state: 'visible', timeout: wait }),
-            page.waitForURL(/\/editor\//, { timeout: wait }),
+            page.getByRole('button', { name: /^Deploy/ }).first().waitFor({ state: 'visible', timeout: wait }),
         ]).then(() => true).catch(() => false);
         let afterReload = false;
         if (!ok) {

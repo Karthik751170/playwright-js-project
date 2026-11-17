@@ -13,6 +13,9 @@ const FEATURES = [
 
 // [pattern, feature, expected]. First match wins, so specific patterns come first.
 const RULES = [
+    // Content checks (lib/contentChecks.js): each check passes its own expected text.
+    [/^brief (has|names|is about|lists|targets|states|city split|age groups|sample size)/i, 'AI prompt & research brief', 'The research brief is complete and consistent with the prompt'],
+    [/^(survey (questions|length|has)|every survey question|choice questions|logic only)/i, 'Survey creation', 'The created survey is well-formed and matches the brief'],
     // Sign-up / Login
     [/^sign-up form/i, 'Sign-up', 'A new email shows the "Create your account" form with a password box (not submitted: the monitor never creates accounts)'],
     [/^sign-up/i, 'Sign-up', 'Sign-up page works for a new email'],

@@ -446,7 +446,8 @@ async function sidebarAction(page, chatUrl, action, opts) {
     await page.waitForTimeout(8000);
     const openSidebar = page.locator("xpath=//button[@aria-label='Open sidebar']").first();
     if (await openSidebar.isVisible().catch(() => false)) { await openSidebar.click(); await page.waitForTimeout(2000); }
-    const id = (chatUrl.match(/\/chat\/([0-9a-f-]{20,})/) || [])[1];
+    // Campaign rows link to /chat/<id>; quick-question rows link to /quick-question?chatId=<id> (seen 2026-11-17).
+    const id = (chatUrl.match(/(?:\/chat\/|[?&]chatId=)([0-9a-f-]{20,})/) || [])[1];
     const row = page.locator(`a[href*="${id}"]`).filter({ visible: true }).first();
     if (!id || !(await row.isVisible().catch(() => false))) return { available: false, reason: 'campaign row not found in the sidebar' };
     await row.hover();

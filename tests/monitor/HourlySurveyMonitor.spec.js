@@ -8,6 +8,7 @@ const { ensureSignedIn } = require('../../utils/HerculesEmailAuth');
 const { installTracker, highlightShot } = require('./lib/evidence');
 const { describeCheck } = require('./lib/expectations');
 const { checkCreatedAudience } = require('./lib/create');
+const { checkBrief, checkSurvey, parseSurveyQuestions } = require('./lib/contentChecks');
 const EXPECT = require('../../config/hourlyMonitorExpectations');
 
 /**
@@ -75,9 +76,12 @@ test('Hourly monitor: create survey and validate', async ({ page }) => {
         await page.getByRole('textbox', { name: /Describe the research you/i })
             .or(page.locator("textarea[aria-label='Ask Hercules a question']")).first().fill(prompt);
         await page.getByRole('button', { name: 'Send' }).click();
-        const chatOk = await page.waitForURL(/\/(ai\/)?chat\/[^/]+/, { timeout: 120_000 }).then(() => true).catch(() => false);
+        // The chat works when Hercules shows the prompt as a message and starts answering. The URL is not used
+        // (run #54: chat was working but the URL stayed /chat, which failed the old URL check).
+        const promptMarker = prompt.slice(0, 30);
+        const chatOk = await page.waitForFunction(m => document.body.innerText.includes(m), promptMarker, { timeout: 120_000 }).then(() => true).catch(() => false);
         result.facts.chatUrl = page.url();
-        if (!await check('chat opened', chatOk, page.url())) { await shot('no-chat'); return; }
+        if (!await check('chat opened', chatOk, chatOk ? 'prompt shown as a chat message' : 'prompt never appeared as a chat message')) { await shot('no-chat'); return; }
 
         // 3. Wizard + brief, until "create the survey" appears
         const gen = new HerculesSurveyGenerator(page);
@@ -118,7 +122,9 @@ test('Hourly monitor: create survey and validate', async ({ page }) => {
             await shot('brief-not-ready');
             return;
         }
-        await check('wizard step count', steps <= EXPECT.brief.maxWizardSteps, `${steps} (max ${EXPECT.brief.maxWizardSteps})`);
+        // How many clarifying steps the AI asks varies a lot by prompt (7 in run #56, 39 in run #57), so this is a WARN.
+        // A wizard that is really stuck is still caught by 'brief offers "create the survey"' (FAIL after the brief time limit).
+        await check('wizard step count', steps <= EXPECT.brief.maxWizardSteps, `${steps} (max ${EXPECT.brief.maxWizardSteps})`, 'warn');
         await shot('research-brief');
 
         const briefText = await page.locator('body').innerText();
@@ -127,6 +133,10 @@ test('Hourly monitor: create survey and validate', async ({ page }) => {
         result.facts.targetAudience = audience && { ...audience, raw: undefined };
         result.facts.briefQuestionCount = Number(briefText.match(/(\d+)[-\s]question/i)?.[1]) || null;
         if (EXPECT.brief.requireTargetAudience) await check('brief has Target Audience', !!audience, audience ? `sample ${audience.totalSampleSize}` : 'section not found');
+        // Brief content: sections, client, product, cities, counts that must add up. Derived from the prompt and the
+        // brief's own structure, never exact wording (see lib/contentChecks.js).
+        const runChecks = async list => { for (const c of list) await check(c.name, c.ok, c.detail, c.severity, { expected: c.expected }); };
+        await runChecks(checkBrief(briefText, topic, audience, EXPECT.brief));
         // The audience is checked after the survey is created (View Audience), not on the brief.
 
         // 4. Create the survey
@@ -137,7 +147,7 @@ test('Hourly monitor: create survey and validate', async ({ page }) => {
         const surveyCard = page.getByText(/Survey is In-drafts/i).or(page.getByText(/^Survey Version \(\d+\)$/)).first();
         let created = await Promise.race([
             surveyCard.waitFor({ state: 'visible', timeout: createWait }),
-            page.waitForURL(/\/editor\//, { timeout: createWait }),
+            page.getByRole('button', { name: /^Deploy/ }).first().waitFor({ state: 'visible', timeout: createWait }),
         ]).then(() => true).catch(() => false);
         let afterReload = false;
         if (!created) {
@@ -163,12 +173,18 @@ test('Hourly monitor: create survey and validate', async ({ page }) => {
         const surveyText = await page.locator('body').innerText();
         fs.writeFileSync(path.join(OUT_DIR, 'survey.txt'), surveyText);
         // Questions panel lists Q1, Q2, …; fall back to the brief's "N-question" count.
+        // Count the numbered questions themselves ("1.", "2.", …). The old count took the highest "Qn" mentioned
+        // in a logic note, which under-counted (run #56: 18 reported, 21 questions).
+        const parsedQs = parseSurveyQuestions(surveyText);
+        fs.writeFileSync(path.join(OUT_DIR, 'survey-questions.json'), JSON.stringify(parsedQs, null, 2));
         const qNums = [...surveyText.matchAll(/(?:^|\n)\s*Q(\d{1,3})\b/g)].map(m => Number(m[1]));
-        const qCount = qNums.length ? Math.max(...qNums) : result.facts.briefQuestionCount;
+        const qCount = parsedQs.length || (qNums.length ? Math.max(...qNums) : result.facts.briefQuestionCount);
         result.facts.questionCount = qCount;
-        result.facts.questionCountSource = qNums.length ? 'questions panel' : 'brief';
+        result.facts.questionCountSource = parsedQs.length ? 'numbered questions' : qNums.length ? 'questions panel' : 'brief';
         await check('question count in range', qCount != null && qCount >= EXPECT.survey.minQuestions && qCount <= EXPECT.survey.maxQuestions,
             `${qCount ?? 'not found'} (${result.facts.questionCountSource}; expected ${EXPECT.survey.minQuestions}-${EXPECT.survey.maxQuestions})`);
+        // Survey data: numbering, options, wording, product relevance, logic references, length vs the brief.
+        await runChecks(checkSurvey(surveyText, topic, briefText, { questionCountTolerance: EXPECT.survey.questionCountTolerance }));
         await check('whole run within budget', Date.now() - t0 <= RUN_BUDGET, `${mins(Date.now() - t0)} min (max ${EXPECT.run.maxMinutes})`);
     } catch (e) {
         await check('unexpected error', false, e.stack?.split('\n').slice(0, 3).join(' | ') || String(e));

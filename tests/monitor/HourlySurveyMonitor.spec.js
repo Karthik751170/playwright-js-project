@@ -75,9 +75,12 @@ test('Hourly monitor: create survey and validate', async ({ page }) => {
         await page.getByRole('textbox', { name: /Describe the research you/i })
             .or(page.locator("textarea[aria-label='Ask Hercules a question']")).first().fill(prompt);
         await page.getByRole('button', { name: 'Send' }).click();
-        const chatOk = await page.waitForURL(/\/(ai\/)?chat\/[^/]+/, { timeout: 120_000 }).then(() => true).catch(() => false);
+        // The chat works when Hercules shows the prompt as a message and starts answering. The URL is not used
+        // (run #54: chat was working but the URL stayed /chat, which failed the old URL check).
+        const promptMarker = prompt.slice(0, 30);
+        const chatOk = await page.waitForFunction(m => document.body.innerText.includes(m), promptMarker, { timeout: 120_000 }).then(() => true).catch(() => false);
         result.facts.chatUrl = page.url();
-        if (!await check('chat opened', chatOk, page.url())) { await shot('no-chat'); return; }
+        if (!await check('chat opened', chatOk, chatOk ? 'prompt shown as a chat message' : 'prompt never appeared as a chat message')) { await shot('no-chat'); return; }
 
         // 3. Wizard + brief, until "create the survey" appears
         const gen = new HerculesSurveyGenerator(page);
@@ -137,7 +140,7 @@ test('Hourly monitor: create survey and validate', async ({ page }) => {
         const surveyCard = page.getByText(/Survey is In-drafts/i).or(page.getByText(/^Survey Version \(\d+\)$/)).first();
         let created = await Promise.race([
             surveyCard.waitFor({ state: 'visible', timeout: createWait }),
-            page.waitForURL(/\/editor\//, { timeout: createWait }),
+            page.getByRole('button', { name: /^Deploy/ }).first().waitFor({ state: 'visible', timeout: createWait }),
         ]).then(() => true).catch(() => false);
         let afterReload = false;
         if (!created) {

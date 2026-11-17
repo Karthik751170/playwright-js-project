@@ -122,7 +122,9 @@ test('Hourly monitor: create survey and validate', async ({ page }) => {
             await shot('brief-not-ready');
             return;
         }
-        await check('wizard step count', steps <= EXPECT.brief.maxWizardSteps, `${steps} (max ${EXPECT.brief.maxWizardSteps})`);
+        // How many clarifying steps the AI asks varies a lot by prompt (7 in run #56, 39 in run #57), so this is a WARN.
+        // A wizard that is really stuck is still caught by 'brief offers "create the survey"' (FAIL after the brief time limit).
+        await check('wizard step count', steps <= EXPECT.brief.maxWizardSteps, `${steps} (max ${EXPECT.brief.maxWizardSteps})`, 'warn');
         await shot('research-brief');
 
         const briefText = await page.locator('body').innerText();

@@ -57,12 +57,18 @@ const SECTIONS = {
     extra: [['Type of Study', /Type of Study/i], ['Key Data Points', /Key Data Points/i], ['Expected Insights', /Expected Insights/i], ['Assumptions & Open Items', /Assumptions\s*(?:&|and)\s*Open Items/i]],
 };
 
-/** "About 16-18 questions" -> [16, 18]; "a 12-question survey" -> [12, 12]; otherwise null. */
+/**
+ * The brief's own statement of the survey length, e.g. "Estimated length: About 16-18 questions, roughly 8-11 minutes".
+ * Anchored on the "Estimated length" label so other "N-M questions" phrases in the brief (per phase, per screener…)
+ * are never mistaken for the total. No label -> null and the dependent checks are skipped.
+ */
 function statedQuestionRange(text) {
-    const r = String(text || '').match(/(\d{1,2})\s*(?:-|–|to)\s*(\d{1,2})\s*questions/i);
+    const line = (String(text || '').match(/Estimated length[^\n]*/i) || [])[0];
+    if (!line) return null;
+    const r = line.match(/(\d{1,2})\s*(?:-|–|to)\s*(\d{1,2})\s*questions/i);
     if (r) { const lo = Number(r[1]), hi = Number(r[2]); return [Math.min(lo, hi), Math.max(lo, hi)]; }
-    const s = String(text || '').match(/(\d{1,2})[-\s]question/i);
-    return s ? [Number(s[1]), Number(s[1])] : null;
+    const s1 = line.match(/(\d{1,2})\s*[-\s]?questions?\b/i);
+    return s1 ? [Number(s1[1]), Number(s1[1])] : null;
 }
 
 /**

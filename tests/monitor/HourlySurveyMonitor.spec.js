@@ -73,6 +73,19 @@ test('Hourly monitor: create survey and validate', async ({ page }) => {
             .filter(Boolean).join(' ') || 'We are launching across all tier 1, tier 2 and metro cities in India.';
         result.facts.prompt = prompt;
 
+        // Prompt box validation, checked before anything is sent. An empty prompt must not be sendable. A whitespace-only
+        // prompt should not be either (the Quick Question box blocks it); on 2026-11-17 Send was still enabled for
+        // 5 spaces, so that one is a WARN until the app fixes it. Nothing is sent here.
+        const promptBox = page.getByRole('textbox', { name: /Describe the research you/i }).or(page.locator("textarea[aria-label='Ask Hercules a question']")).first();
+        const sendBtn = page.getByRole('button', { name: 'Send' });
+        await promptBox.fill('');
+        const emptyBlocked = await sendBtn.isDisabled().catch(() => false);
+        await check('prompt box: empty prompt cannot be sent', emptyBlocked, emptyBlocked ? 'Send is disabled' : 'Send is enabled with an empty prompt', 'fail', { el: sendBtn.first(), expected: 'Send is disabled while the prompt box is empty' });
+        await promptBox.fill('     ');
+        const blankBlocked = await sendBtn.isDisabled().catch(() => false);
+        await check('prompt box: whitespace-only prompt cannot be sent', blankBlocked, blankBlocked ? 'Send is disabled' : 'Send is enabled for a prompt of only spaces', 'warn', { el: sendBtn.first(), expected: 'Send stays disabled for a prompt that has only spaces' });
+        await promptBox.fill('');
+
         await page.getByRole('textbox', { name: /Describe the research you/i })
             .or(page.locator("textarea[aria-label='Ask Hercules a question']")).first().fill(prompt);
         await page.getByRole('button', { name: 'Send' }).click();

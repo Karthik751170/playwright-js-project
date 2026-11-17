@@ -291,6 +291,30 @@ test('quick question: validation, types, wording checks, step 2, rename / duplic
             await h.shot('quick-question-page');
         });
 
+        // Rename dialog rules, seen on production 2026-11-17: an empty or whitespace-only name cannot be saved, a normal name can,
+        // and the quick-question name box stops at 100 characters. Nothing is saved: the dialog is cancelled.
+        await h.scenario('rename dialog validation', async () => {
+            await qqTab();
+            const d = await H.openRenameDialog(page, cardFor(current).getByRole('button', { name: 'Open menu' }).first());
+            if (!d.available) return h.skip('rename dialog validation', 'Rename not offered');
+            await d.input.fill('');
+            const emptyBlocked = await d.saveBlocked();
+            await h.expectProduct('rename dialog: an empty name cannot be saved', emptyBlocked, emptyBlocked ? 'Save is greyed out' : 'Save is active with an empty name', 'fail', { el: d.save, expected: 'Save is greyed out while the name is empty' });
+            await d.input.fill('   ');
+            const blankBlocked = await d.saveBlocked();
+            await h.expectProduct('rename dialog: a whitespace-only name cannot be saved', blankBlocked, blankBlocked ? 'Save is greyed out' : 'Save is active for a name of only spaces', 'fail', { el: d.save, expected: 'Save is greyed out for a name of only spaces' });
+            await d.input.fill('a');
+            const okBlocked = await d.saveBlocked();
+            await h.expectProduct('rename dialog: a normal name can be saved', !okBlocked, okBlocked ? 'Save is greyed out for a valid name' : 'Save is active', 'fail', { el: d.save, expected: 'Save becomes active once the name has text' });
+            await d.input.fill('x'.repeat(131));
+            const len = (await d.input.inputValue()).length;
+            await h.expectProduct('rename dialog: the name length is capped', len <= 100, `131 characters typed, ${len} kept`, 'warn', { el: d.input, expected: 'The name box stops at 100 characters' });
+            await d.cancel.click();
+            await page.waitForTimeout(1500);
+            const names = await cardNames();
+            await h.expectProduct('rename dialog: cancel leaves the name unchanged', names.includes(current), names.includes(current) ? `card still named "${current}"` : `"${current}" not found; names: ${names.slice(0, 5).join(' | ')}`, 'fail', { el: cardFor(current), expected: 'Cancel closes the dialog and the name is unchanged' });
+        });
+
         await h.scenario('rename via H icon', async () => {
             const n = `QA QuickQ ${stamp} H`;
             await openQuickQuestion(current);

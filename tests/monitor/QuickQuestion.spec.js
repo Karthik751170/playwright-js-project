@@ -313,7 +313,16 @@ test('quick question: validation, types, wording checks, step 2, rename / duplic
             const names = await cardNames();
             if (await h.expectProduct('rename via Quick Question tab shows on the card', names.includes(n), names.includes(n) ? `card shows "${n}"` : `not found; names: ${names.slice(0, 5).join(' | ')}`, 'fail', { el: cardFor(n) })) current = n;
         });
-        h.skip('rename via sidebar', 'quick questions have no sidebar row menu');
+        // Quick questions do have a sidebar row (Recents): a[href*="/quick-question?chatId=<id>"] with a 3-dot
+        // button whose menu offers Star / Rename / Delete (no Duplicate). Opened from the card so the URL carries the id.
+        await h.scenario('rename via sidebar', async () => {
+            const n = `QA QuickQ ${stamp} Side`;
+            const url = await openQuickQuestion(current);
+            const r = await H.sidebarAction(page, url, 'Rename', { newName: n });
+            if (!r.available) return h.skip('rename via sidebar', r.reason || 'Rename not offered in the sidebar menu');
+            const names = await cardNames();
+            if (await h.expectProduct('rename via sidebar shows on the card', names.includes(n), names.includes(n) ? `card shows "${n}"` : `not found; names: ${names.slice(0, 5).join(' | ')}`, 'fail', { el: cardFor(n) })) current = n;
+        });
 
         await h.scenario('duplicate via H icon', async () => {
             const before = await countCards(current);

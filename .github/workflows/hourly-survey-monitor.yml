@@ -1,8 +1,10 @@
 name: Hourly Hercules Survey Monitor
 
 # Every hour, headless on GitHub: sign in with the monitor account, run each monitor group in its
-# own parallel job, and post any failure (product defects first) to the Google Chat space.
-# A failed check fails that job, so GitHub's own failure notification fires too.
+# own parallel job, then build ONE HTML report and post it to the Google Chat space.
+# The space gets the report when the tests ran (PASS, WARN or FAIL). A job that failed before its tests
+# finished (crash, timeout, cancel) posts nothing there. A failed check still fails its job, so GitHub's
+# own failure notification still fires.
 on:
   schedule:
     # Two slots an hour: GitHub can delay or skip a scheduled run, so :37 is a fallback for :07.
@@ -79,9 +81,8 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GROQ_API_KEY_2: ${{ secrets.GROQ_API_KEY_2 }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          # Alerts: Google Chat space incoming webhook
-          GCHAT_WEBHOOK_URL: ${{ secrets.GCHAT_WEBHOOK_URL }}
-          GCHAT_MENTIONS: ${{ secrets.GCHAT_MENTIONS }}
+          # No Google Chat post from the group jobs: the report job below posts the report (and only the report).
+          GCHAT_WEBHOOK_URL: ''
         run: node scripts/hourlySurveyMonitor.js
 
       - name: Summary
@@ -113,3 +114,51 @@ jobs:
             test-results/monitor/
           retention-days: 7
           if-no-files-found: ignore
+
+  report:
+    needs: [gate, monitor]
+    # After the groups, pass or fail; skipped when the gate skipped this slot.
+    if: ${{ always() && needs.gate.outputs.run == 'true' }}
+    name: report
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/download-artifact@v4
+        continue-on-error: true   # no artifacts = the groups died early; the post step then stays silent
+        with:
+          pattern: survey-monitor-*
+          path: downloaded
+
+      - name: Build the HTML report
+        run: |
+          mkdir -p reports/monitor/run
+          # <artifact>/reports/monitor/<timestamp>/<group>/result.json + evidence/ -> one folder per group.
+          for f in $(find downloaded -name result.json -path '*/*/*/result.json' 2>/dev/null); do
+            g=$(basename "$(dirname "$f")"); cp -R "$(dirname "$f")" "reports/monitor/run/$g"
+          done
+          ls reports/monitor/run
+          if [ -n "$(ls -A reports/monitor/run)" ]; then node scripts/monitorFeatureReport.js reports/monitor/run; fi
+
+      - name: Upload the HTML report
+        id: html
+        uses: actions/upload-artifact@v4
+        with:
+          name: monitor-html-report-${{ github.run_id }}
+          path: reports/monitor/run/
+          retention-days: 14
+          if-no-files-found: ignore
+
+      - name: Post the report to Google Chat (only when the tests ran)
+        env:
+          GCHAT_WEBHOOK_URL: ${{ secrets.GCHAT_WEBHOOK_URL }}
+          GCHAT_MENTIONS: ${{ secrets.GCHAT_MENTIONS }}   # mentioned only when a test FAILED
+          EXPECTED_GROUPS: basic,quickq
+          REPORT_URL: ${{ steps.html.outputs.artifact-url }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: node scripts/postMonitorReport.js reports/monitor/run

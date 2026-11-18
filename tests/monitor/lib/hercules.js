@@ -464,7 +464,10 @@ async function sidebarAction(page, chatUrl, action, opts) {
  */
 async function openRenameDialog(page, opener) {
     await opener.click({ force: true });
-    const item = page.getByRole('menuitem', { name: /^Rename/i }).filter({ visible: true }).last();
+    // Same lookup as menuAction: the sidebar menu items are role=menuitem, but the card menu's may not be (run #59: "Rename not offered").
+    const item = page.getByRole('menuitem', { name: /^Rename/i })
+        .or(page.locator('button, li, p, span, div').filter({ hasText: /^\s*Rename\s*$/i }))
+        .filter({ visible: true }).last();
     if (!(await item.isVisible({ timeout: 3000 }).catch(() => false))) { await page.keyboard.press('Escape').catch(() => {}); return { available: false }; }
     await item.click();
     const heading = page.getByText(/^Rename this (quick question|campaign)$/i).first();
